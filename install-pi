@@ -23,11 +23,16 @@ PI_PACKAGES=(
   "npm:@juicesharp/rpiv-pi"
   "npm:@samfp/pi-memory"
   "npm:pi-vim"
-  "npm:@casualjim/pi-superpowers"
+  "/home/aktersnurra/projects/vibe/superpowers"
 )
 
 SETTINGS="$PI/settings.json"
 echo "Installing Pi packages..."
+if [[ -f "$SETTINGS" ]] && grep -qF '"npm:@casualjim/pi-superpowers"' "$SETTINGS"; then
+  echo "  removing official superpowers package"
+  pi remove "npm:@casualjim/pi-superpowers"
+fi
+
 for pkg in "${PI_PACKAGES[@]}"; do
   if [[ -f "$SETTINGS" ]] && grep -qF "\"$pkg\"" "$SETTINGS"; then
     echo "  already installed: $pkg"

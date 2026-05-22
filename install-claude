@@ -14,7 +14,9 @@ for skill in "$DOTFILES/skills/"/*/; do
 done
 
 echo "Installing Claude plugins..."
-claude plugins install superpowers@claude-plugins-official --scope user
+claude plugins uninstall superpowers@claude-plugins-official --scope user --keep-data || true
+claude plugins marketplace add /home/aktersnurra/projects/vibe/superpowers || true
+claude plugins install superpowers@superpowers-dev --scope user
 claude plugins install frontend-design@claude-plugins-official --scope user
 
 echo "Claude configured."
