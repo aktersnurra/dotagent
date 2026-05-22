@@ -24,7 +24,10 @@ PI_PACKAGES=(
   "npm:@samfp/pi-memory"
   "npm:pi-vim"
   "git:github.com/aktersnurra/superpowers"
+  "git:github.com/aktersnurra/no-clown-fiesta.pi"
 )
+
+PI_THEME="no-clown-fiesta-dark"
 
 SETTINGS="$PI/settings.json"
 echo "Installing Pi packages..."
@@ -47,5 +50,33 @@ for pkg in "${PI_PACKAGES[@]}"; do
     pi install "$pkg"
   fi
 done
+
+echo "Activating Pi theme: $PI_THEME"
+if command -v python3 >/dev/null 2>&1; then
+  python3 - "$SETTINGS" "$PI_THEME" <<'PY'
+import json
+import os
+import sys
+
+settings_path, theme_name = sys.argv[1], sys.argv[2]
+settings = {}
+
+if os.path.exists(settings_path):
+    with open(settings_path, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+        if content:
+            settings = json.loads(content)
+
+settings["theme"] = theme_name
+
+os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+with open(settings_path, "w", encoding="utf-8") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+PY
+else
+  echo "python3 is required to activate Pi theme in $SETTINGS" >&2
+  exit 1
+fi
 
 echo "Pi configured."
