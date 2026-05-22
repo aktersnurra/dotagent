@@ -12,9 +12,35 @@ description: Jujutsu (jj) version control idioms and workflows. Use whenever
   are normal operations, not exceptional ones.
 - Never suggest `git` commands. All VCS operations use `jj`.
 
+## Workspaces (default workflow for feature work)
+
+- **Always use workspaces for new features.** Do not start feature work
+  directly on `@` in the root workspace.
+- `jj workspace add <path>` — create a new workspace at the given path
+  (typically a sibling directory); each workspace gets its own working
+  tree and independent `@`.
+- `jj workspace list` — list all workspaces and their working-copy commits.
+- `jj workspace root` — print the root path of the current workspace.
+- `jj workspace forget <name>` — unregister a workspace from the repo
+  (does not delete the directory; remove it manually afterwards).
+- `jj workspace rename <old> <new>` — rename a workspace.
+- `jj workspace update-stale` — recover a workspace whose working-copy
+  commit has been rewritten from another workspace.
+- Workspaces share the same jj repo storage and history; each has an
+  independent `@`. Changes in one workspace are immediately visible to all.
+- Typical tmux / parallel Claude Code setup:
+  ```
+  # From the root repo directory:
+  jj workspace add ../repo-feature-a
+  jj workspace add ../repo-feature-b
+  # Each tmux pane: cd into the respective sibling directory
+  ```
+- Do not use `jj new` as a substitute for workspace isolation when running
+  parallel sessions.
+
 ## Basic operations
 
-- `jj st` — status
+- `jj st` — status (alias for `jj status`)
 - `jj log` — history (default graph view)
 - `jj diff` — diff of working copy
 - `jj describe -m "message"` — set commit message for current change
@@ -22,14 +48,17 @@ description: Jujutsu (jj) version control idioms and workflows. Use whenever
 - `jj squash` — fold working copy into parent
 - `jj split` — split current change into two
 - `jj edit <rev>` — move @ to an existing commit for amendment
+- `jj undo` — undo the last operation
 
 ## Bookmarks (not branches)
 
 - jj uses bookmarks, not branches. The concept maps roughly but the
   commands differ.
 - `jj bookmark create <name>` — create bookmark at current revision
-- `jj bookmark set <name>` — move bookmark to current revision
+- `jj bookmark set <name>` — create or move a bookmark to current revision
 - `jj bookmark list` — list all bookmarks
+- `jj bookmark delete <name>` — delete a bookmark
+- `jj bookmark move <name> --to <rev>` — move a bookmark to a revision
 - Do not use `git branch` terminology or commands.
 
 ## Rebasing and history
@@ -54,9 +83,10 @@ description: Jujutsu (jj) version control idioms and workflows. Use whenever
 
 - `jj git fetch` — fetch from remote (not `git fetch`)
 - `jj git fetch -b <bookmark>` — fetch a specific bookmark from remote
-- `jj git push` — push to remote (not `git push`)
-- `jj git push --bookmark <name>` — push a specific bookmark
-- Force push equivalent: `jj git push --force-with-lease`
+- `jj git push` — push to remote (not `git push`); safe by default,
+  only updates remote if it matches last-fetched state
+- `jj git push -b <name>` — push a specific bookmark
+- `jj git push --all` — push all bookmarks
 
 ## Conflict resolution
 
@@ -79,3 +109,7 @@ description: Jujutsu (jj) version control idioms and workflows. Use whenever
   under the hood — do not double-invoke).
 - Never use `git commit`, `git add`, `git checkout`, `git branch`.
 - Do not suggest `git stash` — use `jj new` to park changes instead.
+- Do not start feature work directly on `@` in the root workspace —
+  use `jj workspace add` instead.
+- Do not use `jj git push --force-with-lease` — this flag does not
+  exist; jj push is already safe-by-default.
