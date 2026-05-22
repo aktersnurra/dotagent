@@ -50,6 +50,22 @@ description: Jujutsu (jj) version control idioms and workflows. Use whenever
 - `jj edit <rev>` — move @ to an existing commit for amendment
 - `jj undo` — undo the last operation
 
+## Commit messages
+
+- Use Conventional Commits for `jj describe -m` messages:
+  `type(scope): imperative subject`.
+- Prefer these types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`,
+  `build`, `ci`, `chore`, `revert`.
+- Include a scope when it clarifies the affected area: `docs(jj): add
+commit message guidance`.
+- Use imperative mood and keep the subject concise: `fix(auth): reject
+expired sessions`, not `fixed auth sessions`.
+- For breaking changes, use `!` after the type or scope and add a
+  `BREAKING CHANGE:` footer in the message body.
+- Match the message to the actual change. If the working copy contains
+  unrelated changes, split first with `jj split` instead of writing a broad
+  message.
+
 ## Bookmarks (not branches)
 
 - jj uses bookmarks, not branches. The concept maps roughly but the
