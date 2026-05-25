@@ -8,8 +8,10 @@ mkdir -p "$OPENCODE/skills"
 
 ln -sf "$DOTFILES/CLAUDE.md" "$OPENCODE/CLAUDE.md"
 
-for skill in "$DOTFILES/skills/"/*/; do
-  ln -sf "$skill" "$OPENCODE/skills/$(basename "$skill")"
+for skill in "$DOTFILES/skills"/*/; do
+  target="$OPENCODE/skills/$(basename "$skill")"
+  rm -rf "$target"
+  ln -s "$skill" "$target"
 done
 
 echo "Opencode configured."

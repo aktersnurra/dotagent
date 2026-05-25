@@ -8,8 +8,10 @@ mkdir -p "$PI/skills"
 
 ln -sf "$DOTFILES/CLAUDE.md" "$PI/AGENTS.md"
 
-for skill in "$DOTFILES/skills/"/*/; do
-  ln -sf "$skill" "$PI/skills/$(basename "$skill")"
+for skill in "$DOTFILES/skills"/*/; do
+  target="$PI/skills/$(basename "$skill")"
+  rm -rf "$target"
+  ln -s "$skill" "$target"
 done
 
 PI_PACKAGES=(

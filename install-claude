@@ -9,8 +9,10 @@ mkdir -p "$CLAUDE/skills"
 ln -sf "$DOTFILES/CLAUDE.md" "$CLAUDE/CLAUDE.md"
 ln -sf "$DOTFILES/settings.json" "$CLAUDE/settings.json"
 
-for skill in "$DOTFILES/skills/"/*/; do
-  ln -sf "$skill" "$CLAUDE/skills/$(basename "$skill")"
+for skill in "$DOTFILES/skills"/*/; do
+  target="$CLAUDE/skills/$(basename "$skill")"
+  rm -rf "$target"
+  ln -s "$skill" "$target"
 done
 
 echo "Installing Claude plugins..."
