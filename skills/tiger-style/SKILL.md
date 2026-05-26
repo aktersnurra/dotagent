@@ -1,4 +1,5 @@
 ---
+name: tiger-style
 description: Tiger Style naming and API design conventions, derived from
   TigerBeetle's style guide. Use when naming functions, types, variables,
   modules, or designing any public API surface.

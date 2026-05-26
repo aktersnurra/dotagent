@@ -1,4 +1,5 @@
 ---
+name: jj
 description: Jujutsu (jj) version control idioms and workflows. Use whenever
   the user mentions jj, jujutsu, bookmarks, revsets, commits, rebasing,
   or any version control operation in this repository.
