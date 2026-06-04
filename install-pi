@@ -24,9 +24,9 @@ PI_PACKAGES=(
   "npm:@juicesharp/rpiv-btw"
   "npm:@juicesharp/rpiv-pi"
   "npm:@samfp/pi-memory"
-  "npm:pi-vim"
+  "git:github.com/aktersnurra/pi-vim"
   "git:github.com/aktersnurra/superpowers"
-  "git:github.com/aktersnurra/no-clown-fiesta.pi"
+  "git:github.com/aktersnurra/no-clown-fiesta.pi@master"
 )
 
 PI_THEME="no-clown-fiesta-dark"
@@ -41,6 +41,23 @@ if [[ -f "$SETTINGS" ]]; then
   if grep -qF '"/home/aktersnurra/projects/vibe/superpowers"' "$SETTINGS"; then
     echo "  removing local superpowers package"
     pi remove "/home/aktersnurra/projects/vibe/superpowers"
+  fi
+  if grep -qF '"npm:pi-vim"' "$SETTINGS"; then
+    echo "  removing upstream pi-vim package from settings"
+    python3 - "$SETTINGS" <<'PY'
+import json
+import sys
+
+settings_path = sys.argv[1]
+with open(settings_path, "r", encoding="utf-8") as f:
+    settings = json.load(f)
+settings["packages"] = [
+    pkg for pkg in settings.get("packages", []) if pkg != "npm:pi-vim"
+]
+with open(settings_path, "w", encoding="utf-8") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+PY
   fi
 fi
 
