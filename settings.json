@@ -9,7 +9,6 @@
       "Read(**/.env*)"
     ]
   },
-  "model": "claude-sonnet-4-6",
   "hooks": {
     "Stop": [
       {

@@ -23,7 +23,7 @@ PI_PACKAGES=(
   "npm:@juicesharp/rpiv-ask-user-question"
   "npm:@juicesharp/rpiv-btw"
   "npm:@juicesharp/rpiv-pi"
-  "npm:@samfp/pi-memory"
+  "npm:pi-hermes-memory"
   "git:github.com/aktersnurra/pi-vim"
   "git:github.com/aktersnurra/superpowers"
   "git:github.com/aktersnurra/no-clown-fiesta.pi@master"
