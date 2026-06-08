@@ -42,6 +42,23 @@ if [[ -f "$SETTINGS" ]]; then
     echo "  removing local superpowers package"
     pi remove "/home/aktersnurra/projects/vibe/superpowers"
   fi
+  if grep -qF '"npm:@samfp/pi-memory"' "$SETTINGS"; then
+    echo "  removing @samfp/pi-memory (conflicts with pi-hermes-memory)"
+    python3 - "$SETTINGS" <<'PY'
+import json
+import sys
+
+settings_path = sys.argv[1]
+with open(settings_path, "r", encoding="utf-8") as f:
+    settings = json.load(f)
+settings["packages"] = [
+    pkg for pkg in settings.get("packages", []) if pkg != "npm:@samfp/pi-memory"
+]
+with open(settings_path, "w", encoding="utf-8") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+PY
+  fi
   if grep -qF '"npm:pi-vim"' "$SETTINGS"; then
     echo "  removing upstream pi-vim package from settings"
     python3 - "$SETTINGS" <<'PY'
