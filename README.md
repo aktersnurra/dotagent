@@ -1,19 +1,21 @@
 # .agent
 
 Personal Coding Harness configuration (Claude Code, Opencode, Pi) —
-global settings and skills symlinked into each harness's config directory.
+harness-specific guidance, global settings, and skills symlinked into each harness's config directory.
 
 ## Structure
 
 ```
 dotagent/
-├── CLAUDE.md          # Global workflow and code discipline instructions (used by all harnesses)
+├── AGENTS.md          # Pi-specific workflow, tool, and skill routing
+├── CLAUDE.md          # Claude Code / Claude-like workflow and plugin routing
 ├── settings.json      # Claude Code settings (model, hooks, permissions, theme)
 ├── install            # Install all harnesses
 ├── install-claude     # Claude Code: symlinks + plugin install
 ├── install-opencode   # Opencode: symlinks
 ├── install-pi         # Pi: symlinks
 └── skills/
+    ├── design-doctrine/ # Explicit, evolvable domain-core design
     ├── elixir/        # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
     ├── explain/       # Detailed explanations, walkthroughs, and durable docs
     ├── jj/            # Jujutsu VCS idioms and workflows
@@ -52,6 +54,7 @@ dotagent/
 
 | Skill                 | Trigger                                                                  |
 | --------------------- | ------------------------------------------------------------------------ |
+| `design-doctrine`     | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
 | `elixir`              | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
 | `explain`             | Detailed explanations, walkthroughs, app/service overviews, durable docs |
 | `jj`                  | Any jj/jujutsu VCS operation                                             |

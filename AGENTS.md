@@ -1,22 +1,21 @@
-# Claude Code Guidance
+# Pi Agent Guidance
 
 ## Purpose
 
-This file is for Claude Code and Claude-like harnesses. It is the stable operating contract for this dotagent setup. Keep it concise: route to installed skills/plugins instead of copying their full workflows here.
+This file is for Pi only. It is the routing layer for Pi packages, tools, and skills. It should not duplicate full workflows from installed skills; invoke the relevant skill and follow it.
 
 ## Instruction precedence
 
 1. Direct user instructions in the current conversation.
 2. Repository-local guidance and active plans/specs.
-3. Invoked skill or plugin instructions.
+3. Invoked skill instructions.
 4. This file.
 5. Default model behavior.
 
 If instructions conflict, prefer the more specific and more recent instruction. Ask only when the conflict changes the outcome.
 
-## Skill and plugin routing
+## Pi routing
 
-- Use Superpowers skills as the source of truth for workflow discipline.
 - Use `using-superpowers` at conversation start and whenever a Superpowers workflow may apply.
 - Use `brainstorming` before creative changes or behavior changes unless the user has already approved the design.
 - Use `test-driven-development` for feature work, bug fixes, refactors, and behavior changes. For pure config/doc edits, verify with focused shell checks.
@@ -25,7 +24,12 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 - Use `jj` for all Jujutsu operations.
 - Use domain/design skills for model-heavy work: `design-doctrine`, `type-driven-development`, `tiger-style`.
 - Use language skills for language-specific work: `elixir`, `ocaml`.
-- Use UI skills and the frontend-design plugin for screens, components, layouts, and visual design review.
+- Use UI skills for screens, components, layouts, and visual design review.
+- Use `context-mode` tools for large outputs: tests, logs, dependency trees, git history, API responses, docs, and generated snapshots.
+- Use `lsp-navigation` for code intelligence and diagnostics.
+- Use `ast-grep` for semantic code search or replacement.
+- Use RPIV skills for artifact workflows: `discover`, `research`, `explore`, `design`, `plan`, `blueprint`, `implement`, `validate`, `code-review`, `revise`.
+- Use `pi-subagents` or Pi subagents when independent work can run in parallel or a focused reviewer/researcher should preserve main context.
 
 ## Operating discipline
 
@@ -33,6 +37,7 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 - Do not clean up adjacent code, comments, formatting, or old imports unless your change made them wrong.
 - Do not add speculative features, abstractions, or error handling.
 - Prefer the smallest API and the fewest moving parts that satisfy the request.
+- Keep one task in progress at a time when using todos.
 - Verify before making success claims. Say what command or check proves the claim.
 - If verification fails, report the failure and keep the work open.
 
@@ -41,6 +46,7 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 - `SPEC.md`: authoritative requirements when present.
 - `PLAN.md`: module breakdown and interfaces when present.
 - `SPEC_FEAT_<name>.md` / `PLAN_FEAT_<name>.md`: feature-specific work when present.
+- RPIV artifacts under `.rpiv/artifacts/` supersede ad-hoc SPEC/PLAN files for RPIV workflows.
 - Append to `CHANGELOG.md` only when the task or workflow explicitly calls for session/release notes.
 
 ## Model usage

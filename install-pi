@@ -6,7 +6,7 @@ PI="$HOME/.pi/agent"
 
 mkdir -p "$PI/skills"
 
-ln -sf "$DOTFILES/CLAUDE.md" "$PI/AGENTS.md"
+ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
 
 for skill in "$DOTFILES/skills"/*/; do
   target="$PI/skills/$(basename "$skill")"
