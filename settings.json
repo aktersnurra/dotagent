@@ -6,10 +6,42 @@
       "Bash(rm -rf*)",
       "Bash(git push origin main*)",
       "Bash(git push origin master*)",
-      "Read(**/.env*)"
+      "Read(**/.env*)",
+      "Bash(cat *.env*)",
+      "Bash(less *.env*)",
+      "Bash(more *.env*)",
+      "Bash(head *.env*)",
+      "Bash(tail *.env*)",
+      "Bash(grep *.env*)",
+      "Bash(awk *.env*)",
+      "Bash(sed *.env*)",
+      "Bash(xxd *.env*)",
+      "Bash(od *.env*)",
+      "Bash(strings *.env*)",
+      "Bash(base64 *.env*)",
+      "Bash(source *.env*)",
+      "Bash(. *.env*)",
+      "Bash(env)",
+      "Bash(env *)",
+      "Bash(printenv*)",
+      "Bash(set)",
+      "Bash(export -p*)"
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/secret-guard.sh",
+            "timeout": 5,
+            "statusMessage": "Checking for secret exposure..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
@@ -38,7 +70,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Context compacting — writing session state...' && cat .claude/writes.log >> SESSION_SUMMARY.md"
+            "command": "echo 'Context compacting — writing session state...' && cat .claude/writes.log >> SESSION_SUMMARY.md && : > .claude/writes.log"
           }
         ]
       }
@@ -58,6 +90,21 @@
         "source": "git",
         "url": "https://github.com/aktersnurra/superpowers.git"
       }
+    }
+  },
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg",
+        "~/.netrc",
+        "~/.config/gh",
+        "~/.config/gcloud",
+        "~/.vault-token",
+        "~/.password-store"
+      ]
     }
   },
   "syntaxHighlightingDisabled": false,

@@ -4,10 +4,15 @@ set -euo pipefail
 DOTFILES="$HOME/projects/dotagent"
 CLAUDE="$HOME/.claude"
 
-mkdir -p "$CLAUDE/skills"
+mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks"
 
 ln -sf "$DOTFILES/CLAUDE.md" "$CLAUDE/CLAUDE.md"
 ln -sf "$DOTFILES/settings.json" "$CLAUDE/settings.json"
+ln -sf "$DOTFILES/.claude/agents/implementer.md" "$CLAUDE/agents/implementer.md"
+
+for hook in "$DOTFILES/hooks"/*; do
+  ln -sf "$hook" "$CLAUDE/hooks/$(basename "$hook")"
+done
 
 for skill in "$DOTFILES/skills"/*/; do
   target="$CLAUDE/skills/$(basename "$skill")"
