@@ -28,6 +28,7 @@
       "Bash(export -p*)"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -59,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"$(date): wrote $CLAUDE_FILE_PATHS\" >> .claude/writes.log"
+            "command": "mkdir -p \"$CLAUDE_PROJECT_DIR/.claude\" && echo \"$(date): wrote $CLAUDE_FILE_PATHS\" >> \"$CLAUDE_PROJECT_DIR/.claude/writes.log\""
           }
         ]
       }
@@ -70,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Context compacting — writing session state...' && cat .claude/writes.log >> SESSION_SUMMARY.md && : > .claude/writes.log"
+            "command": "echo 'Context compacting — writing session state...' && touch \"$CLAUDE_PROJECT_DIR/.claude/writes.log\" && cat \"$CLAUDE_PROJECT_DIR/.claude/writes.log\" >> \"$CLAUDE_PROJECT_DIR/SESSION_SUMMARY.md\" && : > \"$CLAUDE_PROJECT_DIR/.claude/writes.log\""
           }
         ]
       }
