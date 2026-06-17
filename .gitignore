@@ -1,4 +1,5 @@
 .claude/writes.log
+.claude/settings.local.json
 SESSION_SUMMARY.md
 /docs/
 /skills/explain/explain
