@@ -8,11 +8,7 @@ mkdir -p "$PI/skills"
 
 ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
 
-for skill in "$DOTFILES/skills"/*/; do
-  target="$PI/skills/$(basename "$skill")"
-  rm -rf "$target"
-  ln -s "$skill" "$target"
-done
+"$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
 
 PI_PACKAGES=(
   "npm:@ff-labs/pi-fff"

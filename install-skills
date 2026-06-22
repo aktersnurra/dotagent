@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE_DIR="${1:?usage: install-skills <source-dir> <target-dir>}"
+TARGET_DIR="${2:?usage: install-skills <source-dir> <target-dir>}"
+
+mkdir -p "$TARGET_DIR"
+
+for skill in "$SOURCE_DIR"/*/; do
+  name="$(basename "$skill")"
+  target="$TARGET_DIR/$name"
+
+  if [[ -L "$target" ]]; then
+    current="$(readlink "$target")"
+    if [[ "$current" == "$skill" ]]; then
+      continue
+    fi
+
+    echo "Refusing to replace symlink: $target -> $current" >&2
+    echo "Expected: $skill" >&2
+    exit 1
+  fi
+
+  if [[ -e "$target" ]]; then
+    echo "Refusing to replace existing path: $target" >&2
+    exit 1
+  fi
+
+  ln -s "$skill" "$target"
+done

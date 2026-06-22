@@ -2,16 +2,12 @@
 set -euo pipefail
 
 DOTFILES="$HOME/projects/dotagent"
-OPENCODE="$HOME/.config/opencode"
+OPENCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
 
 mkdir -p "$OPENCODE/skills"
 
 ln -sf "$DOTFILES/CLAUDE.md" "$OPENCODE/CLAUDE.md"
 
-for skill in "$DOTFILES/skills"/*/; do
-  target="$OPENCODE/skills/$(basename "$skill")"
-  rm -rf "$target"
-  ln -s "$skill" "$target"
-done
+"$DOTFILES/install-skills" "$DOTFILES/skills" "$OPENCODE/skills"
 
 echo "Opencode configured."

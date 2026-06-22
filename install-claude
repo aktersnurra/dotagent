@@ -14,11 +14,7 @@ for hook in "$DOTFILES/hooks"/*; do
   ln -sf "$hook" "$CLAUDE/hooks/$(basename "$hook")"
 done
 
-for skill in "$DOTFILES/skills"/*/; do
-  target="$CLAUDE/skills/$(basename "$skill")"
-  rm -rf "$target"
-  ln -s "$skill" "$target"
-done
+"$DOTFILES/install-skills" "$DOTFILES/skills" "$CLAUDE/skills"
 
 echo "Installing Claude plugins..."
 claude plugins uninstall superpowers@claude-plugins-official --scope user --keep-data || true
