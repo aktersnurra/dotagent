@@ -3,11 +3,64 @@ set -euo pipefail
 
 DOTFILES="$HOME/projects/dotagent"
 OPENCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+OPENCODE_CONFIG="$OPENCODE/opencode.jsonc"
+OPENCODE_PLUGINS=(
+  "superpowers@git+https://github.com/aktersnurra/superpowers.git"
+)
+
+config_has_plugins() {
+  local plugin
+
+  for plugin in "${OPENCODE_PLUGINS[@]}"; do
+    grep -qF "\"$plugin\"" "$OPENCODE_CONFIG" || return 1
+  done
+}
+
+config_is_missing_or_schema_only() {
+  [[ ! -f "$OPENCODE_CONFIG" ]] && return 0
+
+  ! grep -qvE '^[[:space:]]*(\{|\}|"\$schema"[[:space:]]*:[[:space:]]*"https://opencode.ai/config.json",?)[[:space:]]*$' "$OPENCODE_CONFIG"
+}
+
+write_default_opencode_config() {
+  local index
+  local last_index=$((${#OPENCODE_PLUGINS[@]} - 1))
+
+  {
+    printf '{\n'
+    printf '  "$schema": "https://opencode.ai/config.json",\n'
+    printf '  "plugin": [\n'
+
+    for index in "${!OPENCODE_PLUGINS[@]}"; do
+      if [[ "$index" -eq "$last_index" ]]; then
+        printf '    "%s"\n' "${OPENCODE_PLUGINS[$index]}"
+      else
+        printf '    "%s",\n' "${OPENCODE_PLUGINS[$index]}"
+      fi
+    done
+
+    printf '  ]\n'
+    printf '}\n'
+  } > "$OPENCODE_CONFIG"
+}
 
 mkdir -p "$OPENCODE/skills"
 
 ln -sf "$DOTFILES/CLAUDE.md" "$OPENCODE/CLAUDE.md"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$OPENCODE/skills"
+
+if [[ "${#OPENCODE_PLUGINS[@]}" -gt 0 ]]; then
+  if [[ -f "$OPENCODE_CONFIG" ]] && config_has_plugins; then
+    echo "Opencode plugins already configured."
+  elif config_is_missing_or_schema_only; then
+    write_default_opencode_config
+  else
+    echo "Refusing to modify custom Opencode config: $OPENCODE_CONFIG" >&2
+    echo "Add these documented plugin entries manually:" >&2
+    printf '  %s\n' "${OPENCODE_PLUGINS[@]}" >&2
+    exit 1
+  fi
+fi
 
 echo "Opencode configured."
