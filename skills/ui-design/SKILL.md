@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: First-principles reasoning for designing app UIs that avoid the dashboard/crudy vibe. Use when designing or reviewing any screen, component, or layout — especially for tools (apps used to do something, not consumed passively). Covers hierarchy, structure-matches-logic, when to use cards/lists/charts, what belongs on which screen, and the difference between status surfaces and action surfaces.
+description: First-principles framework for designing app UIs that feel like designed tools rather than database admin panels. Use when designing or reviewing any screen, component, or layout. Covers posture (calm, restraint, outcomes-not-process), structure (hierarchy, container scope, tense), components (cards/lists/forms/charts), microcopy (empty/loading/error states), and an end-of-skill quick-reference checklist. Project-agnostic; for AI-agent-specific patterns (run receipts, diff alphabet, undo-over-approval) see the companion `agentic-ui` skill when present.
 ---
 
 # UI design
@@ -9,7 +9,7 @@ A working framework for designing app interfaces that feel like designed
 tools rather than database admin panels or feature checklists.
 
 This is opinionated. It privileges clarity over completeness, action
-over status, and honest information design over decorative chrome.
+over status, outcomes over process, and restraint over decoration.
 
 ## The core principle
 
@@ -21,9 +21,44 @@ screen is failing. If a user can identify the primary task but can't
 execute it without first parsing five secondary elements, the screen
 is still failing.
 
-The crudy vibe almost always comes from violating this: too many
+The crudy/admin vibe almost always comes from violating this: too many
 peers competing for attention, no clear headline, no obvious next
 action.
+
+## Posture: calm, restraint, outcomes
+
+Before any specific rule, posture. Most apps fail not because they
+break a rule but because their *attitude* is wrong: anxious, busy,
+self-promoting, process-revealing.
+
+**Calm beats busy.** A screen that's quietly confident in its primary
+job is more useful than a screen that crowds context, badges, and
+ambient activity around it. Whitespace is a feature.
+
+**Restraint is designed, not absent.** "Subtract one thing" is not a
+tiebreaker — it is the *defining* property of good app UI. Before
+adding anything to a screen, ask what you'd remove first. Before
+shipping a screen, ask which element, if cut, would make it better.
+If the answer is "nothing," the screen is probably overworked.
+
+**Show outcomes, not process.** The user wants to see the *result* of
+what the system did, not the machinery that produced it. A run log,
+a pipeline diagram, an agent transcript — these are debug surfaces.
+The user surface shows: what's true now, what's next, what changed.
+
+**Use household/domain language.** Surface backend terms (pipeline,
+aggregate, run, inference, tool call, artifact) belong in developer
+views. User-facing copy uses the language of the actual problem
+domain: "dinner," "shopping list," "branch," "meeting," "invoice."
+
+**No mascot, no theatrics.** The system is a capability, not a
+character. Don't write "Hi! I'm your AI assistant!" or "Oops!" or
+"Great job!". Matter-of-fact warmth beats forced personality every
+time.
+
+These four — calm, restraint, outcomes, honest copy — are the
+posture that makes the rest of the rules effective. Get them wrong
+and the rest of the framework can't save the design.
 
 ## The five questions to ask before designing anything
 
@@ -210,23 +245,46 @@ When designing a new screen, write down the answer to "is this
 action or status?" before sketching anything. The answer determines
 80% of the layout decisions that follow.
 
-## Navigation: tabs vs. actions
+## Navigation: operational, not entity-shaped
 
-Tabs are for **destinations** — places the user navigates to find
-things. They should hold things of the same shape (lists, summaries).
+Top-level destinations should name **what the user is trying to
+do**, not the backend tables. This is the same posture as
+"outcomes, not process," applied to nav.
 
-Actions are for **creation, editing, or invocation** — things the
-user does. They belong in buttons, FABs, overflow menus, or
-disclosure controls. They do *not* belong in tabs.
+Operational nav (good):
 
-Test: would the user ever sit on this tab and read? If yes, tab.
-If the tab exists only to launch a form or trigger an action, it's
-not a tab — it's a button hiding in a tab bar.
+```
+Today · Plan · Shop · Capture
+Inbox · Calendar · Compose
+Code · Review · Deploy
+```
+
+Entity-shaped nav (usually wrong as top-level):
+
+```
+Recipes · Pantry · Deals · Receipts
+Messages · Contacts · Threads · Labels
+Files · Branches · Commits · PRs
+```
+
+Entity surfaces still exist — they live *contextually* inside an
+operational surface or as secondary destinations, not as peers in
+the main nav. A "Recipes" library is reached from "Plan"; a "Files"
+list is reached from "Code."
+
+This isn't an absolute rule (some apps genuinely are entity-managers
+— a file browser, a contact manager), but it's the default. When in
+doubt, ask: would the user ever sit on this tab and *read*, or only
+to *launch* something? If only to launch, it's not a tab.
 
 A tab bar should have 3–5 items. More than 5 and labels disappear,
 icons become ambiguous, and the user has to memorize the layout.
 If you have 7 items, you have hidden categories — find them and
 collapse.
+
+**Tabs vs. actions:** tabs are for **destinations**. Actions
+(creation, editing, invocation) belong in buttons, FABs, overflow
+menus — not in the tab bar.
 
 ## Charts: the trend-vs-composition question
 
@@ -281,26 +339,158 @@ output card shows the system's response to the inputs. This
 preserves the declarative → result mental model and avoids
 mixing intent with result.
 
-## Empty states are part of the design
+## Empty states: potential, not absence
 
 Every screen has an empty state. New users hit it first. Power
 users hit it when they delete their data or filter to nothing.
 
 A well-designed empty state:
-- Explains why the surface is empty.
+- Explains why the surface is empty in domain language.
 - Offers the most likely next action.
+- Frames the absence as *potential*, not failure.
 - Doesn't look like a bug.
+
+Good empty state copy:
+
+```
+Nothing to buy yet
+Your current plan is covered.
+
+[Add item]  [Build from plan]
+```
+
+Bad empty state copy:
+
+```
+No data
+```
+
+```
+You haven't created any [things] yet. Click here to get started!
+```
+
+The frame matters. "Nothing to buy" reads as a calm state of the
+world. "No data" reads as broken. "You haven't created any" reads
+as guilt-tripping. Match the language to the domain.
 
 Common empty state failures:
 - A 12-cell grid mostly showing "—" (looks broken, communicates
   "you've failed").
 - A blank panel with no text (looks broken).
 - Generic copy like "No data" (uninformative).
+- Illustrations that consume the whole viewport and say nothing.
 
 Design the empty state with the same care as the populated state.
-For new-user empty states specifically, make sure the screen doesn't
-read as "look at all this nothing." Frame the empty state as
-potential, not absence.
+
+## Loading states: name the work, not the system
+
+Generic spinners are a sign the designer skipped the loading state.
+Specific operation names tell the user what the system is doing
+and how long it should plausibly take.
+
+Good:
+
+```
+Reading recipe
+Checking the week
+Building grocery changes
+Verifying changes
+```
+
+Bad:
+
+```
+Loading…
+Please wait
+AI is thinking
+Just a moment
+```
+
+No anthropomorphic copy ("thinking," "working hard"). No fake
+precision (don't show a progress bar for an operation that has no
+measurable length). Spinners are fine; the *label next to the
+spinner* is what does the work.
+
+For long operations, name the *current* step:
+
+```
+✓ Reading recipe
+✓ Extracting ingredients
+→ Checking pantry
+  Building grocery changes
+```
+
+This makes the system feel deliberate, not stuck.
+
+## Error states: explain consequence and recovery
+
+Every error must answer three questions: what failed, what state
+is the system in now, and what the user can do next.
+
+Good:
+
+```
+Could not read the recipe
+The page may block scraping.
+Nothing was saved.
+
+[Paste text]  [Try again]
+```
+
+Bad:
+
+```
+Error: failed to fetch resource (code 502)
+```
+
+```
+Something went wrong
+```
+
+The "nothing was saved" line — explicit consequence — is **mandatory
+when true**. Trust depends on knowing the system didn't half-apply
+something. If state *was* mutated, say so: "Saved 8 of 12 items;
+the rest failed."
+
+Never:
+- Expose internal error codes or stack traces in the primary message
+  (they can live behind "Details").
+- Blame the user with "you" framing for system failures.
+- Use red as decoration. Reserve danger color for things the user
+  can lose.
+
+## Microcopy: matter-of-fact warmth
+
+The tone of system copy is part of the design. Get it wrong and
+even a well-structured UI feels off.
+
+**Good tone:**
+- Matter-of-fact
+- Warm but not cute
+- Brief
+- Honest about uncertainty
+- Plain domain language
+
+**Bad tone:**
+- "Oopsie!" / "Yay!" / "Great job!"
+- "Your AI assistant has a suggestion!"
+- "Let's optimize your journey"
+- "You forgot to…"
+- Mascots, exclamation marks, forced enthusiasm
+
+Examples:
+
+| Bad | Good |
+|---|---|
+| Great job logging your meal! | Meal logged. |
+| Oops! Something went wrong. | Couldn't save. Try again. |
+| Your AI chef recommends... | Suggested: pork skewers |
+| You haven't planned Thursday | Thursday is open |
+| Click here to get started! | [Plan this week] |
+
+The test: would a competent colleague write this sentence in a
+handoff note? If the answer is "no, this is marketing copy,"
+rewrite.
 
 ## Specific anti-patterns to avoid
 
@@ -343,6 +533,23 @@ these in your own design, stop and fix:
     next to "Copy" buttons at equal weight invite accidents. Put
     destructive actions in overflow menus.
 
+11. **Entity-shaped top nav.** "Recipes / Pantry / Deals" as primary
+    tabs when the user's actual tasks are "plan / shop / cook."
+
+12. **Backend vocabulary in user copy.** "KitchenRun completed,"
+    "Artifact persisted," "Pipeline failed." Translate to domain
+    language always.
+
+13. **Generic spinners with no label.** A spinner without a "what's
+    happening" caption is a confession that the designer skipped
+    the loading state.
+
+14. **Empty states framed as absence/guilt.** "You haven't created
+    any X yet" instead of "No X yet — add one when ready."
+
+15. **Mascot/personality copy.** "Hi! I'm your AI helper!" — the
+    system is a capability, not a character.
+
 ## The squint test, the room test, the 2-second test
 
 Three tests for any screen:
@@ -371,7 +578,9 @@ make room for this?
 Before shipping a screen, ask: which one element, if removed,
 would make this screen better?
 
-Restraint is a designed property, not an absence of work.
+Restraint is a designed property, not an absence of work. The
+best screens look obvious in retrospect because every weak
+element was cut.
 
 ## Process for designing a new screen
 
@@ -396,13 +605,16 @@ When designing a new screen from scratch:
 6. **Sketch container scope** — what goes in which card/section.
    Verify no scope violations.
 
-7. **Design the empty state explicitly.** What does this look like
-   when the user has no data?
+7. **Design empty / loading / error states explicitly.** Each
+   one with the rules from earlier sections.
 
-8. **Apply the three tests** (squint, room, 2-second).
+8. **Audit the microcopy.** Backend terms removed? Mascot tone
+   gone? Domain language used?
 
-9. **Subtract one element.** What's the least important thing? Can
-   it be removed or moved to a detail view?
+9. **Apply the three tests** (squint, room, 2-second).
+
+10. **Subtract one element.** What's the least important thing? Can
+    it be removed or moved to a detail view?
 
 This process catches most crudy-vibe issues before they ship.
 
@@ -424,16 +636,32 @@ When reviewing a screen that feels off but you can't articulate why:
 
 5. **Count visual levels.** More than three? Collapse to three.
 
-6. **Look at the empty state.** Does it look like a bug? Does it
-   discourage rather than offer a next step?
+6. **Look at the empty/loading/error states.** Do any look like
+   bugs? Do any guilt the user? Do any leak backend errors?
 
-7. **Find the anti-patterns** from the list above.
+7. **Audit the microcopy.** Backend terms, mascot tone, fake
+   enthusiasm, anthropomorphic system copy.
 
-8. **Identify the one element that, if removed, would help most.**
+8. **Find the anti-patterns** from the list above.
+
+9. **Identify the one element that, if removed, would help most.**
    Cut it.
 
 Most "crudy" screens get to "clean" in 3–5 specific changes, not
 a full redesign.
+
+## For AI-agent UIs specifically
+
+This skill covers general app UI. Apps where an AI agent mutates
+state on the user's behalf have additional concerns: how to surface
+what the agent did, how to make it reversible, how to render
+uncertainty, how to respect user intent against agent action.
+
+When designing agentic surfaces, also reach for the `agentic-ui`
+skill (when present) for: run receipts, the diff alphabet,
+agent-acts/user-undoes vs. approval-gated proposals, belief states,
+user-lock semantics. The general rules in this skill still apply —
+agentic UI extends them, doesn't replace them.
 
 ## What this skill is not
 
@@ -442,8 +670,8 @@ you which colors to use, which font, which radius for card corners.
 Those are project-level decisions that should be consistent across
 the app but aren't universal principles.
 
-It also doesn't replace seeing well-designed examples. The
-references worth studying for tools (not consumer apps):
+It also doesn't replace seeing well-designed examples. References
+worth studying for tools (not consumer apps):
 
 - Linear (web and mobile) for dense-but-clean.
 - Apple Fitness for action-first single-screen design.
@@ -458,6 +686,8 @@ not templates to copy.
 A short list to keep nearby:
 
 - Every screen has one job.
+- Calm beats busy; restraint is a designed property.
+- Show outcomes, not process. Use domain language, not backend terms.
 - Tense determines structure.
 - Pick three visual levels.
 - Visual structure should mirror logical structure.
@@ -465,6 +695,203 @@ A short list to keep nearby:
 - Containers have scope; respect it.
 - Action surfaces don't fill the viewport.
 - Status surfaces lead with the headline.
+- Nav names what the user is doing, not what entities exist.
 - Tabs are destinations; actions are buttons.
-- Empty states are part of the design.
+- Empty states frame absence as potential, not failure.
+- Loading states name the work, not the system.
+- Errors explain consequence and recovery.
+- Microcopy is matter-of-fact warmth, never mascot theatrics.
 - When in doubt, subtract.
+
+---
+
+# Quick reference
+
+The actionable subset. Use as a fast pass when sketching or reviewing.
+
+## Designing a new screen
+
+1. **One sentence: what does the user want here?**
+   If you can't write it, stop.
+
+2. **Tense:** action / status / wizard?
+
+3. **One primary element.** Big, central, dominant.
+
+4. **Three visual levels, no more.**
+
+5. **Container scope.** Each container has one logical scope.
+
+6. **Empty / loading / error states designed explicitly.**
+
+7. **Microcopy audited.** No backend terms, no mascot tone.
+
+8. **Three tests:** squint / room / 2-second.
+
+9. **Subtract one thing.**
+
+## Reviewing an existing screen
+
+1. **Squint test.** One element clearly dominant?
+2. **Container scope.** Anything violating its container's scope?
+3. **Tense check.** Mixed tenses on one surface?
+4. **Count CTAs.** More than one primary?
+5. **Count visual levels.** More than three?
+6. **Empty / loading / error states.** Any look like bugs?
+7. **Microcopy.** Backend terms? Mascot tone? Guilt framing?
+8. **Anti-pattern scan** (below).
+9. **Subtract.** What helps most if removed?
+
+## Anti-pattern scan
+
+- [ ] Multiple primary CTAs at equal visual weight.
+- [ ] Notification-badge styling on non-notification content.
+- [ ] Native `<input type=number>` steppers visible.
+- [ ] Validation borders bright enough to read as alerts.
+- [ ] Per-cell borders on grids that should be one element.
+- [ ] Charts without axis labels or unit context.
+- [ ] Stacked bars where the user wants per-category trends.
+- [ ] Labels and values at the same visual weight.
+- [ ] Cancel button as prominent as Save.
+- [ ] Destructive actions visible by default (not behind ⋯).
+- [ ] Status info inside an action surface (or vice versa).
+- [ ] Long-term state inside a short-term container.
+- [ ] Entity-shaped top-level nav where operational nav would fit.
+- [ ] Backend vocabulary in user-facing copy.
+- [ ] Generic spinner with no operation label.
+- [ ] Empty state framed as absence/guilt, not potential.
+- [ ] Mascot or theatrical AI-assistant tone.
+
+## Chart-type decision
+
+- **Trend within categories** → lines, one per category.
+- **Composition of a total** → stacked bars.
+- **Comparison of single values** → grouped bars.
+- **Distribution** → histogram.
+
+Magnitude ratios:
+- **<2.5×** → shared axis, fine.
+- **2.5–5×** → shared axis with per-series reference lines.
+- **>5×** → small multiples.
+
+Never dual y-axes.
+
+Every chart needs: axis labels (2–3 values minimum), inline
+series labels (not separate legends), units in the subtitle.
+
+## Cards vs. lists vs. plain layout
+
+- **Card** when the item is a discrete concept with internal
+  structure, and multiple cards on screen are peers.
+- **List row** when many items share identical structure and
+  the user scans across them.
+- **Plain layout (no chrome)** when the content is one or two
+  pieces of text — don't wrap single facts in cards.
+
+If you'd lose meaning by removing the card chrome, the card is
+correctly scoped. If you wouldn't, drop the card.
+
+## Form input categories
+
+When a form has >5 inputs, classify each:
+
+- **Declarative** (what the user wants) → always visible, prominent.
+- **Constraint** (hard limits) → visible, secondary weight.
+- **Tuning hint** (system behavior preferences) → behind disclosure
+  or in a post-output tuning panel.
+
+Forms driving solvers/recommenders: split into input card and
+output card.
+
+## Navigation
+
+- **Tabs** = destinations (places to navigate to).
+- **Buttons/FABs** = actions (things to do).
+- **3–5 tabs**, all labeled. Above 5: hidden categories — find
+  and collapse.
+- Active state must be unambiguous: filled icon + label in accent
+  color minimum.
+- Nav names what the user is *doing*, not what entities exist.
+
+If a tab exists only to launch a form, it's not a tab.
+
+## List row defaults
+
+- Single line when content fits.
+- Tabular figures on any numeric column.
+- Right-aligned numerics, left-aligned text.
+- Drop per-row chevrons unless destination is non-obvious.
+- Whole row tappable; don't hide that behind small targets.
+- Hairline dividers between rows, not per-row borders.
+
+## Card defaults
+
+- Internal padding 24–32px.
+- Title at top, content below, actions at bottom (if any).
+- One concept per card.
+- Tappable cards lead to detail views; secondary actions live
+  in the detail view, not on the summary card.
+- Hairline border or subtle background fill — not both.
+
+## Status surface defaults
+
+- Headline metric in the dominant visual position.
+- Charts and lists below, density appropriate to "reading."
+- Empty state explains and offers next action.
+- Refresh/update mechanism if data is live.
+
+## Action surface defaults
+
+- One primary action, visually dominant.
+- Minimal status, just enough context to confirm "right place."
+- Empty space is fine — screen does not need to fill viewport.
+- Secondary actions present but quiet (links, not buttons).
+
+## Wizard surface defaults
+
+- Two cards: inputs (declarative + constraints) and output
+  (result + tuning).
+- Output card has an empty state until inputs are valid.
+- Output updates live (debounced) or on explicit "Generate" —
+  decide based on solver/compute speed.
+- Save action lives outside both cards; it commits the combination.
+
+## Empty / loading / error microcopy
+
+**Empty state template:**
+```
+[Calm sentence about the state of the world]
+[Optional one-line context]
+
+[Primary action]  [Optional secondary]
+```
+
+**Loading state template:**
+```
+[Specific verb naming the operation]
+```
+Not "Loading," not "Please wait," not "Thinking."
+
+**Error state template:**
+```
+[What failed, in plain language]
+[Why, if briefly explainable]
+[Current state: "Nothing was saved" if true]
+
+[Recovery action]  [Alternative]
+```
+
+## Pre-ship checklist
+
+- [ ] Can a user describe the screen's purpose in 2 seconds?
+- [ ] Is the primary element clearly dominant?
+- [ ] Three visual levels, no more?
+- [ ] Empty / loading / error states designed and reviewed?
+- [ ] Microcopy free of backend terms and mascot tone?
+- [ ] All container scopes clean?
+- [ ] No anti-patterns from the scan list above?
+- [ ] Subtracted at least one element from the first draft?
+- [ ] Three tests pass (squint, room, 2-second)?
+
+If any answer is "no" or "I don't know," go back and fix that
+before shipping.

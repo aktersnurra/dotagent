@@ -28,6 +28,7 @@
       "Bash(export -p*)"
     ]
   },
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -110,6 +111,7 @@
   "syntaxHighlightingDisabled": false,
   "alwaysThinkingEnabled": false,
   "effortLevel": "medium",
+  "tui": "fullscreen",
   "theme": "dark-ansi",
   "editorMode": "vim"
 }
