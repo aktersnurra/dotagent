@@ -16,7 +16,7 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 
 ## Skill and plugin routing
 
-- Use Superpowers skills as the source of truth for workflow discipline.
+- Use the applicable Superpowers skills for features, patches, bug fixes, refactors, planning, implementation, review, and verification.
 - Use `using-superpowers` at conversation start and whenever a Superpowers workflow may apply.
 - Use `brainstorming` before creative changes or behavior changes unless the user has already approved the design.
 - Use `test-driven-development` for feature work, bug fixes, refactors, and behavior changes. For pure config/doc edits, verify with focused shell checks.
@@ -35,13 +35,6 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 - Prefer the smallest API and the fewest moving parts that satisfy the request.
 - Verify before making success claims. Say what command or check proves the claim.
 - If verification fails, report the failure and keep the work open.
-
-## File conventions
-
-- `SPEC.md`: authoritative requirements when present.
-- `PLAN.md`: module breakdown and interfaces when present.
-- `SPEC_FEAT_<name>.md` / `PLAN_FEAT_<name>.md`: feature-specific work when present.
-- Append to `CHANGELOG.md` only when the task or workflow explicitly calls for session/release notes.
 
 ## Model usage
 
