@@ -24,7 +24,7 @@ WHISPER_LANGUAGE=sv WHISPER_MODEL=small \
 
 3. Read the emitted SRT, answer the exact question, then keep the transcript and let the script remove temporary audio.
 
-The script first asks `yt-dlp` for subtitles. If none exist, it pipes the best audio stream directly through `ffmpeg` into a temporary WAV and runs Whisper through `uvx`.
+The script first asks `yt-dlp` for subtitles. If none exist, it pipes the best audio stream directly through `ffmpeg` into a temporary WAV. On macOS it runs `mlx-whisper`; on other Unix systems it selects CUDA when `nvidia-smi -L` succeeds and otherwise runs `openai-whisper` on CPU.
 
 ## Answer
 
@@ -44,7 +44,7 @@ Never paste the full transcript or raw media into the parent context. Never inve
 - `ffmpeg`
 - Network access
 
-`uvx` supplies `yt-dlp` and `openai-whisper`; do not use `pip` or install persistent Python packages. The first Whisper run downloads the selected model into the uv cache.
+`uvx` supplies `yt-dlp`, `mlx-whisper` on macOS, and `openai-whisper` elsewhere; do not use `pip` or install persistent Python packages. The first run downloads the selected runtime and model into the uv cache. `WHISPER_MODEL` defaults to `small`; `MLX_WHISPER_MODEL` can override its macOS Hugging Face model.
 
 ## Common mistakes
 
@@ -52,3 +52,4 @@ Never paste the full transcript or raw media into the parent context. Never inve
 - Answering from memory instead of transcript evidence.
 - Mixing direct statements with inference.
 - Running the workflow in the parent instead of the delegated subagent.
+- Forcing PyTorch `openai-whisper` on Apple Silicon instead of MLX.

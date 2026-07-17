@@ -7,7 +7,6 @@ artifacts=${2:?"usage: transcribe-youtube URL ARTIFACTS_DIR"}
 language=${WHISPER_LANGUAGE:-sv}
 model=${WHISPER_MODEL:-small}
 audio="$artifacts/audio.wav"
-
 mkdir -p "$artifacts"
 chmod 700 "$artifacts"
 trap 'rm -f "$audio"' EXIT HUP INT TERM
@@ -30,11 +29,22 @@ uvx --from yt-dlp yt-dlp \
   ffmpeg -hide_banner -loglevel error -y -i pipe:0 \
     -vn -ac 1 -ar 16000 -c:a pcm_s16le "$audio"
 
-uvx --from openai-whisper whisper "$audio" \
-  --model "$model" --language "$language" --task transcribe \
-  --output_format srt --output_dir "$artifacts" >/dev/null
-
-[[ -s "$artifacts/audio.srt" ]] || { printf 'Whisper produced no transcript\n' >&2; exit 1; }
-mv "$artifacts/audio.srt" "$artifacts/transcript.srt"
+if [[ $(uname -s) == Darwin ]]; then
+  mlx_model=${MLX_WHISPER_MODEL:-mlx-community/whisper-${model}-mlx}
+  uvx --from mlx-whisper mlx_whisper "$audio" \
+    --model "$mlx_model" --language "$language" --task transcribe \
+    --output-format srt --output-dir "$artifacts" \
+    --output-name transcript >/dev/null
+else
+  device=cpu
+  if command -v nvidia-smi >/dev/null && nvidia-smi -L >/dev/null 2>&1; then
+    device=cuda
+  fi
+  uvx --from openai-whisper whisper "$audio" \
+    --device "$device" --model "$model" --language "$language" \
+    --task transcribe --output_format srt --output_dir "$artifacts" >/dev/null
+  mv "$artifacts/audio.srt" "$artifacts/transcript.srt"
+fi
+[[ -s "$artifacts/transcript.srt" ]] || { printf 'Whisper produced no transcript\n' >&2; exit 1; }
 chmod 600 "$artifacts/transcript.srt"
 printf '%s\n' "$artifacts/transcript.srt"
