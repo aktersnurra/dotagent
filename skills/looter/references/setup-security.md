@@ -1,108 +1,103 @@
-# Setup and security
+# Local state and archival security
 
-## Resolve paths and prerequisites
-
-Resolve paths without hard-coded users or hosts:
+## Paths
 
 ```sh
+LOOTER_STATE="${XDG_STATE_HOME:-$HOME/.local/state}/looter"
 LOOTER_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/looter"
 LOOTER_KEY_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/looter/age/keys.txt"
-PI_HOME="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 ```
 
-Private committed data belongs only under `$LOOTER_HOME/briefs` and `$LOOTER_HOME/runs` as `*.sops.json`. Plaintext belongs only in a protected runtime directory.
+`LOOTER_STATE` is the normal plaintext working store. `LOOTER_HOME` is the encrypted jj archive used only for explicit sync/push.
 
-Before setup or a run, verify:
+## Local plaintext state
 
-```sh
-command -v jj
-command -v sops
-command -v rage
-command -v rage-keygen
-command -v pandoc
+Layout:
+
+```text
+$LOOTER_STATE/
+├── briefs/
+│   ├── index.json
+│   └── <opaque-id>.md
+├── runs/
+│   └── <opaque-id>/
+│       ├── manifest.json
+│       └── result.md
+├── latest.json
+└── sync-state.json
 ```
 
-Resolve `pire-browser` from `PATH`, then `$PI_HOME/npm/node_modules/.bin/pire-browser`, and require it to drive Firefox or LibreWolf. If anything is missing, stop and name it; never install automatically.
+Requirements:
 
-## Missing workspace: exactly two choices
+- Set `umask 077`.
+- Root and directories are mode `0700`; files are mode `0600`.
+- Use UUID-based opaque brief/run IDs.
+- Write through a same-directory temporary file, set mode `0600`, then atomically rename.
+- `latest.json` maps briefs to their latest run.
+- `sync-state.json` records dirty brief/run IDs and last successful pushed commit when known.
+- Never place local state inside the encrypted archive or a project repository.
 
-If `$LOOTER_HOME` exists, require `jj -R "$LOOTER_HOME" st` to succeed.
+The user has explicitly accepted that this state is plaintext at rest. Permissions do not protect against device compromise, privileged access, backups, indexing or snapshots.
 
-If it is absent, ask exactly one structured question with only these choices:
+## First-use compatibility bootstrap
 
-1. **Clone existing** — ask for the remote URL in the next user message, assign that exact response to `REMOTE_URL`, then run `jj git clone "$REMOTE_URL" "$LOOTER_HOME"`.
-2. **Create new** — create a fresh signed colocated jj/Git workspace at `$LOOTER_HOME`.
+If the requested approved brief is absent locally but exists in the encrypted archive:
 
-Never guess or persist a provider, host, organization, username, or remote URL.
+1. Check only `sops`, the device key and the requested encrypted containers.
+2. Decrypt the matching brief and latest useful run once into local state.
+3. Verify modes and atomic writes.
+4. Continue on the hot path.
 
-### After cloning
+Bootstrap must not run jj status/log/sign, inspect remotes, re-encrypt, commit, push, render HTML or validate every archive container.
 
-Verify `.sops.yaml` exists; committed private paths contain only `*.sops.json`; and every non-root commit is signed. Set `SOPS_AGE_KEY_FILE="$LOOTER_KEY_FILE"` and try decrypting `briefs/index.sops.json`. If this device is not a recipient, show only its public recipient and stop before any web or model call.
+If the device cannot decrypt the requested brief, stop before web research and show only the public recipient when useful. Do not create a conflicting identity silently.
 
-### Creating a workspace
+## Explicit sync/push gate
 
-Initialize a colocated jj/Git repository with normal signing enabled. Create or reuse the per-device identity as described below. Create a generic README, a plaintext-blocking `.gitignore`, `.sops.yaml`, and an encrypted empty brief index. Its SOPS creation rule must use the compatible expression:
+Enter this section only when the user clearly asks to sync or push Looter remotely. A normal search must never run these checks.
 
-```yaml
-path_regex: ^(briefs|runs)/.*\.sops\.json$
-```
+### Require an explicit remote first
 
-Describe and sign the initial commit, then require `self.signature().status()` to be `good`.
+- Use an existing explicitly configured remote, or ask for the exact remote URL.
+- Never guess provider, host, organization, repository, username or remote.
+- No remote means no encryption, jj setup, signing or commit work.
 
-## Device identity and recipients
+If the encrypted archive is absent, clone the exact supplied remote with `jj git clone`. If it exists, require `jj -R "$LOOTER_HOME" st` to succeed and verify the supplied/configured remote matches user intent before changing anything.
 
-Use one rage X25519 identity per device at `$LOOTER_KEY_FILE`. Obtain consent before creating or reusing it. The containing directory is mode `0700`; the identity is mode `0600`. Never print or commit a private identity. If no key exists, offer generation with `rage-keygen`; never overwrite one. Display only the result of:
+### Cold-path prerequisites
+
+Check `jj`, `sops`, `rage`, `rage-keygen`, the device identity, `.sops.yaml`, recipient authorization and signing only now. Device key directory/file modes are `0700`/`0600`. Never print or commit the private identity.
+
+If this device is not an authorized recipient, display only:
 
 ```sh
 rage-keygen -y "$LOOTER_KEY_FILE"
 ```
 
-A trusted existing device adds the new public recipient to `.sops.yaml`, updates every encrypted container, signs a commit, and pushes. Removing a device removes that recipient, rewraps every container, and signs a commit. Use a portable explicit loop:
+and stop the sync.
+
+### Batch dirty state
+
+1. Snapshot dirty IDs from `sync-state.json`; exclude later writes from this transaction.
+2. Convert each dirty Markdown/JSON artifact into an opaque binary-SOPS JSON container under `briefs/` or `runs/`.
+3. Decrypt and byte-compare every newly written container once.
+4. Scan the archive for committed plaintext and semantic path leakage.
+5. Create one Conventional Commit for the entire snapshot.
+6. Verify `self.signature().status()` is `good`.
+7. Push to the explicit remote.
+8. Mark the snapshot clean atomically only after push succeeds.
+
+Use binary SOPS from `$LOOTER_HOME` so `.sops.yaml` is discovered:
 
 ```sh
-find briefs runs -type f -name '*.sops.json' -print |
-while IFS= read -r container; do
-  SOPS_AGE_KEY_FILE="$LOOTER_KEY_FILE" \
-    sops updatekeys -y "$container" || exit 1
-done
+SOPS_AGE_KEY_FILE="$LOOTER_KEY_FILE" sops encrypt \
+  --input-type binary --output-type json \
+  --filename-override "$output_path" \
+  "$input_path" > "$output_path.tmp" && mv "$output_path.tmp" "$output_path"
 ```
 
-## Binary SOPS containers
+A failed prerequisite, encryption, comparison, leakage, signing or push step stops only sync. Preserve the complete local dirty snapshot for an idempotent retry. Never mark individual items clean incrementally.
 
-Run encryption from `$LOOTER_HOME` so `.sops.yaml` is discovered:
+## Device onboarding and revocation
 
-```sh
-encrypt_binary() {
-  input_path="$1"
-  output_path="$2"
-  SOPS_AGE_KEY_FILE="$LOOTER_KEY_FILE" sops encrypt \
-    --input-type binary --output-type json \
-    --filename-override "$output_path" \
-    "$input_path" > "$output_path.tmp" &&
-    mv "$output_path.tmp" "$output_path"
-}
-
-decrypt_binary() {
-  input_path="$1"
-  output_path="$2"
-  SOPS_AGE_KEY_FILE="$LOOTER_KEY_FILE" sops decrypt \
-    --input-type json --output-type binary \
-    "$input_path" > "$output_path"
-}
-```
-
-Generate one UUID at runtime. Use opaque brief IDs `b-$UUID` and run IDs `r-$UUID`; human titles and dates live only inside encrypted indexes and provenance.
-
-## Runtime plaintext
-
-Set `umask 077`. Create a new mode-`0700` root per operation beneath `$XDG_RUNTIME_DIR` when available; otherwise use secure `mktemp` beneath `${TMPDIR:-/tmp}`. Put decrypted briefs and all researcher, synthesizer, Markdown, HTML, provenance, and Explain output there—never in `$LOOTER_HOME`.
-
-Remove plaintext only after presentation and verified encrypted round trips. If encryption fails, neither commit nor copy plaintext into the workspace.
-
-## Safe migration
-
-Never import plaintext repository history. Create fresh signed encrypted history with opaque binary-SOPS paths. Preserve useful source material and prior signed commit IDs only inside encrypted provenance. Do not select or configure a remote. Before retiring a source, decrypt and byte-compare every migrated artifact, verify signatures, scan the new tree and history for plaintext or human-title/date path leakage, and confirm the encrypted provenance. Retire nothing unless every gate passes.
-
-## Security boundary
-
-SOPS protects committed and remote data at rest. It does not hide marketplace queries, model-provider prompts or outputs, Pi sessions, browser history, active runtime plaintext, or pre-existing backups and snapshots. State this when asked about privacy guarantees.
+Recipient onboarding/removal is also cold-path work. A trusted authorized device updates `.sops.yaml`, rewraps every encrypted container, creates one signed commit and pushes. Never perform recipient rotation during research.

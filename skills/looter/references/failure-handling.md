@@ -1,27 +1,42 @@
 # Failure handling and fact discipline
 
-Apply these rules without rationalizing around them:
+## Hot-path failures
 
-- **Missing prerequisite:** stop and name it; do not install it.
-- **Missing workspace:** run the consent-based setup flow in [Setup and security](setup-security.md).
-- **Unauthorized device:** show only the public recipient and stop before web or model calls.
-- **Brief/index decryption failure:** make no web or model calls.
-- **Research timeout:** retain completed artifacts, mark coverage partial, and synthesize only verified evidence.
-- **Browser failure:** record the failed attempt and exclude unverified listings.
-- **Blocked source:** record it as blocked, never as proof of zero inventory.
-- **Synthesis uncertainty:** lower confidence or use **Insufficient evidence**.
-- **Pandoc/render failure:** preserve encrypted synthesis, report that HTML was not produced, and never auto-install.
-- **Encryption or round-trip failure:** make no commit, copy no plaintext into the workspace, and retain protected runtime plaintext for recovery.
-- **Plaintext/path leakage:** make no commit and do not retire a migration source.
-- **Signing failure:** make no completed checkpoint.
+- **No approved brief:** run one-question-at-a-time grilling; do not browse first.
+- **First-use bootstrap decryption failure:** stop before web research and report the access problem.
+- **Discovery/source failure:** discard affected leads and continue.
+- **Blocked source:** record partial coverage, never zero inventory.
+- **Browser verification failure:** exclude the object; do not relaunch automatically.
+- **Weak shortlist at three minutes:** when fewer than two candidates survive, use one additional discovery pass until the five-minute stop.
+- **Five-minute stop:** post verified partial results without padding.
+- **Ranking uncertainty:** lower confidence or use **Insufficient evidence**.
+- **Local-state write failure:** keep the already-posted result, warn that it was not cached, and write no clean/dirty success marker.
+
+Normal research does not fail because jj, SOPS, rage, signing, Pandoc, remotes or encrypted archives are unavailable. Those are not hot-path prerequisites except SOPS/key access during one-time compatibility bootstrap.
+
+## Optional-mode failures
+
+- **Deep research failure:** retain verified parent evidence and return partial coverage.
+- **Explain/render failure:** report that HTML was not produced; do not alter the market result or invoke sync.
+
+## Cold-path sync failures
+
+- **No explicit remote:** stop before encryption or jj work and ask for the exact remote.
+- **Missing prerequisite or unauthorized device:** stop sync and preserve local dirty state.
+- **Encryption or round-trip failure:** make no completed checkpoint and preserve the entire dirty snapshot.
+- **Plaintext/path leakage:** do not commit or push.
+- **Signing failure:** do not push or mark clean.
+- **Push failure:** report the local commit accurately, retain the full dirty snapshot, and do not mark items clean individually.
+
+Sync failures never invalidate previously posted research or block later local searches.
 
 ## Fact discipline
 
-- Never invent URLs, prices, usage, equipment, service, condition, model variants, seller details, or market values.
-- Never infer common model features as listing facts.
-- Missing means missing.
-- Search snippets are leads only; never recommend dead or unverified links.
+- Never invent URLs, prices, usage, equipment, service, condition, model variants, seller details or market values.
+- Missing means missing; common model equipment is not an exact-listing fact.
+- Search snippets are leads only.
+- Never recommend dead, generic, reconstructed or browser-unverified links.
 - Do not double-rank duplicates or pad Top N.
-- Serious risks may override numeric scores.
-- Seller questions omit answers already present.
-- Preserve unknowns, provenance, confidence, and source limitations in synthesis and encrypted provenance.
+- Serious risks override numeric scores.
+- Ask only seller questions not already answered.
+- Preserve unknowns, evidence conflicts, confidence and material coverage limitations.

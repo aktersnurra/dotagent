@@ -1,55 +1,92 @@
-# Research
+# Local-first research
 
-## Briefs and interaction modes
+## Grill before new or changed research
 
-Briefs are free-form Markdown; interpret intent without requiring schema or frontmatter. Typical headings may include Goal, Budget, Hard requirements, Strong preferences, Candidate models, Avoid, Rank by, Context, and Location. Resolve a brief by decrypting `briefs/index.sops.json` and matching display title or opaque ID. Create and edit plaintext only in the runtime root, then encrypt it before cleanup.
+### New brief
 
-Support these modes:
+Before marketplace search, fetch or browser navigation, invoke `grilling` and:
 
-- **Search from a brief:** complete discovery, verification, synthesis, and presentation.
-- **Inspect one listing:** verify its URL and gather enough market and risk evidence for a focused verdict.
-- **Compare listings:** verify every supplied URL, deduplicate, and recommend one action.
-- **Broaden a search:** preserve hard requirements and state each preference compromised by alternatives.
-- **Refresh a run:** reuse the encrypted brief and prior provenance, remove dead listings, and highlight new listings and price/status changes.
+1. Ask one question at a time with a recommended answer.
+2. Resolve users/passengers, use, location, budget, timing, hard requirements, strong preferences, exclusions, risk tolerance, ownership horizon, evidence threshold and tie-breakers relevant to the category.
+3. Summarize **Hard requirements / Strong preferences / Tie-breakers / Exclusions**.
+4. Obtain explicit approval.
+5. Atomically save the approved brief to local state.
 
-Ask only questions that materially change the outcome.
+The research timer starts after approval.
 
-## Adapt evidence to the category
+### Materially changed brief
 
-Derive fields from the object and brief; do not force a fixed schema.
+Load the approved brief and grill only the changed assumptions and dependent trade-offs. Obtain approval of the revised brief before research.
 
-- Cars: year, mileage, engine, gearbox, drivetrain, registration, service, ownership, tax, and mechanical risks.
-- Boats: hull, dimensions, engine/year/hours, service, trailer, capacity, seaworthiness, and hull/engine risks.
-- Electronics: exact model/generation, condition, battery, accessories, warranty, faults, new price, and successor.
-- Other goods: the smallest evidence set needed for a confident decision.
+### Unchanged refresh
 
-Always capture provenance, canonical direct URL, active status, price, seller/location when available, unknowns, risks, confidence, and brief fit.
+Reuse the approved local brief immediately. Do not repeat the interview. If the brief exists only in the legacy encrypted archive, perform the one-time decryption-only bootstrap from [Local state and archival security](setup-security.md), then continue from local state without jj or encryption.
 
-## Plan focused fan-out
+## Interaction modes
 
-Choose sources dynamically by category, location, specialist relevance, and the brief; suggestions are never a closed allowlist. Before dispatch, call the subagent listing action and use only executable agents. Prefer a small focused fan-out, partitioned by source group, product family, or evidence question.
+- **Search:** discover and verify current objects against an approved brief.
+- **Refresh:** revalidate prior finalists and search only stale/dead slots or new gaps.
+- **Inspect one listing:** verify that canonical URL and gather enough evidence for one verdict.
+- **Compare supplied listings:** verify each URL, deduplicate and recommend one action.
+- **Broaden:** preserve hard requirements and state every preference compromised.
 
-Each research subagent receives the decrypted brief and one bounded scope in fresh context, writes a unique runtime Markdown file, uses file-only output when available, and sets `acceptance: false` because this is evidence research rather than code/tests. Require source coverage, direct candidate URLs, facts, unknowns, confidence, and limitations.
+## Adaptive normal flow
 
-Do not share a mutable browser session. Use isolated named sessions/profiles or serialize verification.
+Target three minutes; stop at five:
 
-## Discover and verify direct pages
+1. Read the latest local candidate manifest.
+2. Build a delta plan: changed filters, stale direct links and uncovered model/source families.
+3. Make one parent `web_search` call with several focused queries.
+4. Fetch only promising direct pages; discard dead, wrong-powertrain, private, over-budget or generic results cheaply.
+5. Open no more than five plausible finalists through one isolated headless `pire-browser` session.
+6. Stop after three recommendation-eligible objects survive.
+7. Rank from the verified manifest in the parent context.
+8. Post the result before writing local state.
 
-Use Firefox or LibreWolf through `pire-browser` as primary whenever rendering or interaction matters. Search/fetch may accelerate discovery, but snippets are leads only.
+If three useful candidates exist at three minutes, answer. If fewer than two exist, use the remaining time for one additional discovery pass. Do not retry failed sources or browser profiles automatically. At five minutes, answer with partial verified evidence.
 
-Before recommending an object:
+## No normal-run fan-out
+
+Do not list or dispatch subagents in a normal run. Startup, duplicated reports and shadow artifacts cost more than they add.
+
+Use research subagents only after explicit `deep research` or `exhaustive search` intent. Then:
+
+- partition genuinely independent scopes;
+- set `artifacts: false`;
+- return compact candidate evidence rather than long duplicate reports;
+- keep parent-side canonical verification authoritative; and
+- state the expanded time/coverage before starting.
+
+## Category evidence
+
+Capture only what the approved brief needs.
+
+- Cars: price, year, mileage, exact powertrain, gearbox/drivetrain, registration, seller/location, service/origin/warranty when stated, relevant equipment and material mechanical risks.
+- Boats: hull, dimensions, engine/year/hours, service, trailer, capacity and material hull/engine risks.
+- Electronics: exact model/generation, condition, battery, accessories, warranty, faults and relevant new/successor price.
+- Other goods: the smallest evidence set required for a confident decision.
+
+Every retained candidate includes canonical URL, active status, current price, seller/location, listing-stated facts, unknowns, brief fit, risk and confidence.
+
+## Canonical direct-page gate
+
+Before recommendation:
 
 1. Open the actual listing page.
 2. Confirm it still appears for sale.
-3. Confirm current price and key specifications.
-4. Capture the canonical direct URL without tracking parameters.
-5. Remove dead, generic-search, reconstructed, or unverifiable URLs.
-6. Label every fact as listing-stated, external, inferred, or unknown.
+3. Confirm current price and correct object, variant/powertrain and seller type.
+4. Capture the canonical URL without tracking parameters.
+5. Remove generic, reconstructed, dead, sold and unverifiable links.
+6. Label external or inferred claims separately from listing facts.
 
-Record every attempted source as successful, blocked, no qualifying result, or partial. Blocked never means zero inventory.
+A failed browser check excludes that object; it does not trigger a relaunch. Blocked never means zero inventory.
 
 ## Deduplicate and assess
 
-Treat registration/VIN/hull number, seller plus exact price, identical photos, or matching model/year/engine/location/description as strong duplicate evidence. Prefer the seller's canonical link while retaining useful active alternatives.
+Use registration/VIN/serial/hull number, seller plus price, identical photos or matching exact description as duplicate evidence. Prefer the seller canonical page when equally verifiable.
 
-Compare against similar active listings. Classify price as **Exceptional**, **Good**, **Fair**, **Slightly expensive**, **Overpriced**, or **Insufficient evidence**. Use ranges unless comparables support precision. Cheap never automatically means good.
+Classify price as **Exceptional**, **Good**, **Fair**, **Slightly expensive**, **Overpriced** or **Insufficient evidence** only when active comparables support it. Cheap never overrides condition, history, risk or fit.
+
+## Progressive depth
+
+Normal research stops at shortlist facts. After the user selects likely finalists, optionally deepen only those objects with ownership risks, exact seller questions, child-seat/luggage checks, comparables and at most two useful YouTube transcripts per finalist. Videos are model-level background evidence only and never establish listing facts.

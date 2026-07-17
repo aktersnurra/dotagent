@@ -7,9 +7,9 @@ description: Use when the user asks for a detailed explanation, walkthrough, cod
 
 ## Overview
 
-Create a durable answer: write the full explanation to Markdown in the current project, render it to HTML with Pandoc and the shared CSS, then open the HTML page in the default browser.
+Create a durable answer: resolve whether the artifact is project-scoped or user-scoped, write the full explanation to Markdown under the matching Superpowers docs root, render it to HTML with Pandoc and the shared CSS, then open the HTML page in the default browser.
 
-Do not put the full explanation in chat. The chat response is only a short artifact summary.
+Do not put the full explanation in chat. The chat response is only a short artifact summary. The current working directory alone never makes a personal or global topic project-scoped.
 
 ## When to Use
 
@@ -23,50 +23,60 @@ Use for requests such as:
 
 Do not use for short conversational answers where the user did not ask for a durable explanation, walkthrough, guide, or document.
 
-## Output Contract
+## Artifact Scope and Output Contract
 
-Write generated files inside the project where the question is asked:
+Resolve the artifact root before writing:
+
+1. **Explicit or domain location:** a user-provided path or an active domain-specific skill's canonical storage contract wins over Explain's generic artifact roots.
+2. **Project scope:** if the subject is the current repository, its code, operation, or architecture, use `docs/superpowers/explain/` in that project.
+3. **User scope:** if the subject is personal, general, or unrelated to the current repository, use `${XDG_DATA_HOME:-$HOME/.local/share}/pi/docs/superpowers/explain/`.
+4. **Ambiguous scope:** ask one location question before writing.
+
+Never place personal or global research in an unrelated repository merely because it is the current working directory.
+
+Write the reading artifacts under the resolved `<explain-root>`:
 
 ```text
-docs/explain/<YYYY-MM-DD>-<topic>.md
-docs/explain/<YYYY-MM-DD>-<topic>.html
+<explain-root>/<YYYY-MM-DD>-<topic>.md
+<explain-root>/<YYYY-MM-DD>-<topic>.html
 ```
 
-If the user explicitly asks for slides, a presentation, a deck, or something to present, also write a separate condensed slide source and render it:
+If the user explicitly asks for slides, also write and render a separate condensed source:
 
 ```text
-docs/explain/<YYYY-MM-DD>-<topic>-slides.md
-docs/explain/<YYYY-MM-DD>-<topic>-slides.html
+<explain-root>/<YYYY-MM-DD>-<topic>-slides.md
+<explain-root>/<YYYY-MM-DD>-<topic>-slides.html
 ```
 
-The reading Markdown file is authoritative for detail. The slides Markdown file is a distilled companion, not the same document rendered differently. HTML files are derived from their matching Markdown sources.
+The reading Markdown file is authoritative. Slides are a distilled companion. HTML files are derived from their matching Markdown sources. Supporting trackers or datasets requested by the user live under the same resolved docs root, never in an unrelated project.
 
 ## Workflow
 
 1. Treat the text after the skill invocation as the question or command to answer.
 2. Research the current project or requested subject enough to answer accurately.
-3. Choose `<topic>`:
+3. Resolve project, user, or ambiguous artifact scope using the rules above. Do not infer scope from the working directory alone.
+4. Choose `<topic>`:
    - If the prompt has an obvious subject, create a lowercase hyphenated slug from it.
    - If the prompt is vague, ask the user for a short title or topic before writing files.
-4. Create `docs/explain/` in the current project if needed.
-5. Write the complete answer to `docs/explain/<YYYY-MM-DD>-<topic>.md`.
-6. Check `command -v pandoc`.
-7. If Pandoc is missing, ask whether to install it before running any install command.
-8. If the user declines installation or Pandoc cannot be installed, stop after Markdown and report that HTML was not generated.
-9. Render and open the reading page with:
+5. Create the resolved `<explain-root>` if needed.
+6. Write the complete answer to `<explain-root>/<YYYY-MM-DD>-<topic>.md`.
+7. Check `command -v pandoc`.
+8. If Pandoc is missing, ask whether to install it before running any install command.
+9. If the user declines installation or Pandoc cannot be installed, stop after Markdown and report that HTML was not generated.
+10. Render and open the reading page with:
 
 ```bash
-skills/explain/scripts/render.sh docs/explain/<YYYY-MM-DD>-<topic>.md
+skills/explain/scripts/render.sh <explain-root>/<YYYY-MM-DD>-<topic>.md
 ```
 
-10. If the user explicitly requested slides, write a condensed slide source to `docs/explain/<YYYY-MM-DD>-<topic>-slides.md`.
-11. Render and open the slide deck with:
+11. If the user explicitly requested slides, write a condensed slide source under the same `<explain-root>`.
+12. Render and open the slide deck with:
 
 ```bash
-skills/explain/scripts/render-slides.sh docs/explain/<YYYY-MM-DD>-<topic>-slides.md
+skills/explain/scripts/render-slides.sh <explain-root>/<YYYY-MM-DD>-<topic>-slides.md
 ```
 
-12. Reply only with:
+13. Reply only with:
     - Markdown path
     - HTML path, if generated
     - Slides Markdown path, if generated
@@ -117,13 +127,15 @@ Only create slides when explicitly requested. Slides are a presentation companio
 
 ## Common Mistakes
 
-| Mistake                             | Correct behavior                                            |
-| ----------------------------------- | ----------------------------------------------------------- |
-| Answering fully in chat             | Write the full answer to Markdown and keep chat short       |
-| Writing into the dotagent repo      | Write into the current project where the question was asked |
-| Rendering before Markdown exists    | Write Markdown first, then render HTML                      |
-| Installing Pandoc automatically     | Ask for approval before installing                          |
-| Skipping browser open               | Use the render helper, which opens the HTML page            |
-| Generating slides by default        | Generate slides only when explicitly requested              |
-| Rendering the reading doc as slides | Write a separate condensed `*-slides.md` source first       |
-| Using one-off CSS                   | Use the skill CSS assets through the render helpers         |
+| Mistake | Correct behavior |
+| --- | --- |
+| Answering fully in chat | Write the full answer to Markdown and keep chat short |
+| Treating the working directory as the artifact scope | Classify the subject as project, user, or ambiguous first |
+| Writing personal research into an unrelated repository | Use the user-scoped Superpowers docs root |
+| Using legacy `docs/explain/` for project artifacts | Use `docs/superpowers/explain/` |
+| Rendering before Markdown exists | Write Markdown first, then render HTML |
+| Installing Pandoc automatically | Ask for approval before installing |
+| Skipping browser open | Use the render helper, which opens the HTML page |
+| Generating slides by default | Generate slides only when explicitly requested |
+| Rendering the reading doc as slides | Write a separate condensed `*-slides.md` source first |
+| Using one-off CSS | Use the skill CSS assets through the render helpers |

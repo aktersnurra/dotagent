@@ -1,75 +1,50 @@
-# Synthesis, presentation, and persistence
+# Results, local caching and optional presentation
 
-## Synthesize in fresh context
+## Rank in the parent context
 
-Dispatch a fresh synthesis subagent with the decrypted brief and completed research artifact paths. Set `acceptance: false` and a runtime output file. It must:
+Normal runs do not dispatch a fresh synthesis agent. Rank directly from the compact browser-verified manifest.
 
-- deduplicate;
-- adapt scoring weights to the brief without letting price overpower condition, documentation, risk, or fit;
-- assign **BUY**, **INSPECT**, **NEGOTIATE**, **WATCH**, or **SKIP**;
-- ask only seller questions not already answered;
-- rank a concise Top N without padding; and
-- produce this structure:
+Adapt weights to the approved brief. Price must not overpower hard fit, condition, documentation, risk or evidence quality. Use **BUY**, **INSPECT**, **NEGOTIATE**, **WATCH** or **SKIP** honestly; unknown hard requirements prevent **BUY**.
 
-```markdown
-# <Brief title> market report
+Do not browse during ranking. If evidence is missing, lower confidence or mark it unknown.
 
-## Market conclusion
+## Post immediately
 
-| Rank | Object | Price | Key specification | Location | Verdict | Confidence | Direct link |
-| ---: | --- | ---: | --- | --- | --- | ---: | --- |
+The normal chat response is:
 
-## 1. Object name
+1. One concise market conclusion.
+2. Top 3 objects, each with verdict, current price, canonical direct link and decisive reason.
+3. One recommended next action.
+4. Material source/coverage limitations.
 
-**Direct listing:** URL
-**Price:**
-**Seller:**
-**Location:**
-**Key facts:**
-**Verdict:**
-**Confidence:**
+Do not delay chat for local writes, Markdown reports, HTML, encryption, jj, signing or remote persistence. Do not paste a long report unless the user asks.
 
-### Why it ranks highly
-### Main concerns
-### Missing information
-### What to ask the seller
-### Price assessment
-### Recommendation
+For one-listing inspection or supplied comparisons, use the same principle with the smallest useful result rather than padding to three.
 
-## Final picks
+## Cache after chat
 
-**Best overall:**
-**Best value:**
-**Lowest-risk option:**
-**Most interesting wildcard:**
-**Best negotiation target:**
-**Listings to skip:**
+After posting:
 
-> If I were spending my own money today, I would choose: ...
-```
+1. Create an opaque run ID.
+2. Atomically write the compact verified `manifest.json`.
+3. Atomically write the concise `result.md`.
+4. Update `latest.json` for the brief.
+5. Add the brief/run IDs to `sync-state.json` dirty state.
 
-## Present with Explain
+Directories are mode `0700`; files mode `0600`. If any write fails, report that the result was not cached. Never imply local reuse or sync readiness when the write failed.
 
-Dispatch an Explain-enabled subagent with the runtime root as `cwd` and the synthesis path as input. Follow the installed Explain skill: create polished Markdown and HTML beneath the runtime project's `docs/explain/`, then open the HTML in the default browser. Never render in `$LOOTER_HOME`.
+The manifest stores only decision-relevant evidence: canonical URL, active status, price, identity/specification, seller/location, listing facts, unknowns, confidence, verdict and checked time. Do not create source-by-source provenance essays.
 
-If Pandoc or rendering fails, preserve the encrypted synthesis and report that HTML was not produced. Never install Pandoc without approval.
+## Optional full report
 
-## Persist an opaque run
+Only explicit wording such as `open full report` invokes Explain/Pandoc. Render from the cached result and manifest, open HTML, and report the path/status. This occurs after the initial chat answer and never triggers archival sync.
 
-Encrypt every completed research artifact, the synthesis, and provenance into a new opaque run directory. Provenance includes every attempted source and status, coverage/limitations, evidence labels, prior signed commit IDs when relevant, and enough source material to refresh or audit the run.
+If rendering fails, report it without changing the market verdict or dirty state. Never install Pandoc automatically.
 
-Decrypt every result and compare it byte-for-byte with its runtime source before describing a jj change. Scan the workspace for plaintext and title/date leakage. Never commit if plaintext exists under `briefs/` or `runs/`, encryption or comparison failed, or signing failed.
+## Optional deep synthesis
 
-Create a Conventional Commit message scoped to the operation, sign `@`, and verify `self.signature().status()` is `good`. Start `jj new` only when another change will follow.
+Only explicit deep/exhaustive intent may use a fresh synthesis agent for a large evidence set. It still cannot replace canonical parent-side verification, and its output must not delay a preliminary verified result when the user requested speed.
 
-Delete runtime plaintext only after successful persistence verification and presentation.
+## Explicit archival handoff
 
-## Final chat response
-
-Do not paste the full report. Return only:
-
-1. Top 3 objects, each with verdict, price, and canonical direct link.
-2. Encrypted run path.
-3. Runtime Markdown and HTML paths while they exist.
-4. Whether the HTML opened.
-5. Material source and coverage limitations.
+When the user later asks to sync/push, follow the cold path in [Local state and archival security](setup-security.md). Batch dirty state; do not regenerate research, re-open listings or render HTML as part of sync.

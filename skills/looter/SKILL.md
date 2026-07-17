@@ -5,25 +5,53 @@ description: Use when researching, inspecting, comparing, broadening, or refresh
 
 # Looter
 
-Find genuinely good live-marketplace purchases. Optimize for decision quality, not result count. Pi is the harness; do not build a crawler, database, adapter framework, configuration language, service, or separate orchestrator.
+Find genuinely good live-marketplace purchases. Optimize for decision quality and response time, not result count or artifact production.
 
-## Mandatory workflow
+## Route intent first
 
-Before setup or research, read and follow **all** focused references:
+Choose exactly one lane before checking tools or touching data:
 
-1. [Setup and security](references/setup-security.md) — prerequisites, consent, workspace/bootstrap, device identity, encryption, runtime plaintext, and migration.
-2. [Research](references/research.md) — interaction modes, brief handling, category adaptation, fan-out, direct-page verification, provenance, deduplication, and assessment.
-3. [Synthesis and presentation](references/synthesis-presentation.md) — fresh synthesis, report contract, Explain rendering, encrypted persistence, signed checkpoints, and final response.
-4. [Failure handling](references/failure-handling.md) — mandatory stop/degrade rules and fact discipline.
+1. **New or materially changed brief** — invoke the `grilling` skill first. Ask one question at a time, give the recommended answer, summarize the resulting brief, and obtain explicit approval before any marketplace web or browser call.
+2. **Unchanged search, refresh, inspection or comparison** — use the normal local-first hot path.
+3. **Explicit deep/exhaustive research** — use optional depth only after the user requests or approves it.
+4. **Explicit full report** — render Explain HTML only after posting the initial result.
+5. **Explicit sync/push** — use the archival cold path only when the user clearly requests remote persistence.
 
-These references are requirements, not optional background. Security and decryption gates happen before any web or model call. Ask only questions that materially change the outcome.
+If the user says “refresh” and an approved local brief exists, treat it as unchanged unless the requested filters materially differ.
+
+If an approved brief exists only in the legacy encrypted archive, run the one-time compatibility bootstrap before entering the hot path. Bootstrap may decrypt only the requested brief and latest useful run; it must not run jj, encrypt, sign, render or push.
+
+## Read only the relevant references
+
+- Normal/new/changed research: [Research](references/research.md), then [Synthesis and presentation](references/synthesis-presentation.md).
+- Local state missing or explicit sync/push: [Local state and archival security](references/setup-security.md).
+- On any failure: [Failure handling](references/failure-handling.md).
+
+Do not load archival instructions during an ordinary run unless first-use bootstrap is actually required.
+
+## Hot-path contract
+
+A normal run targets three minutes and stops at five minutes:
+
+1. Load the approved plaintext brief and latest manifest from local XDG state.
+2. Search only changed filters, stale links and missing model/source gaps.
+3. Use one parent multi-query discovery pass; do not launch subagents.
+4. Cheaply fetch/filter leads.
+5. Verify at most five plausible finalists in one isolated headless Firefox session.
+6. Stop when three recommendation-eligible objects survive.
+7. Rank directly in the parent context.
+8. **Post the verified result immediately.**
+9. Atomically cache the compact manifest and result afterward.
+
+At three minutes, answer if three useful candidates exist. If fewer than two exist, use the remaining time for one additional discovery pass—not a retry of failed sources. At five minutes, answer with verified partial evidence without padding.
+
+Once local state is populated, a normal run must not invoke subagents, jj, Git, SOPS, rage, signing, remote checks, Pandoc, Explain, fresh synthesis agents, ancestry checks, round-trip checks, container counts or encrypted provenance.
 
 ## Invariants
 
-- Never install prerequisites automatically or guess a provider, host, organization, username, or remote.
-- Keep committed private data encrypted in opaque paths; keep every plaintext artifact only in a protected per-operation runtime directory.
-- Search snippets are leads only. Recommend only active listings verified on their canonical direct pages.
-- Preserve provenance, unknowns, source limitations, and evidence labels. Never invent facts, links, prices, or market values.
-- Use fresh, bounded research contexts and a fresh synthesis context. Do not share mutable browser sessions.
-- Persist only after encryption, byte-for-byte round-trip verification, leakage checks, and a good signature.
-- Present a concise linked Top 3 plus artifact paths and material coverage limitations; do not paste the full report into chat.
+- Results precede optional caching, reporting and archival work.
+- Search snippets are leads only. Recommend only active canonical direct pages with current price, correct object/variant or powertrain, and required seller type.
+- Preserve explicit unknowns, conflicts, confidence and material coverage limitations. Never invent listing facts or market values.
+- Local working state is intentionally plaintext and must remain outside the jj workspace with mode-`0700` directories and mode-`0600` files.
+- No remote is guessed or configured implicitly.
+- Deep research, HTML and sync/push are separate explicit operations; none may delay a normal result.
