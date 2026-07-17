@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+url=${1:?"usage: transcribe-youtube URL ARTIFACTS_DIR"}
+artifacts=${2:?"usage: transcribe-youtube URL ARTIFACTS_DIR"}
+language=${WHISPER_LANGUAGE:-sv}
+model=${WHISPER_MODEL:-small}
+audio="$artifacts/audio.wav"
+
+mkdir -p "$artifacts"
+chmod 700 "$artifacts"
+trap 'rm -f "$audio"' EXIT HUP INT TERM
+
+uvx --from yt-dlp yt-dlp \
+  --write-subs --write-auto-subs --sub-langs "$language.*,en.*" \
+  --sub-format vtt --skip-download -o "$artifacts/transcript.%(ext)s" \
+  "$url" >/dev/null 2>&1 || true
+
+transcript=$(find "$artifacts" -type f \( -name '*.srt' -o -name '*.vtt' \) -size +0c -print -quit)
+if [[ -n "$transcript" ]]; then
+  chmod 600 "$transcript"
+  printf '%s\n' "$transcript"
+  exit 0
+fi
+
+uvx --from yt-dlp yt-dlp \
+  --extractor-args 'youtube:player_client=android_vr' \
+  -f 'bestaudio[ext=m4a]/bestaudio' -o - "$url" |
+  ffmpeg -hide_banner -loglevel error -y -i pipe:0 \
+    -vn -ac 1 -ar 16000 -c:a pcm_s16le "$audio"
+
+uvx --from openai-whisper whisper "$audio" \
+  --model "$model" --language "$language" --task transcribe \
+  --output_format srt --output_dir "$artifacts" >/dev/null
+
+[[ -s "$artifacts/audio.srt" ]] || { printf 'Whisper produced no transcript\n' >&2; exit 1; }
+mv "$artifacts/audio.srt" "$artifacts/transcript.srt"
+chmod 600 "$artifacts/transcript.srt"
+printf '%s\n' "$artifacts/transcript.srt"
