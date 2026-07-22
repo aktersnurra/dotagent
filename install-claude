@@ -21,5 +21,7 @@ claude plugins uninstall superpowers@claude-plugins-official --scope user --keep
 claude plugins marketplace add https://github.com/aktersnurra/superpowers || true
 claude plugins install superpowers@superpowers-dev --scope user
 claude plugins install frontend-design@claude-plugins-official --scope user
+claude plugins marketplace add hegeldev/hegel-skill || true
+claude plugins install hegel-skill@hegeldev --scope user
 
 echo "Claude configured."

@@ -18,6 +18,7 @@ dotagent/
     ├── design-doctrine/ # Explicit, evolvable domain-core design
     ├── elixir/        # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
     ├── explain/       # Detailed explanations, walkthroughs, and durable docs
+    ├── hegel/         # Property-based testing with Hegel (Rust, Go, C++, TypeScript, OCaml)
     ├── jj/            # Jujutsu VCS idioms and workflows
     ├── ocaml/         # OCaml idioms, Eio, dune, testing conventions
     ├── tiger-style/   # Tiger Style naming and API design conventions
@@ -49,6 +50,7 @@ dotagent/
 | ----------------- | ---------------------------------------------------------------------------- |
 | `superpowers`     | Workflow skills: spec, plan, checkpoint, TDD, debugging, brainstorming, etc. |
 | `frontend-design` | Production-grade UI component generation                                     |
+| `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi/Opencode) |
 
 ## Skills
 
@@ -57,6 +59,7 @@ dotagent/
 | `design-doctrine`     | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
 | `elixir`              | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
 | `explain`             | Detailed explanations, walkthroughs, app/service overviews, durable docs |
+| `hegel`               | Writing property-based tests (Rust, Go, C++, TypeScript, OCaml)          |
 | `jj`                  | Any jj/jujutsu VCS operation                                             |
 | `ocaml`               | OCaml code, Eio, Lwt, GADTs, dune                                        |
 | `tiger-style`         | Naming functions, types, designing APIs                                  |

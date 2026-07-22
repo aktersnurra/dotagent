@@ -28,7 +28,7 @@
       "Bash(export -p*)"
     ]
   },
-  "model": "claude-fable-5[1m]",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
