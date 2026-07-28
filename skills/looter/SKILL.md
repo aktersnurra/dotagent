@@ -13,9 +13,10 @@ Choose exactly one lane before checking tools or touching data:
 
 1. **New or materially changed brief** — invoke the `grilling` skill first. Ask one question at a time, give the recommended answer, summarize the resulting brief, and obtain explicit approval before any marketplace web or browser call.
 2. **Unchanged search, refresh, inspection or comparison** — use the normal local-first hot path.
-3. **Explicit deep/exhaustive research** — use optional depth only after the user requests or approves it.
-4. **Explicit full report** — render Explain HTML only after posting the initial result.
-5. **Explicit sync/push** — use the archival cold path only when the user clearly requests remote persistence.
+3. **Quick refresh** — use the normal local-first hot path only for partial market awareness.
+4. **Complete pre-shortlist sweep** — mandatory before promoting any object to DOCUMENTS, INSPECT, NEGOTIATE, BUY, travel advice, or a decision-grade top three. Read `references/coverage.md`.
+5. **Explicit full report** — render Explain HTML only after posting the initial result.
+6. **Explicit sync/push** — use the archival cold path only when the user clearly requests remote persistence.
 
 If the user says “refresh” and an approved local brief exists, treat it as unchanged unless the requested filters materially differ.
 
@@ -23,7 +24,8 @@ If an approved brief exists only in the legacy encrypted archive, run the one-ti
 
 ## Read only the relevant references
 
-- Normal/new/changed research: [Research](references/research.md), then [Synthesis and presentation](references/synthesis-presentation.md).
+- Quick refresh or new/changed research: [Research](references/research.md), then [Synthesis and presentation](references/synthesis-presentation.md).
+- Complete pre-shortlist sweep: [Coverage](references/coverage.md), [Research](references/research.md), then [Synthesis and presentation](references/synthesis-presentation.md).
 - Local state missing or explicit sync/push: [Local state and archival security](references/setup-security.md).
 - On any failure: [Failure handling](references/failure-handling.md).
 
@@ -50,7 +52,8 @@ Once local state is populated, a normal run must not invoke subagents, jj, Git, 
 ## Invariants
 
 - Results precede optional caching, reporting and archival work.
-- Search snippets are leads only. Recommend only active canonical direct pages with current price, correct object/variant or powertrain, and required seller type.
+- Search snippets are leads only. External search is a gap detector, not inventory proof. Recommend only active canonical direct pages with current price, correct object/variant or powertrain, and required seller type.
+- Only complete sweeps may make completeness claims. If asked to call unenumerated inventory comprehensive, before grilling or ranking refuse and write `quick refresh — incomplete coverage`; name the source pagination as uncovered.
 - Preserve explicit unknowns, conflicts, confidence and material coverage limitations. Never invent listing facts or market values.
 - Local working state is intentionally plaintext and must remain outside the jj workspace with mode-`0700` directories and mode-`0600` files.
 - No remote is guessed or configured implicitly.

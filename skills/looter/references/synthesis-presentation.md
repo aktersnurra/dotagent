@@ -21,6 +21,12 @@ Do not delay chat for local writes, Markdown reports, HTML, encryption, jj, sign
 
 For one-listing inspection or supplied comparisons, use the same principle with the smallest useful result rather than padding to three.
 
+## Result contracts
+
+- Complete-sweep ranked: identify the timestamp and four-source coverage status.
+- Quick-refresh ranked — incomplete coverage: cannot contain promotion verdicts or purchase/travel advice.
+- Every manifest includes coverage.mode, coverage.complete, and one source record per attempted marketplace.
+
 ## Cache after chat
 
 After posting:
@@ -33,7 +39,7 @@ After posting:
 
 Directories are mode `0700`; files mode `0600`. If any write fails, report that the result was not cached. Never imply local reuse or sync readiness when the write failed.
 
-The manifest stores only decision-relevant evidence: canonical URL, active status, price, identity/specification, seller/location, listing facts, unknowns, confidence, verdict and checked time. Do not create source-by-source provenance essays.
+The manifest stores only decision-relevant evidence: canonical URL, active status, price, identity/specification, seller/location, listing facts, unknowns, confidence, verdict, checked time and required coverage metadata. Do not create source-by-source provenance essays.
 
 ## Optional full report
 

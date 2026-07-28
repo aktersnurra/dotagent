@@ -30,9 +30,9 @@ Reuse the approved local brief immediately. Do not repeat the interview. If the 
 - **Compare supplied listings:** verify each URL, deduplicate and recommend one action.
 - **Broaden:** preserve hard requirements and state every preference compromised.
 
-## Adaptive normal flow
+## Quick refresh
 
-Target three minutes; stop at five:
+This `quick-refresh` flow provides partial market awareness only. Target three minutes; stop at five:
 
 1. Read the latest local candidate manifest.
 2. Build a delta plan: changed filters, stale direct links and uncovered model/source families.
@@ -44,6 +44,12 @@ Target three minutes; stop at five:
 8. Post the result before writing local state.
 
 If three useful candidates exist at three minutes, answer. If fewer than two exist, use the remaining time for one additional discovery pass. Do not retry failed sources or browser profiles automatically. At five minutes, answer with partial verified evidence.
+
+## Complete pre-shortlist sweep
+
+Follow [Marketplace inventory coverage](coverage.md). For Wayke, Blocket, Bytbil and Bilweb, apply the approved brief hard filters directly, exhaust pagination, collect canonical URLs, normalise registration, deduplicate and record every disposition in the coverage ledger. Require all four source records before browser/car.info finalist verification.
+
+A blocked, failed or incompletely enumerated source is partial coverage. It blocks promotion to DOCUMENTS, INSPECT, NEGOTIATE, BUY, travel advice or a decision-grade top three; do not silently fall back to search-engine snippets.
 
 ## No normal-run fan-out
 
