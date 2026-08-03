@@ -12,7 +12,7 @@ dotagent/
 ├── settings.json      # Claude Code settings (model, hooks, permissions, theme)
 ├── install            # Install all harnesses
 ├── install-claude     # Claude Code: symlinks + plugin install
-├── install-opencode   # Opencode: symlinks
+├── install-opencode   # Opencode: symlinks, plugins, browser automation
 ├── install-pi         # Pi: symlinks
 └── skills/
     ├── design-doctrine/ # Explicit, evolvable domain-core design
@@ -43,6 +43,16 @@ dotagent/
 | Claude Code | `~/.claude/CLAUDE.md`          | `~/.claude/skills/`          | `~/.claude/settings.json`   |
 | Opencode    | `~/.config/opencode/CLAUDE.md` | `~/.config/opencode/skills/` | —                           |
 | Pi          | `~/.pi/agent/AGENTS.md`        | `~/.pi/agent/skills/`        | `~/.pi/agent/settings.json` |
+
+## OpenCode integrations
+
+`install-opencode` creates the default `~/.config/opencode/opencode.jsonc` with:
+
+- `@mohak34/opencode-notifier` for macOS desktop notifications and sounds on completion, permission, error, and question events.
+- `@playwright/mcp` configured to launch Chrome, allowing agents to exercise browser flows.
+
+The installer will not overwrite a custom OpenCode config. Add the entries from
+`install-opencode` manually when one already exists.
 
 ## Plugins (Claude Code)
 

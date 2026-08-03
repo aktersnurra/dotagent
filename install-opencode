@@ -6,6 +6,7 @@ OPENCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
 OPENCODE_CONFIG="$OPENCODE/opencode.jsonc"
 OPENCODE_PLUGINS=(
   "superpowers@git+https://github.com/aktersnurra/superpowers.git"
+  "@mohak34/opencode-notifier@latest"
 )
 
 config_has_plugins() {
@@ -39,7 +40,14 @@ write_default_opencode_config() {
       fi
     done
 
-    printf '  ]\n'
+    printf '  ],\n'
+    printf '  "mcp": {\n'
+    printf '    "playwright": {\n'
+    printf '      "type": "local",\n'
+    printf '      "command": ["npx", "-y", "@playwright/mcp@latest", "--browser", "chrome"],\n'
+    printf '      "enabled": true\n'
+    printf '    }\n'
+    printf '  }\n'
     printf '}\n'
   } > "$OPENCODE_CONFIG"
 }
