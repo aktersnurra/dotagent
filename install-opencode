@@ -17,39 +17,14 @@ config_has_plugins() {
   done
 }
 
-config_is_missing_or_schema_only() {
-  [[ ! -f "$OPENCODE_CONFIG" ]] && return 0
+install_plugins() {
+  local plugin
 
-  ! grep -qvE '^[[:space:]]*(\{|\}|"\$schema"[[:space:]]*:[[:space:]]*"https://opencode.ai/config.json",?)[[:space:]]*$' "$OPENCODE_CONFIG"
-}
-
-write_default_opencode_config() {
-  local index
-  local last_index=$((${#OPENCODE_PLUGINS[@]} - 1))
-
-  {
-    printf '{\n'
-    printf '  "$schema": "https://opencode.ai/config.json",\n'
-    printf '  "plugin": [\n'
-
-    for index in "${!OPENCODE_PLUGINS[@]}"; do
-      if [[ "$index" -eq "$last_index" ]]; then
-        printf '    "%s"\n' "${OPENCODE_PLUGINS[$index]}"
-      else
-        printf '    "%s",\n' "${OPENCODE_PLUGINS[$index]}"
-      fi
-    done
-
-    printf '  ],\n'
-    printf '  "mcp": {\n'
-    printf '    "playwright": {\n'
-    printf '      "type": "local",\n'
-    printf '      "command": ["npx", "-y", "@playwright/mcp@latest", "--browser", "chrome"],\n'
-    printf '      "enabled": true\n'
-    printf '    }\n'
-    printf '  }\n'
-    printf '}\n'
-  } > "$OPENCODE_CONFIG"
+  for plugin in "${OPENCODE_PLUGINS[@]}"; do
+    if ! grep -qF "\"$plugin\"" "$OPENCODE_CONFIG" 2>/dev/null; then
+      opencode plugin --global "$plugin"
+    fi
+  done
 }
 
 mkdir -p "$OPENCODE/skills"
@@ -58,17 +33,12 @@ ln -sf "$DOTFILES/CLAUDE.md" "$OPENCODE/CLAUDE.md"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$OPENCODE/skills"
 
-if [[ "${#OPENCODE_PLUGINS[@]}" -gt 0 ]]; then
-  if [[ -f "$OPENCODE_CONFIG" ]] && config_has_plugins; then
-    echo "Opencode plugins already configured."
-  elif config_is_missing_or_schema_only; then
-    write_default_opencode_config
-  else
-    echo "Refusing to modify custom Opencode config: $OPENCODE_CONFIG" >&2
-    echo "Add these documented plugin entries manually:" >&2
-    printf '  %s\n' "${OPENCODE_PLUGINS[@]}" >&2
-    exit 1
-  fi
+if [[ ! -f "$OPENCODE_CONFIG" ]] || ! config_has_plugins; then
+  install_plugins
+else
+  echo "Opencode plugins already configured."
 fi
+
+opencode mcp add playwright -- npx -y "@playwright/mcp@latest" --browser chrome
 
 echo "Opencode configured."
