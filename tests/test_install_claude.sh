@@ -21,4 +21,4 @@ chmod +x "$bin_dir/claude"
 HOME="$home_dir" PATH="$bin_dir:$PATH" "$repo_dir/install-claude"
 
 [[ "$(readlink "$home_dir/.claude/CLAUDE.md")" == "$repo_dir/AGENTS.md" ]]
-[[ "$(readlink "$home_dir/.claude/settings.json")" == "$repo_dir/claude/settings.json" ]]
+[[ "$(readlink "$home_dir/.claude/settings.json")" == "$repo_dir/claude.settings.json" ]]
