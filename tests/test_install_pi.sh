@@ -20,10 +20,14 @@ EOF
 chmod +x "$bin_dir/pi"
 
 HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
-  "$repo_dir/install-pi" --dir "$pi_dir"
+  "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 
 [[ -L "$pi_dir/AGENTS.md" ]]
+[[ "$(readlink "$pi_dir/AGENTS.md")" == "$repo_dir/instructions/AGENTS.md" ]]
 [[ -L "$pi_dir/skills/jj" ]]
 [[ -f "$pi_dir/settings.json" ]]
+[[ "$(jq -r '.defaultProvider' "$pi_dir/settings.json")" == "github-copilot" ]]
+[[ "$(jq -r '.defaultModel' "$pi_dir/settings.json")" == "gpt-5.6-terra" ]]
+[[ "$(jq -r '.defaultThinkingLevel' "$pi_dir/settings.json")" == "medium" ]]
 [[ "$(wc -l <"$pi_log" | tr -d ' ')" -gt 0 ]]
 [[ "$(rg -vF "$pi_dir|" "$pi_log" || true)" == "" ]]

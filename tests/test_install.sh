@@ -23,7 +23,7 @@ EOF
 chmod +x "$dotfiles_dir/install-claude" "$dotfiles_dir/install-pi"
 
 DOTFILES="$dotfiles_dir" INSTALL_LOG="$log_file" \
-  "$repo_dir/install" --pi-dir "$temp_dir/pi-work"
+  "$repo_dir/install" --pi-dir "$temp_dir/pi-work" --provider github-copilot
 
 [[ "$(rg -Fxc 'claude|' "$log_file")" -eq 1 ]]
-[[ "$(rg -Fxc "pi|--dir $temp_dir/pi-work" "$log_file")" -eq 1 ]]
+[[ "$(rg -Fxc "pi|--dir $temp_dir/pi-work --provider github-copilot" "$log_file")" -eq 1 ]]

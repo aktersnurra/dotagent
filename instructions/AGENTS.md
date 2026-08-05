@@ -1,8 +1,8 @@
-# Pi Agent Guidance
+# Agent Guidance
 
 ## Purpose
 
-This file is for Pi only. It is the routing layer for Pi packages, tools, and skills. It should not duplicate full workflows from installed skills; invoke the relevant skill and follow it.
+This file is the shared operating contract for installed coding harnesses. It should not duplicate full workflows from installed skills; invoke the relevant skill and follow it.
 
 ## Instruction precedence
 
@@ -14,7 +14,7 @@ This file is for Pi only. It is the routing layer for Pi packages, tools, and sk
 
 If instructions conflict, prefer the more specific and more recent instruction. Ask only when the conflict changes the outcome.
 
-## Pi routing
+## Skill routing
 
 - Use the applicable Superpowers skills for features, patches, bug fixes, refactors, planning, implementation, review, and verification.
 - Use `using-superpowers` at conversation start and whenever a Superpowers workflow may apply.
@@ -25,12 +25,7 @@ If instructions conflict, prefer the more specific and more recent instruction. 
 - Use `jj` for all Jujutsu operations.
 - Use domain/design skills for model-heavy work: `design-doctrine`, `type-driven-development`, `tiger-style`.
 - Use language skills for language-specific work: `elixir`, `ocaml`.
-- Use UI skills for screens, components, layouts, and visual design review.
-- Use `context-mode` tools for large outputs: tests, logs, dependency trees, git history, API responses, docs, and generated snapshots.
-- Use `lsp-navigation` for code intelligence and diagnostics.
-- Use `ast-grep` for semantic code search or replacement.
-- Use RPIV skills for artifact workflows: `discover`, `research`, `explore`, `design`, `plan`, `blueprint`, `implement`, `validate`, `code-review`, `revise`.
-- Use `pi-subagents` or Pi subagents when independent work can run in parallel or a focused reviewer/researcher should preserve main context.
+- Use UI skills and the frontend-design plugin for screens, components, layouts, and visual design review.
 
 ## Operating discipline
 

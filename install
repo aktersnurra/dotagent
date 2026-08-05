@@ -4,10 +4,11 @@ set -euo pipefail
 DOTFILES="${DOTFILES:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 
 usage() {
-  echo "usage: install [--pi-dir <path>]" >&2
+  echo "usage: install [--pi-dir <path> --provider <provider-id>]" >&2
 }
 
 pi_dir=""
+provider=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -17,6 +18,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       fi
       pi_dir="$2"
+      shift 2
+      ;;
+    --provider)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 2
+      fi
+      provider="$2"
       shift 2
       ;;
     -h|--help)
@@ -32,8 +41,17 @@ done
 
 "$DOTFILES/install-claude"
 
+if [[ -n "$provider" && -z "$pi_dir" ]]; then
+  usage
+  exit 2
+fi
+
 if [[ -n "$pi_dir" ]]; then
-  "$DOTFILES/install-pi" --dir "$pi_dir"
+  args=(--dir "$pi_dir")
+  if [[ -n "$provider" ]]; then
+    args+=(--provider "$provider")
+  fi
+  "$DOTFILES/install-pi" "${args[@]}"
 else
   "$DOTFILES/install-pi"
 fi

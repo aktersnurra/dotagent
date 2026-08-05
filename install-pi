@@ -3,9 +3,10 @@ set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PI="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+provider=""
 
 usage() {
-  echo "usage: install-pi [--dir <path>]" >&2
+  echo "usage: install-pi [--dir <path>] [--provider <provider-id>]" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -16,6 +17,14 @@ while [[ $# -gt 0 ]]; do
         exit 2
       fi
       PI="$2"
+      shift 2
+      ;;
+    --provider)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 2
+      fi
+      provider="$2"
       shift 2
       ;;
     -h|--help)
@@ -31,7 +40,7 @@ done
 
 mkdir -p "$PI/skills"
 
-ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
+ln -sf "$DOTFILES/instructions/AGENTS.md" "$PI/AGENTS.md"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
 
@@ -108,14 +117,17 @@ for pkg in "${PI_PACKAGES[@]}"; do
   fi
 done
 
-echo "Activating Pi theme: $PI_THEME"
 if command -v python3 >/dev/null 2>&1; then
-  python3 - "$SETTINGS" "$PI_THEME" <<'PY'
+  python3 - "$DOTFILES/pi/settings.json" "$SETTINGS" "$provider" <<'PY'
 import json
 import os
 import sys
 
-settings_path, theme_name = sys.argv[1], sys.argv[2]
+defaults_path, settings_path, provider = sys.argv[1:]
+
+with open(defaults_path, "r", encoding="utf-8") as f:
+    defaults = json.load(f)
+
 settings = {}
 
 if os.path.exists(settings_path):
@@ -124,7 +136,9 @@ if os.path.exists(settings_path):
         if content:
             settings = json.loads(content)
 
-settings["theme"] = theme_name
+settings.update(defaults)
+if provider:
+    settings["defaultProvider"] = provider
 
 os.makedirs(os.path.dirname(settings_path), exist_ok=True)
 with open(settings_path, "w", encoding="utf-8") as f:
@@ -132,7 +146,7 @@ with open(settings_path, "w", encoding="utf-8") as f:
     f.write("\n")
 PY
 else
-  echo "python3 is required to activate Pi theme in $SETTINGS" >&2
+  echo "python3 is required to configure Pi settings in $SETTINGS" >&2
   exit 1
 fi
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES="$HOME/projects/dotagent"
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE="$HOME/.claude"
 
 mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks"
 
-ln -sf "$DOTFILES/CLAUDE.md" "$CLAUDE/CLAUDE.md"
-ln -sf "$DOTFILES/settings.json" "$CLAUDE/settings.json"
+ln -sf "$DOTFILES/instructions/AGENTS.md" "$CLAUDE/CLAUDE.md"
+ln -sf "$DOTFILES/claude/settings.json" "$CLAUDE/settings.json"
 ln -sf "$DOTFILES/.claude/agents/implementer.md" "$CLAUDE/agents/implementer.md"
 
 for hook in "$DOTFILES/hooks"/*; do

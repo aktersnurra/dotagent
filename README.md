@@ -7,9 +7,12 @@ harness-specific guidance, global settings, and skills symlinked into each harne
 
 ```
 dotagent/
-├── AGENTS.md          # Pi-specific workflow, tool, and skill routing
-├── CLAUDE.md          # Claude Code / Claude-like workflow and plugin routing
-├── settings.json      # Claude Code settings (model, hooks, permissions, theme)
+├── instructions/
+│   └── AGENTS.md      # Shared agent operating instructions
+├── claude/
+│   └── settings.json  # Claude Code settings
+├── pi/
+│   └── settings.json  # Pi provider, model, thinking, and theme defaults
 ├── install            # Install Claude Code and Pi
 ├── install-claude     # Claude Code: symlinks + plugin install
 ├── install-pi         # Pi: symlinks, packages, and theme
@@ -31,9 +34,11 @@ dotagent/
 ```sh
 ./install            # Claude Code and default Pi profile
 ./install --pi-dir ~/.pi/work
+./install --pi-dir ~/.pi/work --provider github-copilot
 ./install-claude     # Claude Code only
 ./install-pi         # Pi only
 ./install-pi --dir ~/.pi/work
+./install-pi --dir ~/.pi/work --provider github-copilot
 ```
 
 ## Harness config locations
