@@ -150,4 +150,17 @@ else
   exit 1
 fi
 
+if ! command -v ty >/dev/null 2>&1; then
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "uv is required to install ty" >&2
+    exit 1
+  fi
+  echo "Installing ty..."
+  uv tool install ty
+fi
+
+LSP_CONFIG_DIR="$HOME/.pi-lens"
+mkdir -p "$LSP_CONFIG_DIR"
+cp "$DOTFILES/.pi-lens/lsp.json" "$LSP_CONFIG_DIR/lsp.json"
+
 echo "Pi configured."

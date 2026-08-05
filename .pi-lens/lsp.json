@@ -1,0 +1,12 @@
+{
+  "disabledServers": ["python"],
+  "servers": {
+    "ty": {
+      "name": "ty",
+      "extensions": [".py", ".pyi"],
+      "command": "ty",
+      "args": ["server"],
+      "rootMarkers": ["pyproject.toml", ".git"]
+    }
+  }
+}
