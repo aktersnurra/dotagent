@@ -6,8 +6,8 @@ CLAUDE="$HOME/.claude"
 
 mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks"
 
-ln -sf "$DOTFILES/instructions/AGENTS.md" "$CLAUDE/CLAUDE.md"
-ln -sf "$DOTFILES/claude/settings.json" "$CLAUDE/settings.json"
+ln -sf "$DOTFILES/AGENTS.md" "$CLAUDE/CLAUDE.md"
+ln -sf "$DOTFILES/claude.settings.json" "$CLAUDE/settings.json"
 ln -sf "$DOTFILES/.claude/agents/implementer.md" "$CLAUDE/agents/implementer.md"
 
 for hook in "$DOTFILES/hooks"/*; do

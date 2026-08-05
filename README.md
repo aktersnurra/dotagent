@@ -7,12 +7,9 @@ harness-specific guidance, global settings, and skills symlinked into each harne
 
 ```
 dotagent/
-├── instructions/
-│   └── AGENTS.md      # Shared agent operating instructions
-├── claude/
-│   └── settings.json  # Claude Code settings
-├── pi/
-│   └── settings.json  # Pi provider, model, thinking, and theme defaults
+├── AGENTS.md          # Shared agent operating instructions
+├── claude.settings.json # Claude Code settings
+├── pi.settings.json   # Pi provider, model, thinking, and theme defaults
 ├── install            # Install Claude Code and Pi
 ├── install-claude     # Claude Code: symlinks + plugin install
 ├── install-pi         # Pi: symlinks, packages, and theme

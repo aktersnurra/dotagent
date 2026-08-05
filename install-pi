@@ -118,7 +118,7 @@ for pkg in "${PI_PACKAGES[@]}"; do
 done
 
 if command -v python3 >/dev/null 2>&1; then
-  python3 - "$DOTFILES/pi/settings.json" "$SETTINGS" "$provider" <<'PY'
+  python3 - "$DOTFILES/pi.settings.json" "$SETTINGS" "$provider" <<'PY'
 import json
 import os
 import sys

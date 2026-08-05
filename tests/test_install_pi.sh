@@ -23,7 +23,7 @@ HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
   "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 
 [[ -L "$pi_dir/AGENTS.md" ]]
-[[ "$(readlink "$pi_dir/AGENTS.md")" == "$repo_dir/instructions/AGENTS.md" ]]
+[[ "$(readlink "$pi_dir/AGENTS.md")" == "$repo_dir/AGENTS.md" ]]
 [[ -L "$pi_dir/skills/jj" ]]
 [[ -f "$pi_dir/settings.json" ]]
 [[ "$(jq -r '.defaultProvider' "$pi_dir/settings.json")" == "github-copilot" ]]
