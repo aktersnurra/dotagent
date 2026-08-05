@@ -1,10 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTFILES="$HOME/projects/dotagent"
+DOTFILES="${DOTFILES:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+
+usage() {
+  echo "usage: install [--pi-dir <path>]" >&2
+}
+
+pi_dir=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --pi-dir)
+      if [[ $# -lt 2 ]]; then
+        usage
+        exit 2
+      fi
+      pi_dir="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+done
 
 "$DOTFILES/install-claude"
-"$DOTFILES/install-opencode"
-"$DOTFILES/install-pi"
 
-echo "All harnesses configured."
+if [[ -n "$pi_dir" ]]; then
+  "$DOTFILES/install-pi" --dir "$pi_dir"
+else
+  "$DOTFILES/install-pi"
+fi
+
+echo "Claude Code and Pi configured."

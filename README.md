@@ -1,6 +1,6 @@
 # .agent
 
-Personal Coding Harness configuration (Claude Code, Opencode, Pi) —
+Personal coding harness configuration (Claude Code and Pi) —
 harness-specific guidance, global settings, and skills symlinked into each harness's config directory.
 
 ## Structure
@@ -10,10 +10,9 @@ dotagent/
 ├── AGENTS.md          # Pi-specific workflow, tool, and skill routing
 ├── CLAUDE.md          # Claude Code / Claude-like workflow and plugin routing
 ├── settings.json      # Claude Code settings (model, hooks, permissions, theme)
-├── install            # Install all harnesses
+├── install            # Install Claude Code and Pi
 ├── install-claude     # Claude Code: symlinks + plugin install
-├── install-opencode   # Opencode: symlinks, plugins, browser automation
-├── install-pi         # Pi: symlinks
+├── install-pi         # Pi: symlinks, packages, and theme
 └── skills/
     ├── design-doctrine/ # Explicit, evolvable domain-core design
     ├── elixir/        # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
@@ -30,10 +29,11 @@ dotagent/
 ## Install
 
 ```sh
-./install            # all harnesses
+./install            # Claude Code and default Pi profile
+./install --pi-dir ~/.pi/work
 ./install-claude     # Claude Code only
-./install-opencode   # Opencode only
 ./install-pi         # Pi only
+./install-pi --dir ~/.pi/work
 ```
 
 ## Harness config locations
@@ -41,18 +41,7 @@ dotagent/
 | Harness     | Context file                   | Skills                       | Settings                    |
 | ----------- | ------------------------------ | ---------------------------- | --------------------------- |
 | Claude Code | `~/.claude/CLAUDE.md`          | `~/.claude/skills/`          | `~/.claude/settings.json`   |
-| Opencode    | `~/.config/opencode/CLAUDE.md` | `~/.config/opencode/skills/` | —                           |
-| Pi          | `~/.pi/agent/AGENTS.md`        | `~/.pi/agent/skills/`        | `~/.pi/agent/settings.json` |
-
-## OpenCode integrations
-
-`install-opencode` creates the default `~/.config/opencode/opencode.jsonc` with:
-
-- `@mohak34/opencode-notifier` for macOS desktop notifications and sounds on completion, permission, error, and question events.
-- `@playwright/mcp` configured to launch Chrome, allowing agents to exercise browser flows.
-
-The installer will not overwrite a custom OpenCode config. Add the entries from
-`install-opencode` manually when one already exists.
+| Pi          | `<pi-dir>/AGENTS.md`           | `<pi-dir>/skills/`           | `<pi-dir>/settings.json`    |
 
 ## Plugins (Claude Code)
 
@@ -60,7 +49,7 @@ The installer will not overwrite a custom OpenCode config. Add the entries from
 | ----------------- | ---------------------------------------------------------------------------- |
 | `superpowers`     | Workflow skills: spec, plan, checkpoint, TDD, debugging, brainstorming, etc. |
 | `frontend-design` | Production-grade UI component generation                                     |
-| `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi/Opencode) |
+| `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi) |
 
 ## Skills
 
