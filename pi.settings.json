@@ -2,5 +2,11 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-terra",
   "defaultThinkingLevel": "medium",
-  "theme": "no-clown-fiesta-dark"
+  "theme": "no-clown-fiesta-dark",
+  "piVim": {
+    "modeColors": {
+      "normal": "yellow",
+      "insert": "text"
+    }
+  }
 }
