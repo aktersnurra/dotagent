@@ -8,7 +8,7 @@ pi_dir="$temp_dir/pi-work"
 pi_log="$temp_dir/pi.log"
 
 cleanup() {
-  rm -rf "$temp_dir"
+	rm -rf "$temp_dir"
 }
 trap cleanup EXIT
 
@@ -20,14 +20,14 @@ EOF
 chmod +x "$bin_dir/pi"
 
 HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
-  "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
+	"$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 
 [[ -L "$pi_dir/AGENTS.md" ]]
 actual_agents_link="$(readlink "$pi_dir/AGENTS.md")"
 if [[ "$actual_agents_link" != "$repo_dir/AGENTS.md" ]]; then
-  printf 'AGENTS.md link mismatch: got %s, expected %s\n' \
-    "$actual_agents_link" "$repo_dir/AGENTS.md" >&2
-  exit 1
+	printf 'AGENTS.md link mismatch: got %s, expected %s\n' \
+		"$actual_agents_link" "$repo_dir/AGENTS.md" >&2
+	exit 1
 fi
 [[ -L "$pi_dir/skills/jj" ]]
 [[ -f "$pi_dir/settings.json" ]]
