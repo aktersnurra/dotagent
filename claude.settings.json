@@ -83,13 +83,20 @@
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
-    "superpowers@superpowers-dev": true
+    "superpowers@superpowers-dev": true,
+    "hegel-skill@hegeldev": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
       "source": {
         "source": "git",
         "url": "https://github.com/aktersnurra/superpowers.git"
+      }
+    },
+    "hegeldev": {
+      "source": {
+        "source": "github",
+        "repo": "hegeldev/hegel-skill"
       }
     }
   },
