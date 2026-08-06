@@ -40,7 +40,7 @@ done
 
 mkdir -p "$PI/skills"
 
-ln -sf "$DOTFILES/instructions/AGENTS.md" "$PI/AGENTS.md"
+ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
 
