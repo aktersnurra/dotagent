@@ -33,6 +33,14 @@ for command in "$repo_dir"/commands/*.md; do
 	[[ "$actual_link" == "$command" ]]
 done
 
+[[ -f "$repo_dir/commands/sync-master.md" ]]
+grep -qF 'argument-hint: "<target-directory> <base-revision>"' \
+	"$repo_dir/commands/sync-master.md"
+grep -qF 'Filter out every directory matching `*.workspaces`' \
+	"$repo_dir/commands/sync-master.md"
+grep -qF 'jj git fetch' "$repo_dir/commands/sync-master.md"
+grep -qF 'jj new <base-revision>' "$repo_dir/commands/sync-master.md"
+
 HOME="$home_dir" PATH="$bin_dir:$PATH" "$repo_dir/install-claude"
 
 for command in "$repo_dir"/commands/*.md; do
