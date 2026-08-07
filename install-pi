@@ -38,11 +38,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-mkdir -p "$PI/skills"
+mkdir -p "$PI/skills" "$PI/prompts"
 
 ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
+
+for command in "$DOTFILES/commands"/*.md; do
+  [[ -e "$command" ]] || continue
+  ln -sf "$command" "$PI/prompts/$(basename "$command")"
+done
 
 PI_PACKAGES=(
   "npm:@ff-labs/pi-fff"

@@ -4,7 +4,7 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE="$HOME/.claude"
 
-mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks"
+mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks" "$CLAUDE/commands"
 
 ln -sf "$DOTFILES/AGENTS.md" "$CLAUDE/CLAUDE.md"
 ln -sf "$DOTFILES/claude.settings.json" "$CLAUDE/settings.json"
@@ -15,6 +15,11 @@ for hook in "$DOTFILES/hooks"/*; do
 done
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$CLAUDE/skills"
+
+for command in "$DOTFILES/commands"/*.md; do
+  [[ -e "$command" ]] || continue
+  ln -sf "$command" "$CLAUDE/commands/$(basename "$command")"
+done
 
 echo "Installing Claude plugins..."
 claude plugins uninstall superpowers@claude-plugins-official --scope user --keep-data || true
