@@ -14,16 +14,22 @@ dotagent/
 ├── install-claude     # Claude Code: symlinks + plugin install
 ├── install-pi         # Pi: symlinks, packages, and theme
 └── skills/
-    ├── design-doctrine/ # Explicit, evolvable domain-core design
-    ├── elixir/        # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
-    ├── explain/       # Detailed explanations, walkthroughs, and durable docs
-    ├── hegel/         # Property-based testing with Hegel (Rust, Go, C++, TypeScript, OCaml)
-    ├── jj/            # Jujutsu VCS idioms and workflows
-    ├── ocaml/         # OCaml idioms, Eio, dune, testing conventions
-    ├── tiger-style/   # Tiger Style naming and API design conventions
-    ├── type-driven/   # Type-driven design and railway-oriented programming
-    ├── ui-design/     # First-principles UI design reasoning
-    └── ui-design-checklist/ # Fast UI design review checklist
+    ├── design-doctrine/    # Explicit, evolvable domain-core design
+    ├── elixir/             # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
+    ├── explain/            # Detailed explanations, walkthroughs, and durable docs
+    ├── first-principles/   # Question assumptions, evaluate designs from scratch
+    ├── grill-me/           # /grill-me slash command wrapper for grilling
+    ├── grilling/           # Relentless interview to stress-test a plan or design
+    ├── hegel/              # Property-based testing with Hegel (Rust, Go, C++, TypeScript, OCaml)
+    ├── jj/                 # Jujutsu VCS idioms and workflows
+    ├── looter/             # Research and compare live marketplace purchases
+    ├── ocaml/              # OCaml idioms, Eio, dune, testing conventions
+    ├── tiger-style/        # Tiger Style naming and API design conventions
+    ├── transcribing-youtube-videos/ # Answer questions from YouTube video audio/captions
+    ├── type-driven/        # Type-driven design and railway-oriented programming
+    ├── ui-design/          # First-principles UI design reasoning
+    ├── wiki/               # Distill sources into a queryable personal wiki
+    └── writing-docs/       # Rewrite prose into plain Simplified Technical English
 ```
 
 ## Install
@@ -55,15 +61,20 @@ dotagent/
 
 ## Skills
 
-| Skill                 | Trigger                                                                  |
-| --------------------- | ------------------------------------------------------------------------ |
-| `design-doctrine`     | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
-| `elixir`              | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
-| `explain`             | Detailed explanations, walkthroughs, app/service overviews, durable docs |
-| `hegel`               | Writing property-based tests (Rust, Go, C++, TypeScript, OCaml)          |
-| `jj`                  | Any jj/jujutsu VCS operation                                             |
-| `ocaml`               | OCaml code, Eio, Lwt, GADTs, dune                                        |
-| `tiger-style`         | Naming functions, types, designing APIs                                  |
-| `type-driven`         | Modelling errors, designing interfaces, ADTs, ROP                        |
-| `ui-design`           | Designing or reviewing screens, components, and layouts                  |
-| `ui-design-checklist` | Fast UI design review or diagnosis                                       |
+| Skill                          | Trigger                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| `design-doctrine`              | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
+| `elixir`                       | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
+| `explain`                      | Detailed explanations, walkthroughs, app/service overviews, durable docs |
+| `first-principles`             | Questioning assumptions, evaluating a design or approach from scratch   |
+| `grill-me` / `grilling`        | Stress-testing a plan or design via one-question-at-a-time interview     |
+| `hegel`                        | Writing property-based tests (Rust, Go, C++, TypeScript, OCaml)          |
+| `jj`                           | Any jj/jujutsu VCS operation                                             |
+| `looter`                       | Researching or comparing live marketplace purchases                     |
+| `ocaml`                        | OCaml code, Eio, Lwt, GADTs, dune                                        |
+| `tiger-style`                  | Naming functions, types, designing APIs                                  |
+| `transcribing-youtube-videos`  | Answering a question from a YouTube video's audio/captions               |
+| `type-driven`                  | Modelling errors, designing interfaces, ADTs, ROP                        |
+| `ui-design`                    | Designing or reviewing screens, components, and layouts                  |
+| `wiki`                         | Capturing a YouTube/article URL into a wiki page, or querying the wiki   |
+| `writing-docs`                 | Rewriting prose into plain, human-sounding technical English             |
