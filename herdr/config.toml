@@ -1,0 +1,95 @@
+# herdr configuration
+# Custom theme ported from no-clown-fiesta.nvim (dark palette).
+# Keybindings mirror ~/.config/tmux/tmux.conf: C-a prefix, Colemak
+# navigation (m/n/e/i = left/down/up/right), vi-flavored feel.
+
+[theme]
+name = "catppuccin"
+
+[theme.custom]
+panel_bg = "#151515"
+accent = "#BAD7FF"
+red = "#b46958"
+green = "#90A959"
+yellow = "#F4BF75"
+blue = "#BAD7FF"
+
+[terminal]
+new_cwd = "follow"
+
+[keys]
+# Match tmux: C-a instead of the herdr default ctrl+b.
+prefix = "ctrl+a"
+
+reload_config = "prefix+r"
+new_tab = "prefix+c"
+
+# tmux `-h` splits left/right (a vertical divider); `-v` splits top/bottom.
+split_vertical = "prefix+h"
+split_horizontal = "prefix+v"
+
+# Colemak pane navigation, matching tmux's unprefixed Alt+m/n/e/i.
+focus_pane_left = "alt+m"
+focus_pane_down = "alt+n"
+focus_pane_up = "alt+e"
+focus_pane_right = "alt+i"
+
+# Navigate-mode picker uses the same Colemak letters.
+navigate_pane_left = "m"
+navigate_pane_down = "n"
+navigate_pane_up = "e"
+navigate_pane_right = "i"
+
+# Quick jumps between workspaces and agents.
+workspace_picker = "prefix+w"
+previous_workspace = "alt+p"
+next_workspace = "alt+w"
+switch_workspace = "prefix+shift+1..9"
+previous_agent = "alt+["
+next_agent = "alt+]"
+focus_agent = "prefix+alt+1..9"
+
+# Scrollback in $EDITOR, and instant toggle back to the last pane
+# (like tmux's `sesh last`).
+edit_scrollback = "prefix+e"
+last_pane = "alt+a"
+
+# Zoom current pane and toggle the sidebar.
+zoom = "prefix+z"
+toggle_sidebar = "prefix+b"
+
+# lazyjj popup, mirroring tmux's M-g floating terminal.
+[[keys.command]]
+key = "prefix+g"
+type = "popup"
+command = "lazyjj"
+width = "80%"
+height = "75%"
+
+# New jj workspace as a sibling dir named <repo-name>.workspaces.<feature>,
+# opened as its own herdr workspace. Prompts for the feature name.
+[[keys.command]]
+key = "prefix+shift+g"
+type = "popup"
+command = "~/.config/herdr/new-jj-workspace.sh"
+width = "60%"
+height = "40%"
+
+[ui]
+sidebar_start_collapsed = true
+show_agent_labels_on_pane_borders = true
+hide_tab_bar_when_single_tab = true
+accent = "#BAD7FF"
+
+[ui.sound]
+enabled = true
+
+# Native macOS notification when a background agent finishes or needs input.
+[ui.toast]
+delivery = "system"
+
+[ui.sidebar.agents]
+rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+
+[session]
+resume_agents_on_restore = true

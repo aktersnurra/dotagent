@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HERDR="${HERDR_CONFIG_DIR:-$HOME/.config/herdr}"
+
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "herdr is not installed. Install it, then re-run: https://herdr.dev" >&2
+  exit 1
+fi
+
+mkdir -p "$HERDR"
+
+ln -sf "$DOTFILES/herdr/config.toml" "$HERDR/config.toml"
+ln -sf "$DOTFILES/herdr/new-jj-workspace.sh" "$HERDR/new-jj-workspace.sh"
+
+echo "Herdr configured."

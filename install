@@ -40,6 +40,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 "$DOTFILES/install-claude"
+"$DOTFILES/install-herdr"
 
 if [[ -n "$provider" && -z "$pi_dir" ]]; then
   usage
@@ -56,4 +57,4 @@ else
   "$DOTFILES/install-pi"
 fi
 
-echo "Claude Code and Pi configured."
+echo "Claude Code, Herdr, and Pi configured."

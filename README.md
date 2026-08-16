@@ -10,9 +10,13 @@ dotagent/
 ├── AGENTS.md          # Shared agent operating instructions
 ├── claude.settings.json # Claude Code settings
 ├── pi.settings.json   # Pi provider, model, thinking, and theme defaults
-├── install            # Install Claude Code and Pi
+├── install            # Install Claude Code, Herdr, and Pi
 ├── install-claude     # Claude Code: symlinks + plugin install
+├── install-herdr      # Herdr: config.toml + jj workspace script symlinks
 ├── install-pi         # Pi: symlinks, packages, and theme
+├── herdr/
+│   ├── config.toml           # Herdr config (theme, keybindings, worktree-like jj flow)
+│   └── new-jj-workspace.sh   # prefix+shift+g: new jj workspace as a herdr workspace
 └── skills/
     ├── design-doctrine/    # Explicit, evolvable domain-core design
     ├── elixir/             # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions

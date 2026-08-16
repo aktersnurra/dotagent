@@ -20,10 +20,15 @@ cat >"$dotfiles_dir/install-pi" <<'EOF'
 #!/usr/bin/env bash
 printf 'pi|%s\n' "$*" >>"$INSTALL_LOG"
 EOF
-chmod +x "$dotfiles_dir/install-claude" "$dotfiles_dir/install-pi"
+cat >"$dotfiles_dir/install-herdr" <<'EOF'
+#!/usr/bin/env bash
+printf 'herdr|%s\n' "$*" >>"$INSTALL_LOG"
+EOF
+chmod +x "$dotfiles_dir/install-claude" "$dotfiles_dir/install-pi" "$dotfiles_dir/install-herdr"
 
 DOTFILES="$dotfiles_dir" INSTALL_LOG="$log_file" \
   "$repo_dir/install" --pi-dir "$temp_dir/pi-work" --provider github-copilot
 
 [[ "$(rg -Fxc 'claude|' "$log_file")" -eq 1 ]]
+[[ "$(rg -Fxc 'herdr|' "$log_file")" -eq 1 ]]
 [[ "$(rg -Fxc "pi|--dir $temp_dir/pi-work --provider github-copilot" "$log_file")" -eq 1 ]]
