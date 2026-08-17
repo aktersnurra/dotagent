@@ -4,6 +4,11 @@
 theme = "no-clown-fiesta"
 appearance = "dark"
 
+# Stamped on comments so mine are distinguishable from an agent's, which the
+# tuicr skill passes explicitly via --username. Without this both show as
+# "user".
+username = "aktersnurra"
+
 diff_view = "side-by-side"
 ignore_whitespace = false
 relative_line_numbers = true
