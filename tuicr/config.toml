@@ -1,0 +1,36 @@
+# tuicr configuration
+# Theme is the local port in themes/no-clown-fiesta.toml, matching the
+# herdr and neovim palettes.
+theme = "no-clown-fiesta"
+appearance = "dark"
+
+diff_view = "side-by-side"
+ignore_whitespace = false
+relative_line_numbers = true
+
+# Modal editing in the comment box, matching the vim keybindings the rest of
+# the TUI already uses.
+comment_vim = true
+
+mouse = false
+leader = ";"
+
+[[comment_types]]
+id = "issue"
+color = "#b46958"
+definition = "must fix before merge"
+
+[[comment_types]]
+id = "suggestion"
+color = "#88afa2"
+definition = "worth considering, not blocking"
+
+[[comment_types]]
+id = "question"
+color = "#BAD7FF"
+definition = "need clarification to review this"
+
+[[comment_types]]
+id = "praise"
+color = "#90A959"
+definition = "worth calling out as good"

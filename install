@@ -41,6 +41,7 @@ done
 
 "$DOTFILES/install-claude"
 "$DOTFILES/install-herdr"
+"$DOTFILES/install-tuicr"
 
 if [[ -n "$provider" && -z "$pi_dir" ]]; then
   usage
@@ -57,4 +58,4 @@ else
   "$DOTFILES/install-pi"
 fi
 
-echo "Claude Code, Herdr, and Pi configured."
+echo "Claude Code, Herdr, tuicr, and Pi configured."

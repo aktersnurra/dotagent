@@ -74,6 +74,15 @@ type = "plugin_action"
 command = "aktersnurra.next-agent.jump"
 description = "next agent needing attention"
 
+# Review the working copy in tuicr. Sized large: it is a full-screen diff
+# reader, not a quick prompt.
+[[keys.command]]
+key = "prefix+d"
+type = "popup"
+command = "tuicr --working-tree"
+width = "90%"
+height = "90%"
+
 # Fuzzy-pick an existing repo or jj workspace and open it as a workspace.
 [[keys.command]]
 key = "prefix+o"

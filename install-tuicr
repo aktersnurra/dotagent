@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TUICR="${TUICR_CONFIG_DIR:-$HOME/.config/tuicr}"
+
+if ! command -v tuicr >/dev/null 2>&1; then
+  echo "tuicr is not installed. Install it, then re-run: https://tuicr.dev" >&2
+  exit 1
+fi
+
+mkdir -p "$TUICR/themes"
+
+ln -sf "$DOTFILES/tuicr/config.toml" "$TUICR/config.toml"
+ln -sf "$DOTFILES/tuicr/themes/no-clown-fiesta.toml" "$TUICR/themes/no-clown-fiesta.toml"
+
+echo "tuicr configured."

@@ -1,0 +1,56 @@
+# no-clown-fiesta (dark) ported for tuicr.
+# Palette source: no-clown-fiesta.nvim/lua/no-clown-fiesta/palettes.lua.
+# The scheme is deliberately low-saturation: color marks meaning (added,
+# deleted, needs-attention) and everything else stays gray.
+panel_bg = "#151515"         # bg
+bg_highlight = "#202020"     # accent
+fg_primary = "#E1E1E1"       # fg
+fg_secondary = "#AFAFAF"     # light_gray
+fg_dim = "#727272"           # medium_gray
+
+# Diff colors reuse the sign_* entries the nvim theme uses for its gutter, so
+# tuicr's diff reads the same as a buffer in neovim.
+diff_add = "#90A959"         # green
+diff_add_bg = "#181B18"      # accent_green
+diff_del = "#b46958"         # red
+diff_del_bg = "#1B1818"      # accent_red
+diff_context = "#E1E1E1"
+diff_hunk_header = "#BAD7FF" # blue
+expanded_context_fg = "#727272"
+
+syntax_add_bg = "#181B18"
+syntax_del_bg = "#1B1818"
+
+file_added = "#90A959"
+file_modified = "#F4BF75"    # yellow
+file_deleted = "#b46958"
+file_renamed = "#AA749F"     # purple
+
+reviewed = "#90A959"
+pending = "#F4BF75"
+
+comment_note = "#BAD7FF"
+comment_suggestion = "#88afa2" # cyan
+comment_issue = "#b46958"
+comment_praise = "#90A959"
+
+border_focused = "#BAD7FF"
+border_unfocused = "#373737"   # gray
+status_bar_bg = "#171717"      # alt_bg
+cursor_color = "#D0D0D0"       # cursor_bg
+cursor_line_bg = "#202020"
+branch_name = "#AA749F"
+help_indicator = "#7E97AB"     # gray_blue
+
+# Message badges invert: dark text on a saturated background.
+message_info_fg = "#151515"
+message_info_bg = "#BAD7FF"
+message_warning_fg = "#151515"
+message_warning_bg = "#F4BF75"
+message_error_fg = "#151515"
+message_error_bg = "#b46958"
+update_badge_fg = "#151515"
+update_badge_bg = "#F4BF75"
+
+mode_fg = "#151515"
+mode_bg = "#BAD7FF"
