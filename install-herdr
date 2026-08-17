@@ -14,6 +14,7 @@ mkdir -p "$HERDR"
 ln -sf "$DOTFILES/herdr/config.toml" "$HERDR/config.toml"
 ln -sf "$DOTFILES/herdr/new-jj-workspace.sh" "$HERDR/new-jj-workspace.sh"
 ln -sf "$DOTFILES/herdr/open-workspace.sh" "$HERDR/open-workspace.sh"
+ln -sf "$DOTFILES/herdr/review-pane.sh" "$HERDR/review-pane.sh"
 
 mkdir -p "$HERDR/plugins"
 ln -sfn "$DOTFILES/herdr/plugins/next-agent" "$HERDR/plugins/next-agent"
