@@ -74,6 +74,14 @@ type = "plugin_action"
 command = "aktersnurra.next-agent.jump"
 description = "next agent needing attention"
 
+# Fuzzy-pick an existing repo or jj workspace and open it as a workspace.
+[[keys.command]]
+key = "prefix+o"
+type = "popup"
+command = "~/.config/herdr/open-workspace.sh"
+width = "60%"
+height = "60%"
+
 # New jj workspace as a sibling dir named <repo-name>.workspaces.<feature>,
 # opened as its own herdr workspace. Prompts for the feature name.
 [[keys.command]]
