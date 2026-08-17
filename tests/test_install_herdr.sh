@@ -39,3 +39,25 @@ fi
 
 grep -qF "https://herdr.dev" "$temp_dir/missing.err"
 [[ ! -e "$missing_dir/config.toml" ]]
+
+# macOS notification warning. Run against a minimal PATH holding only a stub
+# herdr, so terminal-notifier is definitively absent regardless of what the
+# host has installed. `uname` must resolve too, hence /usr/bin and /bin.
+shim_dir="$temp_dir/shim"
+mkdir -p "$shim_dir"
+printf '#!/usr/bin/env bash\nexit 0\n' >"$shim_dir/herdr"
+chmod +x "$shim_dir/herdr"
+
+notifier_dir="$temp_dir/herdr-config-notifier"
+PATH="$shim_dir:/usr/bin:/bin" HERDR_CONFIG_DIR="$notifier_dir" \
+  "$repo_dir/install-herdr" >"$temp_dir/notifier.out" 2>"$temp_dir/notifier.err"
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  grep -qF "brew install terminal-notifier" "$temp_dir/notifier.err"
+else
+  # The warning is macOS-only; other platforms must stay quiet about it.
+  ! grep -qF "terminal-notifier" "$temp_dir/notifier.err"
+fi
+
+# The warning never blocks the install.
+[[ "$(readlink "$notifier_dir/config.toml")" == "$repo_dir/herdr/config.toml" ]]

@@ -24,4 +24,11 @@ ln -sfn "$DOTFILES/herdr/plugins/next-agent" "$HERDR/plugins/next-agent"
 herdr plugin link "$DOTFILES/herdr/plugins/next-agent" >/dev/null 2>&1 \
   || echo "Note: run 'herdr plugin link $DOTFILES/herdr/plugins/next-agent' once herdr is running." >&2
 
+# Without terminal-notifier, herdr's `system` toasts fall back to osascript,
+# which shows up as Script Editor in Notification Center and cannot focus the
+# terminal on click. macOS-only: other platforms use their own notifier.
+if [[ "$(uname -s)" == "Darwin" ]] && ! command -v terminal-notifier >/dev/null 2>&1; then
+  echo "Note: terminal-notifier not found. Install it for proper notification icons: brew install terminal-notifier" >&2
+fi
+
 echo "Herdr configured."
