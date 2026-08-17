@@ -1,3 +1,4 @@
+onboarding = false
 # herdr configuration
 # Custom theme ported from no-clown-fiesta.nvim (dark palette).
 # Keybindings mirror ~/.config/tmux/tmux.conf: C-a prefix, Colemak
@@ -65,6 +66,13 @@ type = "popup"
 command = "lazyjj"
 width = "80%"
 height = "75%"
+
+# Jump to whichever agent most needs attention (blocked, then done, then idle).
+[[keys.command]]
+key = "prefix+u"
+type = "plugin_action"
+command = "aktersnurra.next-agent.jump"
+description = "next agent needing attention"
 
 # New jj workspace as a sibling dir named <repo-name>.workspaces.<feature>,
 # opened as its own herdr workspace. Prompts for the feature name.

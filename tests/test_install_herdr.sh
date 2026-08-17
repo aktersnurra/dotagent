@@ -15,6 +15,13 @@ HERDR_CONFIG_DIR="$herdr_dir" "$repo_dir/install-herdr"
 
 [[ "$(readlink "$herdr_dir/config.toml")" == "$repo_dir/herdr/config.toml" ]]
 [[ "$(readlink "$herdr_dir/new-jj-workspace.sh")" == "$repo_dir/herdr/new-jj-workspace.sh" ]]
+[[ "$(readlink "$herdr_dir/plugins/next-agent")" == "$repo_dir/herdr/plugins/next-agent" ]]
+
+# Re-running is idempotent: the plugin symlink is replaced, not nested inside
+# the existing link's target directory.
+HERDR_CONFIG_DIR="$herdr_dir" "$repo_dir/install-herdr"
+[[ "$(readlink "$herdr_dir/plugins/next-agent")" == "$repo_dir/herdr/plugins/next-agent" ]]
+[[ ! -e "$repo_dir/herdr/plugins/next-agent/next-agent" ]]
 
 # herdr missing: fails with a manual-install message, no symlinks created.
 # Strip herdr's own directory from PATH rather than emptying PATH outright,

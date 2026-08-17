@@ -1,0 +1,12 @@
+id = "aktersnurra.next-agent"
+name = "Next Agent"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Jump to the agent that most needs attention, ranked by status."
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "jump"
+title = "Jump to next agent needing attention"
+contexts = ["workspace"]
+command = ["./jump.sh"]
