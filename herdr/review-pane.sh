@@ -25,4 +25,7 @@ pane_id="$(
     | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["pane"]["pane_id"])'
 )"
 
-herdr pane run "$pane_id" tuicr --working-tree >/dev/null
+# `pane run` types the command into the pane's own shell, and that shell owns
+# the pane. Chaining `exit` makes it leave when tuicr does, closing the pane;
+# `pane.split` has no command or close-on-exit option to do this directly.
+herdr pane run "$pane_id" tuicr --working-tree ';' exit >/dev/null
