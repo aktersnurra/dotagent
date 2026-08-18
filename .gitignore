@@ -1,6 +1,7 @@
 .claude/writes.log
 .claude/settings.local.json
 .pi-lens/
+.pi/tasks/
 SESSION_SUMMARY.md
 /docs/
 /skills/explain/explain

@@ -74,10 +74,12 @@ height = "75%"
 key = "prefix+a"
 type = "popup"
 command = "~/.config/herdr/agent-picker.sh"
-# Cells, not percentages: the rows are a fixed ~65 columns wide, so a percentage
-# would only add empty space on a wide screen. 70 covers the widest row plus the
-# popup border; 16 holds a dozen agents, and fzf scrolls past that.
-width = 70
+# Cells, not percentages: the widest row is 82 display columns, so a percentage
+# would only add empty space on a wide screen. 86 covers that plus the fzf
+# pointer gutter and the popup border. Measure with a width that counts
+# characters, not bytes: the icons are multibyte and inflate a byte count by
+# several columns. 16 rows holds a dozen agents, and fzf scrolls past that.
+width = 86
 height = 16
 
 # Jump to whichever agent most needs attention (blocked, then done, then idle).

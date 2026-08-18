@@ -32,10 +32,19 @@ command -v jq >/dev/null 2>&1 || fail "  jq is not installed."
 # A picker that silently omits a row makes the roster harder to read, and
 # picking the current agent is a harmless no-op.
 #
-# Three tab-separated fields: the pane id for the focus call, the visible row,
-# and a trailing field holding the status and agent kind. Only the middle one is
-# shown (--with-nth=2), while --nth widens matching to the trailing field, so
-# typing "blocked" or "opencode" still filters on text that is not on screen.
+# Two tab-separated fields: the pane id for the focus call and the visible row.
+# Only the row is shown (--with-nth=2), and everything shown is matchable, so
+# what can be typed is exactly what is on screen: status word, agent tag,
+# workspace, title.
+#
+# Matching is deliberately NOT scoped with --nth. Under --ansi fzf strips color
+# codes for display but still splits fields on the raw text, and the escape sits
+# at the head of the visible field, so any --nth lands on the wrong slice and
+# matches nothing at all.
+#
+# --exact because fuzzy matching scatters a query's letters across the whole
+# row: "done" matched two thirds of the list by picking letters out of unrelated
+# words. As substrings, queries mean what they look like.
 # awk pads the visible field so the workspace column stays aligned, and moves
 # the agent kind into that trailing field: at this width the title earns the
 # columns more than a repeated "opencode" does, and both stay typeable.
@@ -67,8 +76,7 @@ selected="$(
               # green is finished, yellow is in flight, gray is resting.
               color: ( { blocked: $red, done: $green, idle: $dim, working: $yellow }[.agent_status] // $dim ),
               status: .agent_status,
-              agent: .agent,
-              # cwd is absolute and often deep; the basename is what identifies
+              agent: .agent,              # cwd is absolute and often deep; the basename is what identifies
               # the workspace at a glance.
               # Clipped to the awk column width below: a long workspace name
               # would otherwise push its own title out of alignment with the
@@ -93,9 +101,6 @@ selected="$(
         # change is emitted first so it also ends up nearest the cursor.
         | sort_by(.rank, -.seq)
         | .[]
-        # The icon already encodes the status, so the spelled-out word is
-        # dropped: it is the widest column and buys nothing the glyph lacks.
-        # Status still matches on typing, via the hidden field below.
         # The color escape rides in its own field rather than being glued to the
         # icon: awk pads by byte count, so an escape inside a padded field would
         # throw the column widths off by the length of the escape.
@@ -111,16 +116,16 @@ selected="$(
       ' \
     | grep . \
     | awk -F'\t' -v reset="$c_reset" \
-        '{ row = sprintf("%-2s %-16s %s", $3, $5, $6)
+        '{ row = sprintf("%-2s %-8s %-11s %-16s %s", $3, $7, $4, $5, $6)
            sub(/ +$/, "", row)
-           printf "%s\t%s%s%s\t%s %s\n", $1, $2, row, reset, $7, $4 }' \
+           printf "%s\t%s%s%s\n", $1, $2, row, reset }' \
     | fzf --prompt="  focus agent > " \
           --ansi \
           --no-sort \
+          --exact \
           --info=hidden \
           --delimiter='\t' \
           --with-nth=2 \
-          --nth=2,3 \
           --height=100% \
           --border=none \
           --color="fg+:#BAD7FF,prompt:#BAD7FF,pointer:#BAD7FF,hl:#90A959,hl+:#90A959"
