@@ -42,9 +42,14 @@ navigate_pane_up = "e"
 navigate_pane_right = "i"
 
 # Quick jumps between workspaces and agents.
+#
+# Workspaces step on alt+, / alt+. rather than a letter pair: the obvious
+# mnemonic keys are spoken for, since alt+n is focus_pane_down in the Colemak
+# set above and alt+w reads as "workspace" rather than "next". The < > keys
+# carry their own step-through convention and sit next to each other.
 workspace_picker = "prefix+w"
-previous_workspace = "alt+p"
-next_workspace = "alt+w"
+previous_workspace = "alt+,"
+next_workspace = "alt+."
 switch_workspace = "prefix+shift+1..9"
 previous_agent = "alt+["
 next_agent = "alt+]"
