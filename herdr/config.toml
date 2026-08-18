@@ -67,6 +67,19 @@ command = "lazyjj"
 width = "80%"
 height = "75%"
 
+# Fuzzy-pick any agent, ranked by attention needed then most-recent activity.
+# The companion to prefix+u: that key jumps without showing the queue, this one
+# shows the whole roster when the wanted agent is not the top-ranked one.
+[[keys.command]]
+key = "prefix+a"
+type = "popup"
+command = "~/.config/herdr/agent-picker.sh"
+# Cells, not percentages: the rows are a fixed ~65 columns wide, so a percentage
+# would only add empty space on a wide screen. 70 covers the widest row plus the
+# popup border; 16 holds a dozen agents, and fzf scrolls past that.
+width = 70
+height = 16
+
 # Jump to whichever agent most needs attention (blocked, then done, then idle).
 [[keys.command]]
 key = "prefix+u"

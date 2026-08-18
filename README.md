@@ -17,6 +17,7 @@ dotagent/
 ├── install-pi         # Pi: symlinks, packages, and theme
 ├── herdr/
 │   ├── config.toml           # Herdr config (theme, keybindings, worktree-like jj flow)
+│   ├── agent-picker.sh       # prefix+a: fuzzy-pick any agent, ranked by attention
 │   ├── new-jj-workspace.sh   # prefix+shift+g: new jj workspace as a herdr workspace
 │   ├── open-workspace.sh     # prefix+o: fuzzy-pick a repo/workspace to open
 │   ├── review-pane.sh        # prefix+d: review the diff in tuicr, in a split pane
@@ -66,6 +67,7 @@ Prefix is `ctrl+a`, matching tmux. Custom bindings on top of the defaults:
 
 | Key              | Does                                                                  |
 | ---------------- | --------------------------------------------------------------------- |
+| `prefix+a`       | Fuzzy-pick any agent, ranked by attention then most-recent activity    |
 | `prefix+u`       | Jump to the agent that needs attention (blocked, then done, then idle) |
 | `prefix+o`       | Fuzzy-pick a repo or jj workspace and open it as a workspace           |
 | `prefix+d`       | Review in tuicr in a split pane: the working copy, or the last commit  |
