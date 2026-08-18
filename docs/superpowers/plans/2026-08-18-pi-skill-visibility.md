@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Keep 29 workflow and domain skills visible to the agent while making every other loaded Pi skill available only through `/skill:<name>`.
+**Goal:** Keep 28 workflow and domain skills visible to the agent, make specialized skills available only through `/skill:<name>`, and disable the redundant bundled `ask-user` skill while retaining its tool.
 
 **Architecture:** A global Pi extension uses `before_agent_start`, the first supported hook that sees Pi's canonical loaded `Skill[]`, to enforce `disable-model-invocation` in each source file before the model request. It rewrites only Pi's exact generated skills block for the current turn, using Pi's exported `formatSkillsForPrompt`, so the first turn already follows policy while the persisted frontmatter controls later startups. The dotagent installer symlinks the versioned extension into every configured Pi profile.
 
@@ -11,6 +11,7 @@
 ## Global Constraints
 
 - Preserve `/skill:<name>` commands for every manual-only skill.
+- Keep `npm:pi-ask-user` installed for the `ask_user` tool but configure its package entry with `skills: []`.
 - Use `disable-model-invocation: true` for manual-only skills and remove the field for agent-visible skills.
 - Preserve skill bodies, unrelated frontmatter, and LF/CRLF line endings.
 - Reject duplicate visibility keys and malformed frontmatter without blocking other skills.
@@ -62,7 +63,6 @@ import {
 } from "./policy.ts";
 
 const expectedAgentVisible = [
-  "ask-user",
   "brainstorming",
   "context-mode",
   "design-doctrine",
@@ -95,7 +95,7 @@ const expectedAgentVisible = [
 
 test("agent-visible allowlist matches the approved policy", () => {
   assert.deepEqual([...AGENT_VISIBLE_SKILL_NAMES].sort(), [...expectedAgentVisible].sort());
-  assert.equal(AGENT_VISIBLE_SKILL_NAMES.size, 29);
+  assert.equal(AGENT_VISIBLE_SKILL_NAMES.size, 28);
 });
 
 test("allowlisted skills stay model-invocable", () => {
@@ -104,6 +104,7 @@ test("allowlisted skills stay model-invocable", () => {
 });
 
 test("all other skills become manual-only", () => {
+  assert.equal(desiredDisableModelInvocation("ask-user"), true);
   assert.equal(desiredDisableModelInvocation("ctx-purge"), true);
   assert.equal(desiredDisableModelInvocation("wiki"), true);
   assert.equal(desiredDisableModelInvocation("new-package-skill"), true);
@@ -126,7 +127,6 @@ Create `pi/extensions/pi-skill-visibility/policy.ts`:
 
 ```ts
 export const AGENT_VISIBLE_SKILL_NAMES: ReadonlySet<string> = new Set([
-  "ask-user",
   "brainstorming",
   "context-mode",
   "design-doctrine",
@@ -709,7 +709,7 @@ Run:
 node --test pi/extensions/pi-skill-visibility/*.test.ts
 ```
 
-Expected: 17 tests pass, 0 fail.
+Expected: 18 tests pass, 0 fail.
 
 - [ ] **Step 9: Run LSP diagnostics on the extension**
 
@@ -739,6 +739,7 @@ jj new
 
 - Consumes: versioned directory `pi/extensions/pi-skill-visibility`
 - Produces: symlink `<pi-dir>/extensions/pi-skill-visibility`
+- Produces: package entry `{ "source": "npm:pi-ask-user", "skills": [] }`
 
 - [ ] **Step 1: Extend the installer test with failing assertions**
 
@@ -746,6 +747,17 @@ In `tests/test_install_pi.sh`, add `collision_pi_dir` beside the existing paths:
 
 ```bash
 collision_pi_dir="$temp_dir/pi-collision"
+```
+
+Seed the profile before the first installer call so the test covers migration from the existing string package entry:
+
+```bash
+mkdir -p "$pi_dir"
+cat >"$pi_dir/settings.json" <<'EOF'
+{
+  "packages": ["npm:pi-ask-user"]
+}
+EOF
 ```
 
 After the current `AGENTS.md` and skill-link assertions, add:
@@ -770,6 +782,10 @@ if HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
   echo "install-pi replaced an unrelated extension directory" >&2
   exit 1
 fi
+
+jq -e '.packages | any(type == "object" and .source == "npm:pi-ask-user" and .skills == [])' \
+  "$pi_dir/settings.json" >/dev/null
+jq -e '.packages | all(. != "npm:pi-ask-user")' "$pi_dir/settings.json" >/dev/null
 ```
 
 - [ ] **Step 2: Run the installer test and verify it fails**
@@ -831,6 +847,19 @@ link_directory \
   "$PI/extensions/pi-skill-visibility"
 ```
 
+In the existing Python settings merge, normalize the ask-user package after applying defaults:
+
+```python
+packages = []
+for package in settings.get("packages", []):
+    source = package if isinstance(package, str) else package.get("source")
+    if source == "npm:pi-ask-user":
+        package = {"source": source} if isinstance(package, str) else dict(package)
+        package["skills"] = []
+    packages.append(package)
+settings["packages"] = packages
+```
+
 - [ ] **Step 4: Run the installer test**
 
 Run:
@@ -859,7 +888,7 @@ Run:
 node --test pi/extensions/pi-skill-visibility/*.test.ts
 ```
 
-Expected: 17 tests pass, 0 fail.
+Expected: 18 tests pass, 0 fail.
 
 - [ ] **Step 7: Commit installer integration**
 
@@ -1005,6 +1034,6 @@ jj status
 Expected:
 
 - no blocking diagnostics;
-- 17 extension tests pass;
+- 18 extension tests pass;
 - every installer test exits 0;
 - `jj status` shows only the empty working-copy change created after the final implementation commit.

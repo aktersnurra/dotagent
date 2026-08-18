@@ -27,7 +27,6 @@ workflow routing, tool routing, and domain guidance that should activate from
 code or task context:
 
 ```text
-ask-user
 brainstorming
 context-mode
 design-doctrine
@@ -58,7 +57,10 @@ writing-plans
 writing-skills
 ```
 
-All other discovered skills are user-invokable by default.
+All other discovered skills are user-invokable by default, except the bundled
+`ask-user` skill. The installer keeps `npm:pi-ask-user` for the `ask_user` tool
+but configures that package with `skills: []`, so the redundant skill is not
+loaded or registered as a slash command.
 
 ### Initial user-invokable set
 

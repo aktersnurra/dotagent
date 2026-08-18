@@ -6,7 +6,6 @@ import {
 } from "./policy.ts";
 
 const expectedAgentVisible = [
-  "ask-user",
   "brainstorming",
   "context-mode",
   "design-doctrine",
@@ -39,7 +38,7 @@ const expectedAgentVisible = [
 
 test("agent-visible allowlist matches the approved policy", () => {
   assert.deepEqual([...AGENT_VISIBLE_SKILL_NAMES].sort(), [...expectedAgentVisible].sort());
-  assert.equal(AGENT_VISIBLE_SKILL_NAMES.size, 29);
+  assert.equal(AGENT_VISIBLE_SKILL_NAMES.size, 28);
 });
 
 test("allowlisted skills stay model-invocable", () => {
@@ -48,6 +47,7 @@ test("allowlisted skills stay model-invocable", () => {
 });
 
 test("all other skills become manual-only", () => {
+  assert.equal(desiredDisableModelInvocation("ask-user"), true);
   assert.equal(desiredDisableModelInvocation("ctx-purge"), true);
   assert.equal(desiredDisableModelInvocation("wiki"), true);
   assert.equal(desiredDisableModelInvocation("new-package-skill"), true);

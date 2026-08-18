@@ -38,9 +38,36 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-mkdir -p "$PI/skills" "$PI/prompts"
+link_directory() {
+  local source="$1"
+  local target="$2"
+
+  if [[ -L "$target" ]]; then
+    local current
+    current="$(readlink "$target")"
+    if [[ "$current" == "$source" ]]; then
+      return 0
+    fi
+    printf 'Refusing to replace symlink: %s -> %s\nExpected: %s\n' \
+      "$target" "$current" "$source" >&2
+    return 1
+  fi
+
+  if [[ -e "$target" ]]; then
+    printf 'Refusing to replace existing path: %s\n' "$target" >&2
+    return 1
+  fi
+
+  ln -s "$source" "$target"
+}
+
+mkdir -p "$PI/skills" "$PI/prompts" "$PI/extensions"
 
 ln -sf "$DOTFILES/AGENTS.md" "$PI/AGENTS.md"
+
+link_directory \
+  "$DOTFILES/pi/extensions/pi-skill-visibility" \
+  "$PI/extensions/pi-skill-visibility"
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
 
@@ -143,6 +170,15 @@ if os.path.exists(settings_path):
 settings.update(defaults)
 if provider:
     settings["defaultProvider"] = provider
+
+packages = []
+for package in settings.get("packages", []):
+    source = package if isinstance(package, str) else package.get("source")
+    if source == "npm:pi-ask-user":
+        package = {"source": source} if isinstance(package, str) else dict(package)
+        package["skills"] = []
+    packages.append(package)
+settings["packages"] = packages
 
 os.makedirs(os.path.dirname(settings_path), exist_ok=True)
 with open(settings_path, "w", encoding="utf-8") as f:
