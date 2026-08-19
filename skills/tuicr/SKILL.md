@@ -1,6 +1,7 @@
 ---
 name: tuicr
 description: Use tuicr's review CLI to read and add comments in active TUI review sessions, and launch tuicr in cmux, tmux, Zellij, or Herdr when a user needs an interactive review pane.
+disable-model-invocation: true
 ---
 
 # tuicr Review Workflow

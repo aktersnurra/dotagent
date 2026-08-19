@@ -1,6 +1,7 @@
 ---
 name: transcribing-youtube-videos
 description: Use when a question must be answered from a YouTube video and captions may be missing, disabled, incomplete, or insufficient for timestamped evidence.
+disable-model-invocation: true
 ---
 
 # Transcribing YouTube Videos

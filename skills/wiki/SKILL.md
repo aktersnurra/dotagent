@@ -1,6 +1,7 @@
 ---
 name: wiki
 description: Use when distilling knowledge from a YouTube video or article URL into a personal markdown wiki page, or when querying that wiki to answer a question from previously captured knowledge.
+disable-model-invocation: true
 ---
 
 # Wiki

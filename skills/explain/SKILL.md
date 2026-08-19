@@ -1,6 +1,7 @@
 ---
 name: explain
 description: Use when the user asks for a detailed explanation, walkthrough, codebase tour, app overview, service overview, operational guide, or durable Markdown/HTML documentation generated from an answer.
+disable-model-invocation: true
 ---
 
 # Explain

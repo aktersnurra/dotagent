@@ -120,5 +120,6 @@
   "effortLevel": "medium",
   "tui": "fullscreen",
   "theme": "dark-ansi",
-  "editorMode": "vim"
+  "editorMode": "vim",
+  "agentPushNotifEnabled": true
 }

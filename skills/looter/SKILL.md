@@ -1,6 +1,7 @@
 ---
 name: looter
 description: Use when researching, inspecting, comparing, broadening, or refreshing live marketplace purchases such as cars, boats, electronics, tools, furniture, machinery, sporting goods, or collectibles.
+disable-model-invocation: true
 ---
 
 # Looter
