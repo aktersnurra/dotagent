@@ -2,10 +2,11 @@
 .claude/settings.local.json
 .pi-lens/
 .pi/tasks/
+.pi-subagents/
 .superpowers/
 SESSION_SUMMARY.md
 /docs/
-/pi/extensions/pi-skill-visibility/node_modules/
+/pi/extensions/pi-skill-visibility/node_modules
 /skills/explain/explain
 /skills/jj/jj
 /skills/ocaml/ocaml
