@@ -89,7 +89,11 @@ selected="$(
               # An agent with no task names itself after its directory, which
               # the workspace column already shows; blanking that repeat keeps
               # the eye on the rows that actually say something.
-              title: ( ( .terminal_title_stripped | sub("^(OC \\| |π - )"; "") ) as $t
+              # An agent that never set a terminal title reports null here, and
+              # sub() rejects a non-string, which under `set -e` takes the whole
+              # picker down. Default to empty so a titleless agent is just a
+              # blank title column.
+              title: ( ( ( .terminal_title_stripped // "" ) | sub("^(OC \\| |π - )"; "") ) as $t
                        | ( .cwd | sub("/$"; "") | split("/") | last ) as $base
                        | if $t == $base then "" else $t end ),
               focused: .focused }
