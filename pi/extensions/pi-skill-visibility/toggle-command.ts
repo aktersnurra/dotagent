@@ -1,5 +1,9 @@
 import type { ExtensionCommandContext, Skill } from "@earendil-works/pi-coding-agent";
-import { enforceSkillVisibility, type EnforcementResult } from "./enforcer.ts";
+import {
+  projectSkillVisibility,
+  type EnforcementResult,
+} from "./enforcer.ts";
+import { readSkillFingerprint } from "./frontmatter.ts";
 import {
   buildSavedRegistry,
   readVisibilityRegistry,
@@ -7,7 +11,11 @@ import {
   writeVisibilityRegistry,
   type VisibilityRegistry,
 } from "./registry.ts";
-import { resolveSkillInventory, type ResolvedInventory } from "./resolver.ts";
+import {
+  resolveSkillInventory,
+  type ResolvedInventory,
+  type ResolvedSkill,
+} from "./resolver.ts";
 import { showSkillToggleUi, type SkillToggleUiResult } from "./toggle-overlay.ts";
 import type { ToggleRow } from "./toggle-model.ts";
 
@@ -16,7 +24,11 @@ export interface ToggleCommandDependencies {
   readRegistry(path: string): Promise<VisibilityRegistry>;
   writeRegistry(path: string, registry: VisibilityRegistry): Promise<void>;
   resolve(skills: Skill[], overrides: VisibilityRegistry["overrides"]): Promise<ResolvedInventory<Skill>>;
-  enforce(skills: Skill[], overrides: VisibilityRegistry["overrides"]): Promise<EnforcementResult>;
+  fingerprint(path: string): Promise<string>;
+  project(
+    skills: Array<ResolvedSkill<Skill>>,
+    expectedFingerprints: ReadonlyMap<string, string>,
+  ): Promise<EnforcementResult>;
   showUi(ctx: ExtensionCommandContext, rows: ToggleRow[]): Promise<SkillToggleUiResult>;
 }
 
@@ -25,7 +37,8 @@ const defaultDependencies: ToggleCommandDependencies = {
   readRegistry: readVisibilityRegistry,
   writeRegistry: writeVisibilityRegistry,
   resolve: resolveSkillInventory,
-  enforce: enforceSkillVisibility,
+  fingerprint: readSkillFingerprint,
+  project: projectSkillVisibility,
   showUi: showSkillToggleUi,
 };
 
@@ -60,6 +73,29 @@ export async function runToggleSkillsCommand(
     return;
   }
 
+  if (inventory.errors.length > 0) {
+    ctx.ui.notify(formatErrors(
+      `${inventory.errors.length} skill installation${inventory.errors.length === 1 ? "" : "s"} skipped during resolution`,
+      inventory.errors,
+    ), "warning");
+  }
+
+  const popupFingerprints = new Map<string, string>();
+  const snapshotErrors: Array<{ name: string; message: string }> = [];
+  for (const item of inventory.skills) {
+    try {
+      popupFingerprints.set(item.canonicalPath, await dependencies.fingerprint(item.canonicalPath));
+    } catch (error) {
+      snapshotErrors.push({ name: item.skill.name, message: message(error) });
+    }
+  }
+  if (snapshotErrors.length > 0) {
+    ctx.ui.notify(formatErrors(
+      `${snapshotErrors.length} skill content snapshot${snapshotErrors.length === 1 ? "" : "s"} unavailable`,
+      snapshotErrors,
+    ), "warning");
+  }
+
   const rows = inventory.skills.map((item): ToggleRow => ({
     id: item.canonicalPath,
     name: item.skill.name,
@@ -70,16 +106,17 @@ export async function runToggleSkillsCommand(
   const result = await dependencies.showUi(ctx, rows);
   if (result.action === "cancel") return;
 
-  const changed = result.drafts.filter((draft) => {
-    const row = rows.find((candidate) => candidate.id === draft.id);
-    return row && row.savedMode !== draft.desiredMode;
+  const desired = new Map(result.drafts.map((draft) => [draft.id, draft.desiredMode]));
+  const affected = inventory.skills.flatMap((item) => {
+    const desiredMode = desired.get(item.canonicalPath);
+    if (desiredMode === undefined || desiredMode === item.mode) return [];
+    return [{ ...item, mode: desiredMode }];
   });
-  if (changed.length === 0) {
+  if (affected.length === 0) {
     ctx.ui.notify("No skill visibility changes", "info");
     return;
   }
 
-  const desired = new Map(result.drafts.map((draft) => [draft.id, draft.desiredMode]));
   const saved = buildSavedRegistry(inventory.skills, desired);
   try {
     await dependencies.writeRegistry(path, saved);
@@ -88,8 +125,11 @@ export async function runToggleSkillsCommand(
     return;
   }
 
-  const enforcement = await dependencies.enforce(skills, saved.overrides);
-  ctx.ui.notify(formatApplyResult(changed.length, enforcement), enforcement.errors.length ? "warning" : "info");
+  const enforcement = await dependencies.project(affected, popupFingerprints);
+  ctx.ui.notify(
+    formatApplyResult(affected.length, enforcement),
+    enforcement.errors.length ? "warning" : "info",
+  );
   await ctx.reload();
   return;
 }
@@ -105,7 +145,9 @@ function formatApplyResult(changes: number, result: EnforcementResult): string {
   const lines = [`Applied ${changes} change${changes === 1 ? "" : "s"} to skill visibility.`];
   if (result.errors.length) {
     lines.push(`${result.errors.length} file projection${result.errors.length === 1 ? "" : "s"} skipped.`);
-    for (const error of result.errors.slice(0, 3)) lines.push(`- ${error.name}: ${error.message}`);
+    for (const error of result.errors.slice(0, 3)) {
+      lines.push(`- ${error.name}: ${bound(error.message)}`);
+    }
     if (result.errors.length > 3) lines.push(`- … ${result.errors.length - 3} more`);
   }
   lines.push("Reloading Pi resources.");
@@ -113,9 +155,16 @@ function formatApplyResult(changes: number, result: EnforcementResult): string {
 }
 
 function formatErrors(prefix: string, errors: Array<{ name: string; message: string }>): string {
-  return [prefix, ...errors.slice(0, 3).map((error) => `- ${error.name}: ${error.message}`)].join("\n");
+  const lines = [prefix];
+  for (const error of errors.slice(0, 3)) lines.push(`- ${error.name}: ${bound(error.message)}`);
+  if (errors.length > 3) lines.push(`- … ${errors.length - 3} more`);
+  return lines.join("\n");
 }
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function bound(value: string, maxLength = 200): string {
+  return value.length <= maxLength ? value : `${value.slice(0, maxLength - 1)}…`;
 }

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 
@@ -10,6 +10,18 @@ export type PatchResult =
 
 export interface WriteResult {
   changed: boolean;
+}
+
+interface WriteHooks {
+  beforeReplace?(): Promise<void>;
+}
+
+export function contentFingerprint(content: string | Uint8Array): string {
+  return createHash("sha256").update(content).digest("hex");
+}
+
+export async function readSkillFingerprint(filePath: string): Promise<string> {
+  return contentFingerprint(await readFile(filePath));
 }
 
 export function patchSkillFrontmatter(raw: string, disabled: boolean): PatchResult {
@@ -54,8 +66,18 @@ export function patchSkillFrontmatter(raw: string, disabled: boolean): PatchResu
   return { ok: true, changed: content !== raw, content };
 }
 
-export async function writeSkillVisibility(filePath: string, disabled: boolean): Promise<WriteResult> {
-  const raw = await readFile(filePath, "utf8");
+export async function writeSkillVisibility(
+  filePath: string,
+  disabled: boolean,
+  expectedFingerprint?: string,
+  hooks: WriteHooks = {},
+): Promise<WriteResult> {
+  const initialBytes = await readFile(filePath);
+  if (expectedFingerprint !== undefined && contentFingerprint(initialBytes) !== expectedFingerprint) {
+    throw new Error("file changed since the popup opened");
+  }
+
+  const raw = initialBytes.toString("utf8");
   const patch = patchSkillFrontmatter(raw, disabled);
   if (!patch.ok) throw new Error(patch.message);
   if (!patch.changed) return { changed: false };
@@ -64,10 +86,16 @@ export async function writeSkillVisibility(filePath: string, disabled: boolean):
   const tempPath = join(dirname(filePath), `.${basename(filePath)}.${randomUUID()}.tmp`);
   try {
     await writeFile(tempPath, patch.content, { encoding: "utf8", mode: fileStat.mode });
+    await hooks.beforeReplace?.();
+    if (expectedFingerprint !== undefined) {
+      const currentFingerprint = contentFingerprint(await readFile(filePath));
+      if (currentFingerprint !== expectedFingerprint) {
+        throw new Error("file changed since the popup opened");
+      }
+    }
     await rename(tempPath, filePath);
-  } catch (error) {
+    return { changed: true };
+  } finally {
     await rm(tempPath, { force: true });
-    throw error;
   }
-  return { changed: true };
 }

@@ -14,27 +14,34 @@ interface RegisteredExtension {
   handler: (event: any, ctx: any) => Promise<{ systemPrompt: string }>;
   commandName: string;
   commandDescription: string;
+  commandHandler: (args: string, ctx: any) => Promise<void>;
 }
 
 function registerExtension(): RegisteredExtension {
   let handler: RegisteredExtension["handler"] | undefined;
   let commandName: string | undefined;
   let commandDescription: string | undefined;
+  let commandHandler: RegisteredExtension["commandHandler"] | undefined;
   const pi = {
     on(event: string, registered: RegisteredExtension["handler"]) {
       assert.equal(event, "before_agent_start");
       handler = registered;
     },
-    registerCommand(name: string, options: { description: string }) {
+    registerCommand(name: string, options: {
+      description: string;
+      handler: RegisteredExtension["commandHandler"];
+    }) {
       commandName = name;
       commandDescription = options.description;
+      commandHandler = options.handler;
     },
   } as unknown as ExtensionAPI;
   skillVisibilityExtension(pi);
   assert.ok(handler);
   assert.ok(commandName);
   assert.ok(commandDescription);
-  return { handler, commandName, commandDescription };
+  assert.ok(commandHandler);
+  return { handler, commandName, commandDescription, commandHandler };
 }
 
 function skill(dir: string, name: string, filePath: string, disabled: boolean): Skill {
@@ -96,6 +103,16 @@ test("before_agent_start loads registry overrides, enforces files, and filters t
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("registered command handler delegates to the toggle command", async () => {
+  const { commandHandler } = registerExtension();
+  const notifications: string[] = [];
+  await commandHandler("", {
+    hasUI: false,
+    ui: { notify(message: string) { notifications.push(message); } },
+  });
+  assert.deepEqual(notifications, ["/toggle-skills requires interactive Pi"]);
 });
 
 test("malformed registry falls back to checked-in defaults without overwriting it", async () => {

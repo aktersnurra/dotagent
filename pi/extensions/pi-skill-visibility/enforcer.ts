@@ -8,6 +8,7 @@ import {
 } from "./resolver.ts";
 
 export type { SkillIdentity } from "./resolver.ts";
+export type ResolvedProjection<T extends SkillIdentity = SkillIdentity> = ResolvedSkill<T>;
 
 export interface VisibilityError {
   name: string;
@@ -23,7 +24,11 @@ export interface EnforcementResult {
 
 interface Dependencies {
   realpath(path: string): Promise<string>;
-  writeVisibility(path: string, disabled: boolean): Promise<{ changed: boolean }>;
+  writeVisibility(
+    path: string,
+    disabled: boolean,
+    expectedFingerprint?: string,
+  ): Promise<{ changed: boolean }>;
 }
 
 const defaultDependencies: Dependencies = {
@@ -31,30 +36,54 @@ const defaultDependencies: Dependencies = {
   writeVisibility: writeSkillVisibility,
 };
 
+export async function projectSkillVisibility<T extends SkillIdentity>(
+  resolved: Array<ResolvedSkill<T>>,
+  expectedFingerprints?: ReadonlyMap<string, string>,
+  dependencies: Pick<Dependencies, "writeVisibility"> = defaultDependencies,
+): Promise<EnforcementResult> {
+  const changed: string[] = [];
+  const errors: VisibilityError[] = [];
+
+  for (const item of resolved) {
+    const expectedFingerprint = expectedFingerprints?.get(item.canonicalPath);
+    if (expectedFingerprints && expectedFingerprint === undefined) {
+      errors.push({
+        name: item.skill.name,
+        path: item.skill.filePath,
+        message: "popup-open content snapshot was unavailable",
+      });
+      continue;
+    }
+
+    try {
+      const result = await dependencies.writeVisibility(
+        item.canonicalPath,
+        item.mode === "manual",
+        expectedFingerprint,
+      );
+      if (result.changed) changed.push(item.skill.filePath);
+    } catch (error) {
+      errors.push({
+        name: item.skill.name,
+        path: item.skill.filePath,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return { resolved, changed, errors };
+}
+
 export async function enforceSkillVisibility(
   skills: SkillIdentity[],
   overrides: VisibilityOverrides,
   dependencies: Dependencies = defaultDependencies,
 ): Promise<EnforcementResult> {
   const inventory = await resolveSkillInventory(skills, overrides, dependencies.realpath);
-  const changed: string[] = [];
-  const errors: VisibilityError[] = [...inventory.errors];
-
-  for (const resolved of inventory.skills) {
-    try {
-      const result = await dependencies.writeVisibility(
-        resolved.canonicalPath,
-        resolved.mode === "manual",
-      );
-      if (result.changed) changed.push(resolved.skill.filePath);
-    } catch (error) {
-      errors.push({
-        name: resolved.skill.name,
-        path: resolved.skill.filePath,
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  return { resolved: inventory.skills, changed, errors };
+  const projected = await projectSkillVisibility(inventory.skills, undefined, dependencies);
+  return {
+    resolved: inventory.skills,
+    changed: projected.changed,
+    errors: [...inventory.errors, ...projected.errors],
+  };
 }
