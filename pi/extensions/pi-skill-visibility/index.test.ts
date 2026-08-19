@@ -10,17 +10,31 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import skillVisibilityExtension from "./index.ts";
 
-function registerHandler(): (event: any, ctx: any) => Promise<{ systemPrompt: string }> {
-  let handler: ((event: any, ctx: any) => Promise<{ systemPrompt: string }>) | undefined;
+interface RegisteredExtension {
+  handler: (event: any, ctx: any) => Promise<{ systemPrompt: string }>;
+  commandName: string;
+  commandDescription: string;
+}
+
+function registerExtension(): RegisteredExtension {
+  let handler: RegisteredExtension["handler"] | undefined;
+  let commandName: string | undefined;
+  let commandDescription: string | undefined;
   const pi = {
-    on(event: string, registered: typeof handler) {
+    on(event: string, registered: RegisteredExtension["handler"]) {
       assert.equal(event, "before_agent_start");
       handler = registered;
+    },
+    registerCommand(name: string, options: { description: string }) {
+      commandName = name;
+      commandDescription = options.description;
     },
   } as unknown as ExtensionAPI;
   skillVisibilityExtension(pi);
   assert.ok(handler);
-  return handler;
+  assert.ok(commandName);
+  assert.ok(commandDescription);
+  return { handler, commandName, commandDescription };
 }
 
 function skill(dir: string, name: string, filePath: string, disabled: boolean): Skill {
@@ -60,7 +74,10 @@ test("before_agent_start loads registry overrides, enforces files, and filters t
 
   try {
     await withAgentDir(dir, async () => {
-      const handler = registerHandler();
+      const { handler, commandName, commandDescription } = registerExtension();
+      assert.equal(commandName, "toggle-skills");
+      assert.match(commandDescription, /Startup/);
+      assert.match(commandDescription, /Manual/);
       const skills = [
         skill(dir, "systematic-debugging", debuggingPath, false),
         skill(dir, "wiki", wikiPath, true),
@@ -93,7 +110,7 @@ test("malformed registry falls back to checked-in defaults without overwriting i
 
   try {
     await withAgentDir(dir, async () => {
-      const handler = registerHandler();
+      const { handler } = registerExtension();
       const skills = [
         skill(dir, "systematic-debugging", debuggingPath, true),
         skill(dir, "wiki", wikiPath, false),

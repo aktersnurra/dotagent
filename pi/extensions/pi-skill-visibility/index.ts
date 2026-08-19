@@ -11,6 +11,7 @@ import {
 } from "./registry.ts";
 import type { VisibilityOverrides } from "./resolver.ts";
 import { rewriteSkillPrompt } from "./prompt.ts";
+import { runToggleSkillsCommand } from "./toggle-command.ts";
 
 interface LoadedRegistry {
   overrides: VisibilityOverrides;
@@ -27,6 +28,13 @@ export default function skillVisibilityExtension(pi: ExtensionAPI): void {
     }));
   let enforcement: Promise<EnforcementResult> | undefined;
   let warned = false;
+
+  pi.registerCommand("toggle-skills", {
+    description: "Choose Startup or Manual visibility for loaded skills",
+    handler: async (_args, ctx) => {
+      await runToggleSkillsCommand(ctx);
+    },
+  });
 
   pi.on("before_agent_start", async (event, ctx) => {
     const skills = (event.systemPromptOptions.skills ?? []) as Skill[];
