@@ -29,6 +29,12 @@ export const AGENT_VISIBLE_SKILL_NAMES: ReadonlySet<string> = new Set([
   "writing-skills",
 ]);
 
+export type SkillVisibilityMode = "startup" | "manual";
+
+export function defaultSkillVisibility(name: string): SkillVisibilityMode {
+  return AGENT_VISIBLE_SKILL_NAMES.has(name) ? "startup" : "manual";
+}
+
 export function desiredDisableModelInvocation(name: string): boolean {
-  return !AGENT_VISIBLE_SKILL_NAMES.has(name);
+  return defaultSkillVisibility(name) === "manual";
 }

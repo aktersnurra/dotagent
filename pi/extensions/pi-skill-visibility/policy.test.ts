@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   AGENT_VISIBLE_SKILL_NAMES,
-  desiredDisableModelInvocation,
+  defaultSkillVisibility,
 } from "./policy.ts";
 
 const expectedAgentVisible = [
@@ -36,19 +36,10 @@ const expectedAgentVisible = [
   "writing-skills",
 ] as const;
 
-test("agent-visible allowlist matches the approved policy", () => {
+test("checked-in Startup defaults match the approved 28 skills", () => {
   assert.deepEqual([...AGENT_VISIBLE_SKILL_NAMES].sort(), [...expectedAgentVisible].sort());
   assert.equal(AGENT_VISIBLE_SKILL_NAMES.size, 28);
-});
-
-test("allowlisted skills stay model-invocable", () => {
-  assert.equal(desiredDisableModelInvocation("systematic-debugging"), false);
-  assert.equal(desiredDisableModelInvocation("elixir"), false);
-});
-
-test("all other skills become manual-only", () => {
-  assert.equal(desiredDisableModelInvocation("ask-user"), true);
-  assert.equal(desiredDisableModelInvocation("ctx-purge"), true);
-  assert.equal(desiredDisableModelInvocation("wiki"), true);
-  assert.equal(desiredDisableModelInvocation("new-package-skill"), true);
+  assert.equal(defaultSkillVisibility("systematic-debugging"), "startup");
+  assert.equal(defaultSkillVisibility("wiki"), "manual");
+  assert.equal(defaultSkillVisibility("new-package-skill"), "manual");
 });
