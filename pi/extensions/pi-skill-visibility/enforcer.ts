@@ -1,11 +1,13 @@
 import { realpath } from "node:fs/promises";
 import { writeSkillVisibility } from "./frontmatter.ts";
-import { desiredDisableModelInvocation } from "./policy.ts";
+import {
+  resolveSkillInventory,
+  type ResolvedSkill,
+  type SkillIdentity,
+  type VisibilityOverrides,
+} from "./resolver.ts";
 
-export interface SkillIdentity {
-  name: string;
-  filePath: string;
-}
+export type { SkillIdentity } from "./resolver.ts";
 
 export interface VisibilityError {
   name: string;
@@ -14,6 +16,7 @@ export interface VisibilityError {
 }
 
 export interface EnforcementResult {
+  resolved: ResolvedSkill[];
   changed: string[];
   errors: VisibilityError[];
 }
@@ -30,30 +33,28 @@ const defaultDependencies: Dependencies = {
 
 export async function enforceSkillVisibility(
   skills: SkillIdentity[],
+  overrides: VisibilityOverrides,
   dependencies: Dependencies = defaultDependencies,
 ): Promise<EnforcementResult> {
-  const seen = new Set<string>();
+  const inventory = await resolveSkillInventory(skills, overrides, dependencies.realpath);
   const changed: string[] = [];
-  const errors: VisibilityError[] = [];
+  const errors: VisibilityError[] = [...inventory.errors];
 
-  for (const skill of skills) {
+  for (const resolved of inventory.skills) {
     try {
-      const canonicalPath = await dependencies.realpath(skill.filePath);
-      if (seen.has(canonicalPath)) continue;
-      seen.add(canonicalPath);
       const result = await dependencies.writeVisibility(
-        canonicalPath,
-        desiredDisableModelInvocation(skill.name),
+        resolved.canonicalPath,
+        resolved.mode === "manual",
       );
-      if (result.changed) changed.push(skill.filePath);
+      if (result.changed) changed.push(resolved.skill.filePath);
     } catch (error) {
       errors.push({
-        name: skill.name,
-        path: skill.filePath,
+        name: resolved.skill.name,
+        path: resolved.skill.filePath,
         message: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
-  return { changed, errors };
+  return { resolved: inventory.skills, changed, errors };
 }

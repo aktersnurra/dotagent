@@ -3,27 +3,34 @@ import test from "node:test";
 import { rewriteSkillPrompt, type PromptSkill } from "./prompt.ts";
 
 const skills: PromptSkill[] = [
-  { name: "systematic-debugging", disableModelInvocation: false },
-  { name: "ctx-purge", disableModelInvocation: false },
+  { name: "duplicate", filePath: "/a/SKILL.md", disableModelInvocation: false },
+  { name: "duplicate", filePath: "/b/SKILL.md", disableModelInvocation: false },
 ];
-const visible = new Set(["systematic-debugging"]);
+const modes = new Map([
+  ["/a/SKILL.md", "startup" as const],
+  ["/b/SKILL.md", "manual" as const],
+]);
+
 const format = (items: PromptSkill[]) => {
-  const names = items.filter((item) => !item.disableModelInvocation).map((item) => item.name);
-  return names.length === 0 ? "" : `\n<available_skills>${names.join(",")}</available_skills>\n`;
+  const paths = items.filter((item) => !item.disableModelInvocation).map((item) => item.filePath);
+  return paths.length === 0 ? "" : `\n<available_skills>${paths.join(",")}</available_skills>\n`;
 };
 
-test("replaces Pi's exact current skills block", () => {
+test("rewrites duplicate names by exact path mode", () => {
   const original = `Header${format(skills)}\nCurrent working directory: /repo`;
-  assert.deepEqual(rewriteSkillPrompt(original, skills, visible, format), {
-    systemPrompt: `Header${format([{ name: "systematic-debugging", disableModelInvocation: false }])}\nCurrent working directory: /repo`,
-  });
+  const result = rewriteSkillPrompt(original, skills, modes, format);
+  assert.equal(result.systemPrompt, `Header${format([{ ...skills[0]!, disableModelInvocation: false }])}\nCurrent working directory: /repo`);
 });
 
-test("inserts allowlisted skills when all source files were manual-only", () => {
+test("inserts Startup skills when source files were Manual", () => {
   const manualSkills = skills.map((skill) => ({ ...skill, disableModelInvocation: true }));
-  const original = "Header\nCurrent working directory: /repo";
-  const result = rewriteSkillPrompt(original, manualSkills, visible, format);
-  assert.equal(result.systemPrompt, `Header${format([{ name: "systematic-debugging", disableModelInvocation: false }])}\nCurrent working directory: /repo`);
+  const result = rewriteSkillPrompt(
+    "Header\nCurrent working directory: /repo",
+    manualSkills,
+    modes,
+    format,
+  );
+  assert.equal(result.systemPrompt, `Header${format([{ ...manualSkills[0]!, disableModelInvocation: false }])}\nCurrent working directory: /repo`);
 });
 
 test("does not insert skills when the read tool is disabled", () => {
@@ -31,15 +38,15 @@ test("does not insert skills when the read tool is disabled", () => {
   assert.deepEqual(rewriteSkillPrompt(
     "Header\nCurrent working directory: /repo",
     manualSkills,
-    visible,
+    modes,
     format,
     false,
   ), { systemPrompt: "Header\nCurrent working directory: /repo" });
 });
 
-test("returns a diagnostic instead of guessing when the prompt shape is unknown", () => {
+test("returns a diagnostic instead of guessing at an unknown prompt shape", () => {
   const manualSkills = skills.map((skill) => ({ ...skill, disableModelInvocation: true }));
-  assert.deepEqual(rewriteSkillPrompt("Custom prompt", manualSkills, visible, format), {
+  assert.deepEqual(rewriteSkillPrompt("Custom prompt", manualSkills, modes, format), {
     systemPrompt: "Custom prompt",
     error: "could not locate Pi's working-directory marker",
   });
