@@ -5,7 +5,11 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { patchSkillFrontmatter, writeSkillVisibility } from "./frontmatter.ts";
+import {
+  contentFingerprint,
+  patchSkillFrontmatter,
+  writeSkillVisibility,
+} from "./frontmatter.ts";
 
 const body = "\n# Example\n\nKeep this body unchanged.\n";
 
@@ -84,6 +88,25 @@ test("atomic writer skips unchanged files and persists changed files", async () 
     const second = await writeSkillVisibility(file, true);
     assert.deepEqual(second, { changed: false });
     assert.equal(await readFile(file, "utf8"), afterFirst);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("atomic writer preserves bytes changed after its initial read", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "pi-skill-visibility-race-"));
+  const file = join(dir, "SKILL.md");
+  const raw = `---\nname: example\ndescription: Original.\n---${body}`;
+  const concurrent = `---\nname: example\ndescription: Concurrent edit.\n---${body}`;
+  try {
+    await writeFile(file, raw, "utf8");
+    await assert.rejects(
+      writeSkillVisibility(file, true, contentFingerprint(raw), {
+        beforeReplace: async () => { await writeFile(file, concurrent, "utf8"); },
+      }),
+      /changed since the popup opened/,
+    );
+    assert.equal(await readFile(file, "utf8"), concurrent);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

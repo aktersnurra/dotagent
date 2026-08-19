@@ -1,5 +1,8 @@
+import type { SkillVisibilityMode } from "./policy.ts";
+
 export interface PromptSkill {
   name: string;
+  filePath: string;
   disableModelInvocation: boolean;
 }
 
@@ -13,7 +16,7 @@ export interface PromptRewriteResult {
 export function rewriteSkillPrompt<T extends PromptSkill>(
   systemPrompt: string,
   skills: T[],
-  visibleNames: ReadonlySet<string>,
+  modesByPath: ReadonlyMap<string, SkillVisibilityMode>,
   formatter: SkillFormatter<T>,
   includeSkills = true,
 ): PromptRewriteResult {
@@ -21,7 +24,7 @@ export function rewriteSkillPrompt<T extends PromptSkill>(
 
   const originalBlock = formatter(skills);
   const desiredSkills = skills
-    .filter((skill) => visibleNames.has(skill.name))
+    .filter((skill) => modesByPath.get(skill.filePath) === "startup")
     .map((skill) => ({ ...skill, disableModelInvocation: false }) as T);
   const desiredBlock = formatter(desiredSkills);
 

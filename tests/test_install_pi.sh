@@ -28,6 +28,15 @@ cat >"$pi_dir/settings.json" <<'EOF'
   ]
 }
 EOF
+cat >"$pi_dir/skill-visibility.json" <<'EOF'
+{
+  "version": 1,
+  "overrides": {
+    "/skills/wiki/SKILL.md": "startup"
+  }
+}
+EOF
+cp "$pi_dir/skill-visibility.json" "$temp_dir/skill-visibility.expected.json"
 
 HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
 	"$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
@@ -52,6 +61,7 @@ fi
 HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
   "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 [[ "$(readlink "$pi_dir/extensions/pi-skill-visibility")" == "$expected_extension_link" ]]
+cmp "$temp_dir/skill-visibility.expected.json" "$pi_dir/skill-visibility.json"
 
 mkdir -p "$collision_pi_dir/extensions/pi-skill-visibility"
 if HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \

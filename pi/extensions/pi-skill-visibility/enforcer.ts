@@ -1,11 +1,14 @@
 import { realpath } from "node:fs/promises";
 import { writeSkillVisibility } from "./frontmatter.ts";
-import { desiredDisableModelInvocation } from "./policy.ts";
+import {
+  resolveSkillInventory,
+  type ResolvedSkill,
+  type SkillIdentity,
+  type VisibilityOverrides,
+} from "./resolver.ts";
 
-export interface SkillIdentity {
-  name: string;
-  filePath: string;
-}
+export type { SkillIdentity } from "./resolver.ts";
+export type ResolvedProjection<T extends SkillIdentity = SkillIdentity> = ResolvedSkill<T>;
 
 export interface VisibilityError {
   name: string;
@@ -14,13 +17,18 @@ export interface VisibilityError {
 }
 
 export interface EnforcementResult {
+  resolved: ResolvedSkill[];
   changed: string[];
   errors: VisibilityError[];
 }
 
 interface Dependencies {
   realpath(path: string): Promise<string>;
-  writeVisibility(path: string, disabled: boolean): Promise<{ changed: boolean }>;
+  writeVisibility(
+    path: string,
+    disabled: boolean,
+    expectedFingerprint?: string,
+  ): Promise<{ changed: boolean }>;
 }
 
 const defaultDependencies: Dependencies = {
@@ -28,32 +36,54 @@ const defaultDependencies: Dependencies = {
   writeVisibility: writeSkillVisibility,
 };
 
-export async function enforceSkillVisibility(
-  skills: SkillIdentity[],
-  dependencies: Dependencies = defaultDependencies,
+export async function projectSkillVisibility<T extends SkillIdentity>(
+  resolved: Array<ResolvedSkill<T>>,
+  expectedFingerprints?: ReadonlyMap<string, string>,
+  dependencies: Pick<Dependencies, "writeVisibility"> = defaultDependencies,
 ): Promise<EnforcementResult> {
-  const seen = new Set<string>();
   const changed: string[] = [];
   const errors: VisibilityError[] = [];
 
-  for (const skill of skills) {
+  for (const item of resolved) {
+    const expectedFingerprint = expectedFingerprints?.get(item.canonicalPath);
+    if (expectedFingerprints && expectedFingerprint === undefined) {
+      errors.push({
+        name: item.skill.name,
+        path: item.skill.filePath,
+        message: "popup-open content snapshot was unavailable",
+      });
+      continue;
+    }
+
     try {
-      const canonicalPath = await dependencies.realpath(skill.filePath);
-      if (seen.has(canonicalPath)) continue;
-      seen.add(canonicalPath);
       const result = await dependencies.writeVisibility(
-        canonicalPath,
-        desiredDisableModelInvocation(skill.name),
+        item.canonicalPath,
+        item.mode === "manual",
+        expectedFingerprint,
       );
-      if (result.changed) changed.push(skill.filePath);
+      if (result.changed) changed.push(item.skill.filePath);
     } catch (error) {
       errors.push({
-        name: skill.name,
-        path: skill.filePath,
+        name: item.skill.name,
+        path: item.skill.filePath,
         message: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
-  return { changed, errors };
+  return { resolved, changed, errors };
+}
+
+export async function enforceSkillVisibility(
+  skills: SkillIdentity[],
+  overrides: VisibilityOverrides,
+  dependencies: Dependencies = defaultDependencies,
+): Promise<EnforcementResult> {
+  const inventory = await resolveSkillInventory(skills, overrides, dependencies.realpath);
+  const projected = await projectSkillVisibility(inventory.skills, undefined, dependencies);
+  return {
+    resolved: inventory.skills,
+    changed: projected.changed,
+    errors: [...inventory.errors, ...projected.errors],
+  };
 }
