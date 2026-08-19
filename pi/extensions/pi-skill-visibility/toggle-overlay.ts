@@ -53,9 +53,16 @@ class SkillToggleOverlay {
   }
 
   render(width: number): string[] {
-    const innerWidth = Math.max(32, width - 2);
-    const height = clamp(Math.floor((this.tui.terminal.rows ?? 30) * 0.78), 14, 42);
-    const bodyHeight = Math.max(6, height - 7);
+    const renderWidth = Math.max(0, Math.floor(width));
+    const terminalRows = Math.max(0, Math.floor(this.tui.terminal.rows ?? 30));
+    if (renderWidth === 0 || terminalRows === 0) return [];
+    if (renderWidth < 36 || terminalRows < 8) {
+      return this.degraded(renderWidth, terminalRows);
+    }
+
+    const innerWidth = renderWidth - 2;
+    const height = Math.min(terminalRows, clamp(Math.floor(terminalRows * 0.78), 8, 42));
+    const bodyHeight = height - 7;
     const header = this.header(innerWidth);
     const search = this.model.mode === "search"
       ? this.theme.fg("accent", `Search: ${this.model.query}▏`)
@@ -76,6 +83,22 @@ class SkillToggleOverlay {
   }
 
   invalidate(): void {}
+
+  private degraded(width: number, height: number): string[] {
+    const selected = this.model.selectedRow();
+    const current = selected ? this.model.modeFor(selected) : undefined;
+    const lines = [
+      this.theme.fg("accent", this.theme.bold("Skill visibility")),
+      selected
+        ? `${selected.name} ${current === "startup" ? "STARTUP" : "MANUAL"}`
+        : this.theme.fg("dim", "No matching skills"),
+      this.model.mode === "search"
+        ? `Search: ${this.model.query}`
+        : `${this.model.changedCount()} changed`,
+      this.theme.fg("dim", "space toggle · s save · q quit"),
+    ];
+    return lines.slice(0, height).map((line) => fit(line, width));
+  }
 
   private header(width: number): string {
     const title = this.theme.fg("accent", this.theme.bold("Skill visibility"));
