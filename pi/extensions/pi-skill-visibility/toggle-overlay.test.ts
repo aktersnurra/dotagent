@@ -41,14 +41,14 @@ test("renders compact labels and returns changed drafts on save", async () => {
 
   assert.deepEqual(options, {
     overlay: true,
-    overlayOptions: { anchor: "center", width: "82%", maxHeight: "86%", minWidth: 72 },
+    overlayOptions: { anchor: "center", width: "64%", maxHeight: "70%", minWidth: 44 },
   });
   assert.match(rendered.join("\n"), /Skill visibility/);
-  assert.match(rendered.join("\n"), /wiki/);
-  assert.match(rendered.join("\n"), /STARTUP/);
+  assert.match(rendered.join("\n"), /\[✓\] wiki — Capture knowledge/);
   assert.match(rendered.join("\n"), /j\/n down/);
-  assert.match(changed.join("\n"), /wiki \*/);
-  assert.match(changed.join("\n"), /MANUAL/);
+  assert.doesNotMatch(rendered.join("\n"), /STARTUP|MANUAL|Local|┌|├|│|└/);
+  assert.match(changed.join("\n"), /\[ \] wiki \*/);
+  assert.doesNotMatch(changed.join("\n"), /STARTUP|MANUAL|Local|┌|├|│|└/);
   assert.equal(renders, 1);
   assert.deepEqual(result, {
     action: "apply",

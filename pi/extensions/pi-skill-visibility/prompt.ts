@@ -31,10 +31,19 @@ export function rewriteSkillPrompt<T extends PromptSkill>(
   if (originalBlock.length > 0 && systemPrompt.includes(originalBlock)) {
     return { systemPrompt: systemPrompt.replace(originalBlock, desiredBlock) };
   }
-  if (desiredBlock.length === 0) return { systemPrompt };
 
   const marker = "\nCurrent working directory:";
   const markerIndex = systemPrompt.lastIndexOf(marker);
+  const currentSkillsMarker = "[Skills]\n";
+  const currentSkillsIndex = systemPrompt.indexOf(currentSkillsMarker);
+  if (currentSkillsIndex >= 0 && markerIndex > currentSkillsIndex) {
+    const currentBlock = `${currentSkillsMarker}  ${desiredSkills.map((skill) => skill.name).join(", ")}\n`;
+    return {
+      systemPrompt: `${systemPrompt.slice(0, currentSkillsIndex)}${currentBlock}${systemPrompt.slice(markerIndex)}`,
+    };
+  }
+
+  if (desiredBlock.length === 0) return { systemPrompt };
   if (markerIndex < 0) {
     return { systemPrompt, error: "could not locate Pi's working-directory marker" };
   }

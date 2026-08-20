@@ -16,7 +16,7 @@ export function showSkillToggleUi(
     (tui, theme, _keybindings, done) => new SkillToggleOverlay(tui, theme, rows, done),
     {
       overlay: true,
-      overlayOptions: { anchor: "center", width: "82%", maxHeight: "86%", minWidth: 72 },
+      overlayOptions: { anchor: "center", width: "64%", maxHeight: "70%", minWidth: 44 },
     },
   );
 }
@@ -60,26 +60,16 @@ class SkillToggleOverlay {
       return this.degraded(renderWidth, terminalRows);
     }
 
-    const innerWidth = renderWidth - 2;
-    const height = Math.min(terminalRows, clamp(Math.floor(terminalRows * 0.78), 8, 42));
-    const bodyHeight = height - 7;
-    const header = this.header(innerWidth);
+    const height = Math.min(terminalRows, clamp(Math.floor(terminalRows * 0.70), 6, 32));
+    const bodyHeight = height - 3;
+    const header = this.header(renderWidth);
     const search = this.model.mode === "search"
       ? this.theme.fg("accent", `Search: ${this.model.query}▏`)
       : this.theme.fg("muted", `Search: ${this.model.query || "press /"}`);
-    const body = this.rows(innerWidth, bodyHeight);
-    const footer = this.theme.fg("dim", "j/n down · k/e up · gg/G jump · / search · space toggle · s save · q quit");
+    const body = this.rows(renderWidth, bodyHeight);
+    const footer = this.theme.fg("dim", "j/n down · k/e up · / search · space toggle · s save · q quit");
 
-    return [
-      this.theme.fg("borderAccent", `┌${"─".repeat(innerWidth)}┐`),
-      frame(this.theme, header, innerWidth),
-      frame(this.theme, search, innerWidth),
-      this.theme.fg("borderMuted", `├${"─".repeat(innerWidth)}┤`),
-      ...body.map((line) => frame(this.theme, line, innerWidth)),
-      this.theme.fg("borderMuted", `├${"─".repeat(innerWidth)}┤`),
-      frame(this.theme, footer, innerWidth),
-      this.theme.fg("borderAccent", `└${"─".repeat(innerWidth)}┘`),
-    ];
+    return [header, search, ...body, footer].map((line) => fit(line, renderWidth));
   }
 
   invalidate(): void {}
@@ -90,7 +80,7 @@ class SkillToggleOverlay {
     const lines = [
       this.theme.fg("accent", this.theme.bold("Skill visibility")),
       selected
-        ? `${selected.name} ${current === "startup" ? "STARTUP" : "MANUAL"}`
+        ? `${current === "startup" ? "[✓]" : "[ ]"} ${selected.name}`
         : this.theme.fg("dim", "No matching skills"),
       this.model.mode === "search"
         ? `Search: ${this.model.query}`
@@ -116,26 +106,15 @@ class SkillToggleOverlay {
     const slice = visible.slice(start, start + height);
     const lines = slice.map((row) => {
       const current = this.model.modeFor(row);
+      const checkbox = current === "startup" ? "[✓]" : "[ ]";
       const changed = current !== row.savedMode ? this.theme.fg("accent", " *") : "";
-      const marker = row.id === selected?.id ? "›" : " ";
-      const label = `${marker} ${row.name}${changed}`;
-      const source = this.theme.fg("dim", ` — ${row.sourceLabel}`);
-      const status = current === "startup"
-        ? this.theme.fg("accent", "STARTUP")
-        : this.theme.fg("muted", "MANUAL");
-      const left = `${label}${source}`;
-      const gap = Math.max(1, width - visibleWidth(left) - visibleWidth(status));
-      const line = `${left}${" ".repeat(gap)}${status}`;
+      const line = `${checkbox} ${row.name}${changed} — ${row.description}`;
       return row.id === selected?.id
         ? this.theme.fg("accent", this.theme.bold(fit(line, width)))
         : fit(line, width);
     });
     return pad(lines, height);
   }
-}
-
-function frame(theme: Theme, content: string, width: number): string {
-  return `${theme.fg("borderAccent", "│")}${fit(content, width)}${theme.fg("borderAccent", "│")}`;
 }
 
 function fit(text: string, width: number): string {

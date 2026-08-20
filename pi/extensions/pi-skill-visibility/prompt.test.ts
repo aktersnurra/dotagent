@@ -33,6 +33,23 @@ test("inserts Startup skills when source files were Manual", () => {
   assert.equal(result.systemPrompt, `Header${format([{ ...manualSkills[0]!, disableModelInvocation: false }])}\nCurrent working directory: /repo`);
 });
 
+test("rewrites Pi's current [Skills] section", () => {
+  const namedSkills: PromptSkill[] = [
+    { name: "startup", filePath: "/a/SKILL.md", disableModelInvocation: false },
+    { name: "manual", filePath: "/b/SKILL.md", disableModelInvocation: false },
+  ];
+  const namedModes = new Map([
+    ["/a/SKILL.md", "startup" as const],
+    ["/b/SKILL.md", "manual" as const],
+  ]);
+  const currentPrompt = "Header\n[Skills]\n  startup, manual\n\nCurrent working directory: /repo";
+
+  const result = rewriteSkillPrompt(currentPrompt, namedSkills, namedModes, format);
+
+  assert.match(result.systemPrompt, /\[Skills\]\n  startup\n/);
+  assert.doesNotMatch(result.systemPrompt, /manual/);
+});
+
 test("does not insert skills when the read tool is disabled", () => {
   const manualSkills = skills.map((skill) => ({ ...skill, disableModelInvocation: true }));
   assert.deepEqual(rewriteSkillPrompt(
