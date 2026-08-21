@@ -63,14 +63,14 @@ function dependencies(
 			})),
 			errors: [],
 		}),
-		fingerprint: async () => "popup-open-fingerprint",
+		fingerprint: async () => "selector-open-fingerprint",
 		project: async () => ({ resolved: [], changed: [], errors: [] }),
 		showUi: async () => ({ action: "cancel", drafts: [] }),
 		...overrides,
 	};
 }
 
-test("headless command returns without opening the popup", async () => {
+test("headless command returns without opening the selector", async () => {
 	const state = context([skill("wiki", "/wiki/SKILL.md")], false);
 	let opened = false;
 	await runToggleSkillsCommand(
@@ -149,7 +149,7 @@ test("apply writes minimal registry, projects, notifies, and reloads once", asyn
 				assert.equal(affected[0]?.mode, "startup");
 				assert.deepEqual(
 					[...expectedFingerprints],
-					[["/wiki/SKILL.md", "popup-open-fingerprint"]],
+					[["/wiki/SKILL.md", "selector-open-fingerprint"]],
 				);
 				return { resolved: affected, changed: ["/wiki/SKILL.md"], errors: [] };
 			},
@@ -257,8 +257,8 @@ test("projection errors still reload after the registry was saved", async () => 
 	assert.match(state.notices.at(-1)?.[0] ?? "", /read-only/);
 });
 
-test("a skill changed while the popup is open is not overwritten", async () => {
-	const dir = await mkdtemp(join(tmpdir(), "pi-skill-popup-race-"));
+test("a skill changed while the selector is open is not overwritten", async () => {
+	const dir = await mkdtemp(join(tmpdir(), "pi-skill-selector-race-"));
 	const file = join(dir, "SKILL.md");
 	const original =
 		"---\nname: wiki\ndescription: Original.\ndisable-model-invocation: true\n---\nBody\n";
@@ -298,7 +298,7 @@ test("a skill changed while the popup is open is not overwritten", async () => {
 		assert.equal(state.reloads(), 1);
 		assert.match(
 			state.notices.at(-1)?.[0] ?? "",
-			/changed since the popup opened/,
+			/changed since the selector opened/,
 		);
 	} finally {
 		await rm(dir, { recursive: true, force: true });

@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-	compositeTuiLine,
-	sliceByColumn,
-	stripTerminalSequences,
-	visibleWidth,
-} from "@earendil-works/pi-tui";
-import { showSkillToggleUi } from "./toggle-overlay.ts";
+import { visibleWidth } from "@earendil-works/pi-tui";
+import { showSkillToggleUi } from "./toggle-selector.ts";
 
 const rows = [
 	{
@@ -20,6 +15,7 @@ const rows = [
 
 const theme = {
 	fg: (_color: string, text: string) => text,
+	bg: (_color: string, text: string) => text,
 	bold: (text: string) => text,
 };
 
@@ -55,24 +51,16 @@ test("renders compact labels and returns changed drafts on save", async () => {
 		rows,
 	);
 
-	assert.deepEqual(options, {
-		overlay: true,
-		overlayOptions: {
-			anchor: "center",
-			width: "64%",
-			minWidth: 44,
-		},
-	});
-	assert.equal(rendered[0], `╭${"─".repeat(88)}╮`);
-	assert.equal(rendered.at(-1), `╰${"─".repeat(88)}╯`);
-	for (const line of rendered.slice(1, -1)) {
-		assert.equal(line.startsWith("│"), true);
-		assert.equal(line.endsWith("│"), true);
-		assert.equal(visibleWidth(line), 90);
-	}
+	assert.equal(options, undefined);
+	assert.match(rendered[0] ?? "", /Skill visibility/);
+	assert.match(
+		rendered[1] ?? "",
+		/Filter: press \/.*↑↓ move.*space toggle.*s save.*q close/,
+	);
+	assert.ok(rendered.length <= 14);
+	for (const line of rendered) assert.equal(visibleWidth(line), 90);
 	assert.match(rendered.join("\n"), /Skill visibility/);
 	assert.match(rendered.join("\n"), /\[✓\] wiki — Capture knowledge/);
-	assert.match(rendered.join("\n"), /j\/n down/);
 	assert.doesNotMatch(rendered.join("\n"), /STARTUP|MANUAL|Local|├/);
 	assert.match(changed.join("\n"), /\[ \] wiki \*/);
 	assert.doesNotMatch(changed.join("\n"), /STARTUP|MANUAL|Local|├/);
@@ -81,6 +69,30 @@ test("renders compact labels and returns changed drafts on save", async () => {
 		action: "apply",
 		drafts: [{ id: "/skills/wiki/SKILL.md", desiredMode: "manual" }],
 	});
+});
+
+test("uses Pi's normal custom selector surface instead of an overlay", async () => {
+	let options: unknown = "not-called";
+	await showSkillToggleUi(
+		{
+			ui: {
+				custom: async (factory: any, customOptions: unknown) =>
+					new Promise((resolve) => {
+						options = customOptions;
+						const component = factory(
+							{ terminal: { rows: 24 }, requestRender() {} },
+							theme,
+							{},
+							resolve,
+						);
+						component.handleInput("q");
+					}),
+			},
+		} as any,
+		rows,
+	);
+
+	assert.equal(options, undefined);
 });
 
 test("cancel returns unchanged drafts without requesting another render", async () => {
@@ -145,7 +157,7 @@ test("renders a no-match search state", async () => {
 		rows,
 	);
 
-	assert.match(rendered.join("\n"), /Search: z/);
+	assert.match(rendered.join("\n"), /Filter: z/);
 	assert.match(rendered.join("\n"), /No matching skills/);
 	assert.equal(renders, 3);
 });
@@ -200,8 +212,8 @@ test("bounds every rendered line to the allocated width and terminal rows", asyn
 	}
 });
 
-test("keeps the bottom frame on short terminals without compositor truncation", async () => {
-	for (let terminalRows = 2; terminalRows <= 8; terminalRows += 1) {
+test("keeps the selector within short terminal dimensions", async () => {
+	for (let terminalRows = 1; terminalRows <= 8; terminalRows += 1) {
 		let rendered: string[] = [];
 		await showSkillToggleUi(
 			{
@@ -223,46 +235,6 @@ test("keeps the bottom frame on short terminals without compositor truncation", 
 		);
 
 		assert.ok(rendered.length <= terminalRows);
-		assert.match(rendered.at(-1) ?? "", /^╰.*╯$/);
-	}
-});
-
-test("replaces transcript cells throughout the framed overlay rectangle", async () => {
-	let rendered: string[] = [];
-	await showSkillToggleUi(
-		{
-			ui: {
-				custom: async (factory: any) =>
-					new Promise((resolve) => {
-						const component = factory(
-							{ terminal: { rows: 24 }, requestRender() {} },
-							theme,
-							{},
-							resolve,
-						);
-						rendered = component.render(44);
-						component.handleInput("q");
-					}),
-			},
-		} as any,
-		rows,
-	);
-
-	const totalWidth = 70;
-	const startCol = 9;
-	const baseLine = "~".repeat(totalWidth);
-	for (const overlayLine of rendered) {
-		const composite = compositeTuiLine(
-			baseLine,
-			overlayLine,
-			startCol,
-			44,
-			totalWidth,
-		);
-		const inside = stripTerminalSequences(
-			sliceByColumn(composite, startCol, 44, true),
-		);
-		assert.equal(visibleWidth(inside), 44);
-		assert.doesNotMatch(inside, /~/);
+		for (const line of rendered) assert.equal(visibleWidth(line), 44);
 	}
 });

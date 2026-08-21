@@ -19,7 +19,7 @@ import {
 import {
 	showSkillToggleUi,
 	type SkillToggleUiResult,
-} from "./toggle-overlay.ts";
+} from "./toggle-selector.ts";
 import type { ToggleRow } from "./toggle-model.ts";
 
 export interface ToggleCommandDependencies {
@@ -98,11 +98,11 @@ export async function runToggleSkillsCommand(
 		);
 	}
 
-	const popupFingerprints = new Map<string, string>();
+	const selectorFingerprints = new Map<string, string>();
 	const snapshotErrors: Array<{ name: string; message: string }> = [];
 	for (const item of inventory.skills) {
 		try {
-			popupFingerprints.set(
+			selectorFingerprints.set(
 				item.canonicalPath,
 				await dependencies.fingerprint(item.canonicalPath),
 			);
@@ -156,7 +156,10 @@ export async function runToggleSkillsCommand(
 		return;
 	}
 
-	const enforcement = await dependencies.project(affected, popupFingerprints);
+	const enforcement = await dependencies.project(
+		affected,
+		selectorFingerprints,
+	);
 	ctx.ui.notify(
 		formatApplyResult(affected.length, enforcement),
 		enforcement.errors.length ? "warning" : "info",
