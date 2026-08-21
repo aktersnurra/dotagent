@@ -99,6 +99,12 @@ export class ToggleModel {
     return this.rows.filter((row) => this.modeFor(row) !== row.savedMode).length;
   }
 
+  setSearchQuery(query: string): void {
+    if (query === this.query) return;
+    this.query = query;
+    this.selectedIndex = 0;
+  }
+
   private handleSearchInput(data: string): ToggleEffect {
     if (matchesInput(data, Key.enter)) {
       this.mode = "normal";
@@ -109,13 +115,11 @@ export class ToggleModel {
       return "render";
     }
     if (matchesInput(data, Key.backspace)) {
-      this.query = Array.from(this.query).slice(0, -1).join("");
-      this.selectedIndex = 0;
+      this.setSearchQuery(Array.from(this.query).slice(0, -1).join(""));
       return "render";
     }
     if (isPrintableInput(data)) {
-      this.query += data;
-      this.selectedIndex = 0;
+      this.setSearchQuery(this.query + data);
       return "render";
     }
     return undefined;

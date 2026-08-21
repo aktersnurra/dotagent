@@ -2,8 +2,15 @@ import type {
 	ExtensionCommandContext,
 	Theme,
 } from "@earendil-works/pi-coding-agent";
-import type { TUI } from "@earendil-works/pi-tui";
-import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import {
+	Input,
+	Key,
+	matchesKey,
+	truncateToWidth,
+	visibleWidth,
+	type Focusable,
+	type TUI,
+} from "@earendil-works/pi-tui";
 import {
 	ToggleModel,
 	type ToggleDraft,
@@ -22,11 +29,23 @@ export function showSkillToggleUi(
 	return ctx.ui.custom<SkillToggleUiResult>(
 		(tui, theme, _keybindings, done) =>
 			new SkillToggleSelector(tui, theme, rows, done),
+		{
+			overlay: true,
+			overlayOptions: {
+				anchor: "center",
+				width: "92%",
+				minWidth: 76,
+				maxHeight: "88%",
+				margin: 1,
+			},
+		},
 	);
 }
 
-class SkillToggleSelector {
+class SkillToggleSelector implements Focusable {
+	private _focused = false;
 	private readonly model: ToggleModel;
+	private readonly searchInput = new Input();
 	private readonly tui: TUI;
 	private readonly theme: Theme;
 	private readonly done: (result: SkillToggleUiResult) => void;
@@ -43,7 +62,21 @@ class SkillToggleSelector {
 		this.model = new ToggleModel(rows);
 	}
 
+	get focused(): boolean {
+		return this._focused;
+	}
+
+	set focused(value: boolean) {
+		this._focused = value;
+		this.syncSearchFocus();
+	}
+
 	handleInput(data: string): void {
+		if (this.model.mode === "search") {
+			this.handleSearchInput(data);
+			return;
+		}
+
 		const effect = this.model.handleInput(data);
 		if (effect === "save") {
 			this.done({ action: "apply", drafts: this.model.drafts() });
@@ -53,6 +86,8 @@ class SkillToggleSelector {
 			this.done({ action: "cancel", drafts: this.model.drafts() });
 			return;
 		}
+		this.searchInput.setValue(this.model.query);
+		this.syncSearchFocus();
 		if (effect === "render") this.tui.requestRender();
 	}
 
@@ -63,21 +98,60 @@ class SkillToggleSelector {
 
 		const height = Math.min(
 			terminalRows,
-			clamp(Math.floor(terminalRows * 0.45), 6, 14),
+			clamp(Math.floor(terminalRows * 0.65), 8, 14),
 		);
 		if (renderWidth < 36 || terminalRows < 8) {
 			return this.degraded(renderWidth, height);
 		}
 
-		const bodyHeight = Math.max(0, height - 2);
-		const header = this.header(renderWidth);
-		const toolbar = this.toolbar(renderWidth);
-		const body = this.rows(renderWidth, bodyHeight);
-
-		return [header, toolbar, ...body].map((line) => fit(line, renderWidth));
+		const innerWidth = Math.max(0, renderWidth - 4);
+		const bodyHeight = Math.max(0, height - 4);
+		const top = this.theme.fg(
+			"borderAccent",
+			`┌${"─".repeat(Math.max(0, renderWidth - 2))}┐`,
+		);
+		const bottom = this.theme.fg(
+			"borderAccent",
+			`└${"─".repeat(Math.max(0, renderWidth - 2))}┘`,
+		);
+		const lines = [
+			top,
+			this.renderFramedLine(this.header(innerWidth), renderWidth),
+			this.renderFramedLine(this.toolbar(innerWidth), renderWidth),
+			...this.rows(innerWidth, bodyHeight).map((line) =>
+				this.renderFramedLine(line, renderWidth),
+			),
+			bottom,
+		];
+		return lines.slice(0, height).map((line) => fit(line, renderWidth));
 	}
 
-	invalidate(): void {}
+	invalidate(): void {
+		this.searchInput.invalidate();
+	}
+
+	private handleSearchInput(data: string): void {
+		if (matchesKey(data, Key.escape) || matchesKey(data, Key.enter)) {
+			const effect = this.model.handleInput(data);
+			this.syncSearchFocus();
+			if (effect === "render") this.tui.requestRender();
+			return;
+		}
+
+		this.searchInput.handleInput(data);
+		this.model.setSearchQuery(this.searchInput.getValue());
+		this.tui.requestRender();
+	}
+
+	private syncSearchFocus(): void {
+		this.searchInput.focused = this._focused && this.model.mode === "search";
+	}
+
+	private renderFramedLine(content: string, width: number): string {
+		const innerWidth = Math.max(0, width - 4);
+		const padded = fit(content, innerWidth);
+		return `${this.theme.fg("borderAccent", "│")} ${padded} ${this.theme.fg("borderAccent", "│")}`;
+	}
 
 	private degraded(width: number, height: number): string[] {
 		const selected = this.model.selectedRow();
@@ -110,7 +184,7 @@ class SkillToggleSelector {
 		const gap = width - visibleWidth(filter) - visibleWidth(help);
 		return gap > 0
 			? `${filter}${" ".repeat(gap)}${help}`
-			: `${filter} · ${help}`;
+			: truncateToWidth(`${filter} · ${help}`, width);
 	}
 
 	private header(width: number): string {
@@ -119,7 +193,10 @@ class SkillToggleSelector {
 			"muted",
 			`${this.model.drafts().length} skills · ${this.model.changedCount()} changed`,
 		);
-		return `${title}${" ".repeat(Math.max(1, width - visibleWidth(title) - visibleWidth(summary)))}${summary}`;
+		const gap = width - visibleWidth(title) - visibleWidth(summary);
+		return gap > 0
+			? `${title}${" ".repeat(gap)}${summary}`
+			: truncateToWidth(`${title} · ${summary}`, width);
 	}
 
 	private rows(width: number, height: number): string[] {
@@ -144,13 +221,20 @@ class SkillToggleSelector {
 			const checkbox = current === "startup" ? "[✓]" : "[ ]";
 			const changed =
 				current !== row.savedMode ? this.theme.fg("accent", " *") : "";
-			const line = `${checkbox} ${row.name}${changed} — ${row.description}`;
+			const line = truncateToWidth(
+				`${checkbox} ${singleLine(row.name)}${changed} — ${singleLine(row.description)}`,
+				width,
+			);
 			return row.id === selected?.id
-				? this.theme.fg("accent", this.theme.bold(fit(line, width)))
-				: fit(line, width);
+				? this.theme.bg("selectedBg", this.theme.fg("accent", line))
+				: line;
 		});
 		return pad(lines, height);
 	}
+}
+
+function singleLine(text: string): string {
+	return text.replace(/\s+/gu, " ").trim();
 }
 
 function fit(text: string, width: number): string {
