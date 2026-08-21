@@ -22,7 +22,50 @@ export function showSkillToggleUi(
 	return ctx.ui.custom<SkillToggleUiResult>(
 		(tui, theme, _keybindings, done) =>
 			new SkillToggleOverlay(tui, theme, rows, done),
+		{
+			overlay: true,
+			overlayOptions: {
+				anchor: "center",
+				width: "64%",
+				maxHeight: "70%",
+				minWidth: 44,
+			},
+		},
 	);
+}
+
+class SkillToggleFrame {
+	private readonly theme: Theme;
+
+	constructor(theme: Theme) {
+		this.theme = theme;
+	}
+
+	render(lines: string[], width: number, height: number): string[] {
+		const frameWidth = Math.max(0, Math.floor(width));
+		const frameHeight = Math.max(0, Math.floor(height));
+		if (frameWidth === 0 || frameHeight === 0) return [];
+
+		const border = (text: string) => this.theme.fg("border", text);
+		if (frameWidth === 1) {
+			return Array.from({ length: frameHeight }, () => border("│"));
+		}
+		if (frameHeight === 1) return [border("─".repeat(frameWidth))];
+
+		const innerWidth = frameWidth - 2;
+		const innerHeight = frameHeight - 2;
+		const body = pad(
+			lines.map((line) => fit(line, innerWidth)),
+			innerHeight,
+		);
+		return [
+			border(`╭${"─".repeat(innerWidth)}╮`),
+			...body.map(
+				(line) => `${border("│")}${fit(line, innerWidth)}${border("│")}`,
+			),
+			border(`╰${"─".repeat(innerWidth)}╯`),
+		];
+	}
 }
 
 class SkillToggleOverlay {
@@ -30,6 +73,7 @@ class SkillToggleOverlay {
 	private readonly tui: TUI;
 	private readonly theme: Theme;
 	private readonly done: (result: SkillToggleUiResult) => void;
+	private readonly frame: SkillToggleFrame;
 
 	constructor(
 		tui: TUI,
@@ -40,6 +84,7 @@ class SkillToggleOverlay {
 		this.tui = tui;
 		this.theme = theme;
 		this.done = done;
+		this.frame = new SkillToggleFrame(theme);
 		this.model = new ToggleModel(rows);
 	}
 
@@ -60,28 +105,40 @@ class SkillToggleOverlay {
 		const renderWidth = Math.max(0, Math.floor(width));
 		const terminalRows = Math.max(0, Math.floor(this.tui.terminal.rows ?? 30));
 		if (renderWidth === 0 || terminalRows === 0) return [];
-		if (renderWidth < 36 || terminalRows < 8) {
-			return this.degraded(renderWidth, terminalRows);
-		}
 
 		const height = Math.min(
 			terminalRows,
 			clamp(Math.floor(terminalRows * 0.7), 6, 32),
 		);
-		const bodyHeight = height - 3;
-		const header = this.header(renderWidth);
+		const innerWidth = Math.max(0, renderWidth - 2);
+		const innerHeight = Math.max(0, height - 2);
+		if (renderWidth < 36 || terminalRows < 8) {
+			return this.frame.render(
+				this.degraded(innerWidth, innerHeight),
+				renderWidth,
+				height,
+			);
+		}
+
+		const bodyHeight = innerHeight - 3;
+		const header = this.header(innerWidth);
 		const search =
 			this.model.mode === "search"
 				? this.theme.fg("accent", `Search: ${this.model.query}▏`)
-				: this.theme.fg("muted", `Search: ${this.model.query || "press /"}`);
-		const body = this.rows(renderWidth, bodyHeight);
+				: this.theme.fg(
+						"muted",
+						`Search: ${this.model.query || "press /"}`,
+					);
+		const body = this.rows(innerWidth, bodyHeight);
 		const footer = this.theme.fg(
 			"dim",
 			"j/n down · k/e up · / search · space toggle · s save · q quit",
 		);
 
-		return [header, search, ...body, footer].map((line) =>
-			fit(line, renderWidth),
+		return this.frame.render(
+			[header, search, ...body, footer],
+			renderWidth,
+			height,
 		);
 	}
 
