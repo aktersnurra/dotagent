@@ -60,7 +60,6 @@ test("renders compact labels and returns changed drafts on save", async () => {
 		overlayOptions: {
 			anchor: "center",
 			width: "64%",
-			maxHeight: "70%",
 			minWidth: 44,
 		},
 	});
@@ -198,6 +197,33 @@ test("bounds every rendered line to the allocated width and terminal rows", asyn
 				);
 			}
 		}
+	}
+});
+
+test("keeps the bottom frame on short terminals without compositor truncation", async () => {
+	for (let terminalRows = 2; terminalRows <= 8; terminalRows += 1) {
+		let rendered: string[] = [];
+		await showSkillToggleUi(
+			{
+				ui: {
+					custom: async (factory: any) =>
+						new Promise((resolve) => {
+							const component = factory(
+								{ terminal: { rows: terminalRows }, requestRender() {} },
+								theme,
+								{},
+								resolve,
+							);
+							rendered = component.render(44);
+							component.handleInput("q");
+						}),
+				},
+			} as any,
+			rows,
+		);
+
+		assert.ok(rendered.length <= terminalRows);
+		assert.match(rendered.at(-1) ?? "", /^╰.*╯$/);
 	}
 });
 

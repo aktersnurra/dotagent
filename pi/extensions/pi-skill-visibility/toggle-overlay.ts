@@ -27,7 +27,6 @@ export function showSkillToggleUi(
 			overlayOptions: {
 				anchor: "center",
 				width: "64%",
-				maxHeight: "70%",
 				minWidth: 44,
 			},
 		},
