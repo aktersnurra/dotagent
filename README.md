@@ -71,8 +71,8 @@ Prefix is `ctrl+a`, matching tmux. Custom bindings on top of the defaults:
 | `prefix+u`       | Jump to the agent that needs attention (blocked, then done, then idle) |
 | `prefix+o`       | Fuzzy-pick a repo or jj workspace and open it as a workspace           |
 | `prefix+d`       | Review in tuicr in a split pane: the working copy, or the last commit  |
-| `prefix+g`       | lazyjj popup                                                          |
-| `prefix+shift+g` | New jj workspace as a sibling dir, opened as its own herdr workspace   |
+| `prefix+g`       | lazyjj popup (explains when outside a jj repo)                         |
+| `prefix+shift+g` | New jj workspace in `<repo>.workspaces/<feature>`                     |
 
 `prefix+d` reviews the working copy when it is dirty. A clean working copy is
 the common case under jj, so it falls back to the nearest non-empty ancestor

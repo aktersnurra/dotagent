@@ -64,11 +64,12 @@ last_pane = "alt+a"
 zoom = "prefix+z"
 toggle_sidebar = "prefix+b"
 
-# lazyjj popup, mirroring tmux's M-g floating terminal.
+# lazyjj popup, mirroring tmux's M-g floating terminal. The wrapper keeps the
+# popup open with an explanation when the active pane is outside a jj repo.
 [[keys.command]]
 key = "prefix+g"
 type = "popup"
-command = "lazyjj"
+command = "~/.config/herdr/lazyjj.sh"
 width = "80%"
 height = "75%"
 
@@ -110,8 +111,8 @@ command = "~/.config/herdr/open-workspace.sh"
 width = "60%"
 height = "60%"
 
-# New jj workspace as a sibling dir named <repo-name>.workspaces.<feature>,
-# opened as its own herdr workspace. Prompts for the feature name.
+# New jj workspace in <repo-name>.workspaces/<feature>, opened as its own
+# herdr workspace. Prompts for the feature name.
 [[keys.command]]
 key = "prefix+shift+g"
 type = "popup"
@@ -133,7 +134,19 @@ enabled = true
 delivery = "system"
 
 [ui.sidebar.agents]
-rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+rows = [
+  [
+    "state_icon",
+    "workspace",
+    "tab",
+  ],
+  [
+    "terminal_title_stripped",
+  ],
+  [
+    "agent",
+  ],
+]
 
 [session]
 resume_agents_on_restore = true

@@ -5,7 +5,7 @@ repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 temp_dir="$(mktemp -d)"
 
 cleanup() {
-  rm -rf "$temp_dir"
+	rm -rf "$temp_dir"
 }
 trap cleanup EXIT
 
@@ -14,6 +14,7 @@ herdr_dir="$temp_dir/herdr-config"
 HERDR_CONFIG_DIR="$herdr_dir" "$repo_dir/install-herdr"
 
 [[ "$(readlink "$herdr_dir/config.toml")" == "$repo_dir/herdr/config.toml" ]]
+[[ "$(readlink "$herdr_dir/lazyjj.sh")" == "$repo_dir/herdr/lazyjj.sh" ]]
 [[ "$(readlink "$herdr_dir/new-jj-workspace.sh")" == "$repo_dir/herdr/new-jj-workspace.sh" ]]
 [[ "$(readlink "$herdr_dir/open-workspace.sh")" == "$repo_dir/herdr/open-workspace.sh" ]]
 [[ "$(readlink "$herdr_dir/review-pane.sh")" == "$repo_dir/herdr/review-pane.sh" ]]
@@ -33,9 +34,9 @@ stripped_path="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vFx "$herdr_bin_dir" 
 
 missing_dir="$temp_dir/herdr-config-missing"
 if PATH="$stripped_path" HERDR_CONFIG_DIR="$missing_dir" "$repo_dir/install-herdr" \
-  >"$temp_dir/missing.out" 2>"$temp_dir/missing.err"; then
-  echo "expected install-herdr to fail when herdr is not installed" >&2
-  exit 1
+	>"$temp_dir/missing.out" 2>"$temp_dir/missing.err"; then
+	echo "expected install-herdr to fail when herdr is not installed" >&2
+	exit 1
 fi
 
 grep -qF "https://herdr.dev" "$temp_dir/missing.err"
@@ -51,13 +52,13 @@ chmod +x "$shim_dir/herdr"
 
 notifier_dir="$temp_dir/herdr-config-notifier"
 PATH="$shim_dir:/usr/bin:/bin" HERDR_CONFIG_DIR="$notifier_dir" \
-  "$repo_dir/install-herdr" >"$temp_dir/notifier.out" 2>"$temp_dir/notifier.err"
+	"$repo_dir/install-herdr" >"$temp_dir/notifier.out" 2>"$temp_dir/notifier.err"
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-  grep -qF "brew install terminal-notifier" "$temp_dir/notifier.err"
+	grep -qF "brew install terminal-notifier" "$temp_dir/notifier.err"
 else
-  # The warning is macOS-only; other platforms must stay quiet about it.
-  ! grep -qF "terminal-notifier" "$temp_dir/notifier.err"
+	# The warning is macOS-only; other platforms must stay quiet about it.
+	! grep -qF "terminal-notifier" "$temp_dir/notifier.err"
 fi
 
 # The warning never blocks the install.
