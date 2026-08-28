@@ -103,6 +103,11 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
+      "allowWrite": [
+        "~/.local/share/wiki",
+        "~/projects/dotagent/.jj",
+        "~/projects/dotagent/.git"
+      ],
       "denyRead": [
         "~/.ssh",
         "~/.aws",
