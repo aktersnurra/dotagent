@@ -12,6 +12,8 @@ WIKI_KEY_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/wiki/age/keys.txt"
 
 `WIKI_HOME` is the plaintext working store used by capture and query. `WIKI_ARCHIVE` is a separate jj repository holding a SOPS-encrypted mirror, used only for explicit sync/push.
 
+Only `$WIKI_HOME/*.md` pages are archived. `$WIKI_HOME/.index.md` is a generated cache, regenerable from page frontmatter at any time; it is never encrypted, committed, or pushed. Being a dotfile, it already falls outside the `*.md` glob — do not widen that glob.
+
 ## Archive layout
 
 The archive mirrors `WIKI_HOME`'s flat layout and filenames — one SOPS-encrypted JSON container per page, same `<date>-<slug>` id as the plaintext page (not an opaque UUID; wiki pages are not sensitive-identity-like, and keeping the id readable makes archive entries easy to correlate with local pages):
