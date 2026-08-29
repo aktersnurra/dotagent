@@ -1,7 +1,7 @@
 # .agent
 
-Personal coding harness configuration (Claude Code and Pi) —
-harness-specific guidance, global settings, and skills symlinked into each harness's config directory.
+Personal coding harness configuration (Claude Code and Pi) — harness-specific guidance,
+global settings, and skills symlinked into each harness's config directory.
 
 ## Structure
 
@@ -65,25 +65,25 @@ dotagent/
 
 Prefix is `ctrl+a`, matching tmux. Custom bindings on top of the defaults:
 
-| Key              | Does                                                                  |
-| ---------------- | --------------------------------------------------------------------- |
+| Key              | Does                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
 | `prefix+a`       | Fuzzy-pick any agent, ranked by attention then most-recent activity    |
 | `prefix+u`       | Jump to the agent that needs attention (blocked, then done, then idle) |
 | `prefix+o`       | Fuzzy-pick a repo or jj workspace and open it as a workspace           |
 | `prefix+d`       | Review in tuicr in a split pane: the working copy, or the last commit  |
 | `prefix+g`       | lazyjj popup (explains when outside a jj repo)                         |
-| `prefix+shift+g` | New jj workspace in `<repo>.workspaces/<feature>`                     |
+| `prefix+shift+g` | New jj workspace in `<repo>.workspaces/<feature>`                      |
 
-`prefix+d` reviews the working copy when it is dirty. A clean working copy is
-the common case under jj, so it falls back to the nearest non-empty ancestor
-rather than reporting nothing to review.
+`prefix+d` reviews the working copy when it is dirty. A clean working copy is the common
+case under jj, so it falls back to the nearest non-empty ancestor rather than reporting
+nothing to review.
 
 ## Harness config locations
 
-| Harness     | Context file                   | Skills                       | Settings                    |
-| ----------- | ------------------------------ | ---------------------------- | --------------------------- |
-| Claude Code | `~/.claude/CLAUDE.md`          | `~/.claude/skills/`          | `~/.claude/settings.json`   |
-| Pi          | `<pi-dir>/AGENTS.md`           | `<pi-dir>/skills/`           | `<pi-dir>/settings.json`    |
+| Harness     | Context file          | Skills              | Settings                  |
+| ----------- | --------------------- | ------------------- | ------------------------- |
+| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
+| Pi          | `<pi-dir>/AGENTS.md`  | `<pi-dir>/skills/`  | `<pi-dir>/settings.json`  |
 
 ## Plugins (Claude Code)
 
@@ -91,25 +91,25 @@ rather than reporting nothing to review.
 | ----------------- | ---------------------------------------------------------------------------- |
 | `superpowers`     | Workflow skills: spec, plan, checkpoint, TDD, debugging, brainstorming, etc. |
 | `frontend-design` | Production-grade UI component generation                                     |
-| `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi) |
+| `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi)  |
 
 ## Skills
 
-| Skill                          | Trigger                                                                  |
-| ------------------------------ | ------------------------------------------------------------------------ |
-| `design-doctrine`              | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
-| `elixir`                       | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
-| `explain`                      | Detailed explanations, walkthroughs, app/service overviews, durable docs |
-| `first-principles`             | Questioning assumptions, evaluating a design or approach from scratch   |
-| `grill-me` / `grilling`        | Stress-testing a plan or design via one-question-at-a-time interview     |
-| `hegel`                        | Writing property-based tests (Rust, Go, C++, TypeScript, OCaml)          |
-| `jj`                           | Any jj/jujutsu VCS operation                                             |
-| `looter`                       | Researching or comparing live marketplace purchases                     |
-| `ocaml`                        | OCaml code, Eio, Lwt, GADTs, dune                                        |
-| `tiger-style`                  | Naming functions, types, designing APIs                                  |
-| `transcribing-youtube-videos`  | Answering a question from a YouTube video's audio/captions               |
-| `tuicr`                        | Opening a review pane, reading review comments back (vendored upstream)  |
-| `type-driven`                  | Modelling errors, designing interfaces, ADTs, ROP                        |
-| `ui-design`                    | Designing or reviewing screens, components, and layouts                  |
-| `wiki`                         | Capturing a YouTube/article URL into a wiki page, or querying the wiki   |
-| `writing-docs`                 | Rewriting prose into plain, human-sounding technical English             |
+| Skill                         | Trigger                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `design-doctrine`             | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
+| `elixir`                      | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
+| `explain`                     | Detailed explanations, walkthroughs, app/service overviews, durable docs |
+| `first-principles`            | Questioning assumptions, evaluating a design or approach from scratch    |
+| `grill-me` / `grilling`       | Stress-testing a plan or design via one-question-at-a-time interview     |
+| `hegel`                       | Writing property-based tests (Rust, Go, C++, TypeScript, OCaml)          |
+| `jj`                          | Any jj/jujutsu VCS operation                                             |
+| `looter`                      | Researching or comparing live marketplace purchases                      |
+| `ocaml`                       | OCaml code, Eio, Lwt, GADTs, dune                                        |
+| `tiger-style`                 | Naming functions, types, designing APIs                                  |
+| `transcribing-youtube-videos` | Answering a question from a YouTube video's audio/captions               |
+| `tuicr`                       | Opening a review pane, reading review comments back (vendored upstream)  |
+| `type-driven`                 | Modelling errors, designing interfaces, ADTs, ROP                        |
+| `ui-design`                   | Designing or reviewing screens, components, and layouts                  |
+| `wiki`                        | Capturing a YouTube/article URL into a wiki page, or querying the wiki   |
+| `writing-docs`                | Rewriting prose into plain, human-sounding technical English             |

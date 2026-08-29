@@ -1,6 +1,7 @@
 # Evolving Unit Tests into Property-Based Tests
 
-This guide helps you recognize what property a unit test is hiding and translate it into a hegel PBT. Examples use pseudocode — see the language reference for exact syntax.
+This guide helps you recognize what property a unit test is hiding and translate it into
+a hegel PBT. Examples use pseudocode — see the language reference for exact syntax.
 
 ## Recognizing Properties in Unit Tests
 
@@ -29,7 +30,9 @@ for (input, expected) in [("a", "A"), ("hello", "HELLO"), ("ABC", "ABC")]:
     assert to_upper(input) == expected
 ```
 
-The loop body is the property — but using `expected` as the oracle won't generalize. Look for a structural property instead: the output should equal the input when compared case-insensitively, and every character in the output should be uppercase.
+The loop body is the property — but using `expected` as the oracle won't generalize.
+Look for a structural property instead: the output should equal the input when compared
+case-insensitively, and every character in the output should be uppercase.
 
 ```pseudocode
 # After
@@ -47,7 +50,8 @@ test parse_garbage: assert parse("xyz").is_ok() or parse("xyz").is_err()  # just
 test parse_unicode: assert parse("café").is_ok() or ...
 ```
 
-This is a **robustness** property: the function should handle any input without panicking.
+This is a **robustness** property: the function should handle any input without
+panicking.
 
 ```pseudocode
 # After
@@ -68,7 +72,9 @@ test stack_operations:
     assert s.is_empty()
 ```
 
-This is a **stateful model test** candidate. The test encodes a specific operation sequence — generalize it by drawing random operations. See the stateful testing section in the language reference.
+This is a **stateful model test** candidate. The test encodes a specific operation
+sequence — generalize it by drawing random operations. See the stateful testing section
+in the language reference.
 
 ### Tests with manually seeded RNGs
 
@@ -80,7 +86,9 @@ test sample_distribution:
     assert result in valid_range
 ```
 
-Replace the seeded RNG with hegel's random generator. The fixed seed gives reproducibility but prevents exploration — hegel gives you both exploration and shrinkable counterexamples.
+Replace the seeded RNG with hegel's random generator. The fixed seed gives
+reproducibility but prevents exploration — hegel gives you both exploration and
+shrinkable counterexamples.
 
 ### Multiple tests asserting the same invariant
 
@@ -92,7 +100,8 @@ test sort_reversed: assert sort([3,2,1]) == [1,2,3]
 test sort_sorted:   assert sort([1,2,3]) == [1,2,3]
 ```
 
-Every test checks that the output is sorted and is a permutation of the input. Those are the properties.
+Every test checks that the output is sorted and is a permutation of the input. Those are
+the properties.
 
 ```pseudocode
 # After: two separate properties
@@ -106,8 +115,13 @@ assert sorted(sort(v)) == sorted(v)  # same elements
 
 ## What to Do with the Old Tests
 
-**Usually the PBT subsumes them.** If your PBT covers the full input space, the specific examples in the unit tests are redundant — hegel will explore those cases and many more.
+**Usually the PBT subsumes them.** If your PBT covers the full input space, the specific
+examples in the unit tests are redundant — hegel will explore those cases and many more.
 
-**Keep edge-case tests that serve as documentation.** If a unit test encodes a subtle edge case that was discovered through a bug report, it may be worth keeping as documentation even if the PBT covers it. The unit test communicates "this specific case matters" in a way a PBT doesn't.
+**Keep edge-case tests that serve as documentation.** If a unit test encodes a subtle
+edge case that was discovered through a bug report, it may be worth keeping as
+documentation even if the PBT covers it. The unit test communicates "this specific case
+matters" in a way a PBT doesn't.
 
-**Replace inline, don't create a new file.** Add hegel tests in the same file where the unit tests live. Either replace the unit tests or add the PBTs alongside them.
+**Replace inline, don't create a new file.** Add hegel tests in the same file where the
+unit tests live. Either replace the unit tests or add the PBTs alongside them.

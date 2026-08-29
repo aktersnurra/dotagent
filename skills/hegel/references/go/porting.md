@@ -4,9 +4,11 @@
 
 rapid is the most popular Go PBT library. The main differences:
 
-- rapid uses `t.Draw()` as a method on its test context; hegel uses `hegel.Draw(ht, gen)` as a free function.
+- rapid uses `t.Draw()` as a method on its test context; hegel uses
+  `hegel.Draw(ht, gen)` as a free function.
 - rapid does shrinking in-process; hegel delegates to a server.
-- rapid's `rapid.Check` takes a `func(*rapid.T)`; hegel's `hegel.Test` takes a `*testing.T` and a `func(*hegel.T)`.
+- rapid's `rapid.Check` takes a `func(*rapid.T)`; hegel's `hegel.Test` takes a
+  `*testing.T` and a `func(*hegel.T)`.
 
 ### Test Structure
 
@@ -42,34 +44,37 @@ func TestAddition(t *testing.T) {
 }
 ```
 
-But consider: should those bounds be there at all? If the property is about addition, test the full range unless there's a reason not to.
+But consider: should those bounds be there at all? If the property is about addition,
+test the full range unless there's a reason not to.
 
 ### Generator Mapping
 
-Go's type inference fills in `Integers`'s type parameter from its arguments, so `hegel.Integers(lo, hi)` is usually enough. The table below uses explicit `[T]` only when ambiguous (e.g. `int8`, `uint64`).
+Go's type inference fills in `Integers`'s type parameter from its arguments, so
+`hegel.Integers(lo, hi)` is usually enough. The table below uses explicit `[T]` only
+when ambiguous (e.g. `int8`, `uint64`).
 
-| rapid | Hegel |
-|-------|-------|
-| `rapid.Int()` | `hegel.Integers(math.MinInt, math.MaxInt)` |
-| `rapid.IntRange(lo, hi)` | `hegel.Integers(lo, hi)` |
-| `rapid.Int8()` | `hegel.Integers[int8](math.MinInt8, math.MaxInt8)` |
-| `rapid.Uint64()` | `hegel.Integers[uint64](0, math.MaxUint64)` |
-| `rapid.Float64()` | `hegel.Floats[float64]()` |
-| `rapid.Float64Range(lo, hi)` | `hegel.Floats[float64]().Min(lo).Max(hi)` |
-| `rapid.Bool()` | `hegel.Booleans()` |
-| `rapid.String()` | `hegel.Text()` |
-| `rapid.StringN(min, max, -1)` | `hegel.Text().MinSize(min).MaxSize(max)` |
-| `rapid.SliceOf(gen)` | `hegel.Lists(gen)` |
-| `rapid.SliceOfN(gen, min, max)` | `hegel.Lists(gen).MinSize(min).MaxSize(max)` |
-| `rapid.MapOf(k, v)` | `hegel.Maps(k, v)` |
-| `rapid.Just(value)` | `hegel.Just(value)` |
-| `rapid.SampledFrom(slice)` | `hegel.SampledFrom(slice)` |
-| `rapid.OneOf(g1, g2)` | `hegel.OneOf(g1, g2)` |
-| `rapid.Ptr(gen, true)` | `hegel.Optional(gen)` |
-| `rapid.Map(gen, fn)` | `hegel.Map(gen, fn)` |
-| `rapid.Filter(gen, fn)` | `hegel.Filter(gen, fn)` |
-| `rapid.StringMatching(re)` | `hegel.FromRegex(re, true)` |
-| `rapid.Custom(fn)` | `hegel.Composite(fn)` |
+| rapid                           | Hegel                                              |
+| ------------------------------- | -------------------------------------------------- |
+| `rapid.Int()`                   | `hegel.Integers(math.MinInt, math.MaxInt)`         |
+| `rapid.IntRange(lo, hi)`        | `hegel.Integers(lo, hi)`                           |
+| `rapid.Int8()`                  | `hegel.Integers[int8](math.MinInt8, math.MaxInt8)` |
+| `rapid.Uint64()`                | `hegel.Integers[uint64](0, math.MaxUint64)`        |
+| `rapid.Float64()`               | `hegel.Floats[float64]()`                          |
+| `rapid.Float64Range(lo, hi)`    | `hegel.Floats[float64]().Min(lo).Max(hi)`          |
+| `rapid.Bool()`                  | `hegel.Booleans()`                                 |
+| `rapid.String()`                | `hegel.Text()`                                     |
+| `rapid.StringN(min, max, -1)`   | `hegel.Text().MinSize(min).MaxSize(max)`           |
+| `rapid.SliceOf(gen)`            | `hegel.Lists(gen)`                                 |
+| `rapid.SliceOfN(gen, min, max)` | `hegel.Lists(gen).MinSize(min).MaxSize(max)`       |
+| `rapid.MapOf(k, v)`             | `hegel.Maps(k, v)`                                 |
+| `rapid.Just(value)`             | `hegel.Just(value)`                                |
+| `rapid.SampledFrom(slice)`      | `hegel.SampledFrom(slice)`                         |
+| `rapid.OneOf(g1, g2)`           | `hegel.OneOf(g1, g2)`                              |
+| `rapid.Ptr(gen, true)`          | `hegel.Optional(gen)`                              |
+| `rapid.Map(gen, fn)`            | `hegel.Map(gen, fn)`                               |
+| `rapid.Filter(gen, fn)`         | `hegel.Filter(gen, fn)`                            |
+| `rapid.StringMatching(re)`      | `hegel.FromRegex(re, true)`                        |
+| `rapid.Custom(fn)`              | `hegel.Composite(fn)`                              |
 
 ### Drawing Values
 
@@ -87,11 +92,11 @@ a := hegel.Draw(ht, hegel.Integers(math.MinInt, math.MaxInt))
 
 ### Configuration
 
-| rapid | Hegel |
-|-------|-------|
-| `rapid.Check(t, fn)` (100 cases) | `hegel.Test(t, fn)` (100 cases) |
-| No direct option for case count | `hegel.Test(t, fn, hegel.WithTestCases(500))` |
-| `t.SkipIf(cond)` | `ht.Assume(!cond)` |
+| rapid                            | Hegel                                         |
+| -------------------------------- | --------------------------------------------- |
+| `rapid.Check(t, fn)` (100 cases) | `hegel.Test(t, fn)` (100 cases)               |
+| No direct option for case count  | `hegel.Test(t, fn, hegel.WithTestCases(500))` |
+| `t.SkipIf(cond)`                 | `ht.Assume(!cond)`                            |
 
 ### Dependent Generation
 
@@ -115,11 +120,13 @@ hegel.Test(t, func(ht *hegel.T) {
 })
 ```
 
-This is one of hegel's main ergonomic advantages — dependent generation is just sequential code.
+This is one of hegel's main ergonomic advantages — dependent generation is just
+sequential code.
 
 ## From gopter
 
-gopter is an older Go PBT library inspired by ScalaCheck. It uses a more complex API with explicit property composition.
+gopter is an older Go PBT library inspired by ScalaCheck. It uses a more complex API
+with explicit property composition.
 
 ### Test Structure
 
@@ -158,13 +165,16 @@ func TestReverse(t *testing.T) {
 ```
 
 Key differences:
+
 - gopter separates generator declaration from test body; hegel puts draws inline.
 - gopter properties return `bool`; hegel uses standard assertions (`Fatal`, `Fatalf`).
-- gopter uses `gen.Int()`, `gen.SliceOf()`, etc.; see the rapid mapping table above for hegel equivalents.
+- gopter uses `gen.Int()`, `gen.SliceOf()`, etc.; see the rapid mapping table above for
+  hegel equivalents.
 
 ## From testing/quick
 
-Go's stdlib `testing/quick` package provides basic property testing. It infers generators from function signatures.
+Go's stdlib `testing/quick` package provides basic property testing. It infers
+generators from function signatures.
 
 ### Test Structure
 
@@ -197,13 +207,17 @@ func TestReverse(t *testing.T) {
 ```
 
 Key differences:
-- testing/quick infers generators from function parameter types; hegel uses explicit `Draw` calls with configurable generators.
+
+- testing/quick infers generators from function parameter types; hegel uses explicit
+  `Draw` calls with configurable generators.
 - testing/quick has limited shrinking; hegel provides full automatic shrinking.
-- testing/quick defaults to 100 iterations; hegel also defaults to 100 but is configurable via `WithTestCases`.
+- testing/quick defaults to 100 iterations; hegel also defaults to 100 but is
+  configurable via `WithTestCases`.
 
 ### Generate Interface
 
-If you implemented `testing/quick.Generator` for custom types, replace with explicit draws or a `hegel.Composite` generator:
+If you implemented `testing/quick.Generator` for custom types, replace with explicit
+draws or a `hegel.Composite` generator:
 
 testing/quick:
 
@@ -246,16 +260,25 @@ hegel.Test(t, func(ht *hegel.T) {
 })
 ```
 
-No interface implementation needed. Hegel's imperative style makes custom type generation straightforward.
+No interface implementation needed. Hegel's imperative style makes custom type
+generation straightforward.
 
 ## Porting Checklist
 
 When porting tests from rapid, gopter, or testing/quick:
 
-1. **Remove the old dependency** from `go.mod` (if no other tests use it) and add hegel: `go get hegel.dev/go/hegel@latest`.
+1. **Remove the old dependency** from `go.mod` (if no other tests use it) and add hegel:
+   `go get hegel.dev/go/hegel@latest`.
 2. **Replace the test structure** with `hegel.Test(t, func(ht *hegel.T) { ... })`.
-3. **Convert generators to `hegel.Draw()` calls.** Start with the broadest generators — don't carry over narrow bounds from the old framework unless they're justified by the function's contract.
-4. **Replace framework-specific assertions** (bool returns, `t.SkipIf`) with standard Go assertions (`ht.Fatal`, `ht.Fatalf`) and `ht.Assume()`.
-5. **Simplify dependent generation.** If the old test used `Bind` or `FlatMap` chains just to make later values depend on earlier ones, rewrite as sequential `hegel.Draw()` calls.
-6. **Replace custom `Generator`/`Arbitrary` implementations** with inline `hegel.Draw()` calls or a `hegel.Composite` generator if the construction is reused.
-7. **Run the tests.** If they fail on inputs the old framework didn't find, investigate — that's the point.
+3. **Convert generators to `hegel.Draw()` calls.** Start with the broadest generators —
+   don't carry over narrow bounds from the old framework unless they're justified by the
+   function's contract.
+4. **Replace framework-specific assertions** (bool returns, `t.SkipIf`) with standard Go
+   assertions (`ht.Fatal`, `ht.Fatalf`) and `ht.Assume()`.
+5. **Simplify dependent generation.** If the old test used `Bind` or `FlatMap` chains
+   just to make later values depend on earlier ones, rewrite as sequential
+   `hegel.Draw()` calls.
+6. **Replace custom `Generator`/`Arbitrary` implementations** with inline `hegel.Draw()`
+   calls or a `hegel.Composite` generator if the construction is reused.
+7. **Run the tests.** If they fail on inputs the old framework didn't find, investigate
+   — that's the point.

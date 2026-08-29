@@ -8,13 +8,17 @@ disable-model-invocation: true
 
 ## Contract
 
-The parent delegates the entire operation to **one ordinary subagent**. The parent does not download media, run transcription, or read the raw transcript.
+The parent delegates the entire operation to **one ordinary subagent**. The parent does
+not download media, run transcription, or read the raw transcript.
 
-The subagent receives the URL and exact question, performs the workflow, reads the transcript, and returns only the evidence-backed answer plus the transcript path and limitations. It does not launch another subagent.
+The subagent receives the URL and exact question, performs the workflow, reads the
+transcript, and returns only the evidence-backed answer plus the transcript path and
+limitations. It does not launch another subagent.
 
 ## Workflow
 
-1. Try the dedicated `youtube_transcript` tool when available. If it returns a useful transcript, answer from it.
+1. Try the dedicated `youtube_transcript` tool when available. If it returns a useful
+   transcript, answer from it.
 2. Otherwise resolve the sibling `transcribe-youtube` script and run:
 
 ```bash
@@ -23,9 +27,13 @@ WHISPER_LANGUAGE=sv WHISPER_MODEL=small \
   /absolute/path/to/transcribe-youtube "$url" "$artifacts"
 ```
 
-3. Read the emitted SRT, answer the exact question, then keep the transcript and let the script remove temporary audio.
+3. Read the emitted SRT, answer the exact question, then keep the transcript and let the
+   script remove temporary audio.
 
-The script first asks `yt-dlp` for subtitles. If none exist, it pipes the best audio stream directly through `ffmpeg` into a temporary WAV. On macOS it runs `mlx-whisper`; on other Unix systems it selects CUDA when `nvidia-smi -L` succeeds and otherwise runs `openai-whisper` on CPU.
+The script first asks `yt-dlp` for subtitles. If none exist, it pipes the best audio
+stream directly through `ffmpeg` into a temporary WAV. On macOS it runs `mlx-whisper`;
+on other Unix systems it selects CUDA when `nvidia-smi -L` succeeds and otherwise runs
+`openai-whisper` on CPU.
 
 ## Answer
 
@@ -37,7 +45,8 @@ Return, in order:
 - **Artifact:** the transcript path.
 - **Limitations:** inaudible speech, uncertain names, translation, or missing sections.
 
-Never paste the full transcript or raw media into the parent context. Never invent spoken claims. On failure, report the failed command and its stderr instead of guessing.
+Never paste the full transcript or raw media into the parent context. Never invent
+spoken claims. On failure, report the failed command and its stderr instead of guessing.
 
 ## Dependencies
 
@@ -45,7 +54,10 @@ Never paste the full transcript or raw media into the parent context. Never inve
 - `ffmpeg`
 - Network access
 
-`uvx` supplies `yt-dlp`, `mlx-whisper` on macOS, and `openai-whisper` elsewhere; do not use `pip` or install persistent Python packages. The first run downloads the selected runtime and model into the uv cache. `WHISPER_MODEL` defaults to `small`; `MLX_WHISPER_MODEL` can override its macOS Hugging Face model.
+`uvx` supplies `yt-dlp`, `mlx-whisper` on macOS, and `openai-whisper` elsewhere; do not
+use `pip` or install persistent Python packages. The first run downloads the selected
+runtime and model into the uv cache. `WHISPER_MODEL` defaults to `small`;
+`MLX_WHISPER_MODEL` can override its macOS Hugging Face model.
 
 ## Common mistakes
 

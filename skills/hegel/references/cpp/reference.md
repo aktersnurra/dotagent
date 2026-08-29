@@ -5,16 +5,20 @@
 - [Setup](#setup) — CMake integration, test runner, C++20 requirement
 - [Test Structure](#test-structure) — `hegel::test`, `Settings`, `HealthCheck`
 - [TestCase Methods](#testcase-methods) — `draw`, `assume`, `note`
-- [Generator Reference](#generator-reference) — Numeric, boolean, text, binary, collections, tuples, optional, format, regex, random
+- [Generator Reference](#generator-reference) — Numeric, boolean, text, binary,
+  collections, tuples, optional, format, regex, random
 - [Combinator Methods](#combinator-methods) — `.map()`, `.filter()`, `.flat_map()`
-- [Building Custom Generators](#building-custom-generators) — `compose`, `builds`, `builds_agg`, `field`, `default_generator`, `.override()`
-- [C++-Specific Examples](#c-specific-examples) — Dependent generation, randomness, derived generators
+- [Building Custom Generators](#building-custom-generators) — `compose`, `builds`,
+  `builds_agg`, `field`, `default_generator`, `.override()`
+- [C++-Specific Examples](#c-specific-examples) — Dependent generation, randomness,
+  derived generators
 - [Gotchas](#gotchas)
 - [Stateful Testing](#stateful-testing)
 
 ## Setup
 
-hegel-cpp is a static library (not header-only). It requires **C++20** and **CMake 3.14+**.
+hegel-cpp is a static library (not header-only). It requires **C++20** and **CMake
+3.14+**.
 
 Add it to your `CMakeLists.txt`:
 
@@ -30,17 +34,25 @@ FetchContent_MakeAvailable(hegel)
 target_link_libraries(your_test_target PRIVATE hegel)
 ```
 
-hegel-cpp is **test-runner agnostic**. `hegel::test(...)` is a regular function — it runs the property, shrinks on failure, and throws a `std::runtime_error` with the minimal counterexample. Any runner that surfaces uncaught exceptions as test failures will work: Google Test, Catch2, doctest, Boost.Test, or a hand-written `main`. Use the existing project's runner; don't introduce GTest just for hegel.
+hegel-cpp is **test-runner agnostic**. `hegel::test(...)` is a regular function — it
+runs the property, shrinks on failure, and throws a `std::runtime_error` with the
+minimal counterexample. Any runner that surfaces uncaught exceptions as test failures
+will work: Google Test, Catch2, doctest, Boost.Test, or a hand-written `main`. Use the
+existing project's runner; don't introduce GTest just for hegel.
 
-Write whatever test block the runner uses and call `hegel::test(...)` inside it (see the examples below).
+Write whatever test block the runner uses and call `hegel::test(...)` inside it (see the
+examples below).
 
-If something goes wrong with server installation, see https://hegel.dev/reference/installation.
+If something goes wrong with server installation, see
+https://hegel.dev/reference/installation.
 
 ## Test Structure
 
 ### `hegel::test`
 
-Unlike Rust (`#[hegel::test]`) or Go (`hegel.Case`), hegel-cpp does **not** define a custom test macro. Use your project's existing test framework and call `hegel::test` inside the test body with a lambda that takes a `hegel::TestCase&`:
+Unlike Rust (`#[hegel::test]`) or Go (`hegel.Case`), hegel-cpp does **not** define a
+custom test macro. Use your project's existing test framework and call `hegel::test`
+inside the test body with a lambda that takes a `hegel::TestCase&`:
 
 ```cpp
 #include <hegel/hegel.h>
@@ -66,7 +78,11 @@ TEST_CASE("addition commutes") {
 }
 ```
 
-Inside the lambda, use whatever assertion mechanism the surrounding framework provides — `ASSERT_*`/`EXPECT_*` for GTest, `REQUIRE`/`CHECK` for Catch2 and doctest, `BOOST_TEST` for Boost.Test, `assert` or a `throw` for a hand-written main. On failure, hegel catches the exception, shrinks, and rethrows the minimal counterexample; the outer runner reports it as a failing test.
+Inside the lambda, use whatever assertion mechanism the surrounding framework provides —
+`ASSERT_*`/`EXPECT_*` for GTest, `REQUIRE`/`CHECK` for Catch2 and doctest, `BOOST_TEST`
+for Boost.Test, `assert` or a `throw` for a hand-written main. On failure, hegel catches
+the exception, shrinks, and rethrows the minimal counterexample; the outer runner
+reports it as a failing test.
 
 With configuration:
 
@@ -82,16 +98,17 @@ hegel::test([](hegel::TestCase& tc) {
 
 ### Settings
 
-`hegel::Settings` controls test execution. All fields are optional; pass it to `hegel::test` as the second argument.
+`hegel::Settings` controls test execution. All fields are optional; pass it to
+`hegel::test` as the second argument.
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `test_cases` | `std::optional<uint64_t>` | Number of test cases (default: 100) |
-| `verbosity` | `Verbosity` | `Quiet`, `Normal`, `Verbose`, or `Debug` |
-| `seed` | `std::optional<uint64_t>` | Fixed seed for reproducibility |
-| `derandomize` | `bool` | Use a deterministic seed (default: `false`) |
-| `database` | `Database` | `Database::unset()` (default), `Database::disabled()`, or `Database::from_path(path)` |
-| `suppress_health_check` | `std::vector<HealthCheck>` | Suppress specific health checks |
+| Field                   | Type                       | Purpose                                                                               |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------- |
+| `test_cases`            | `std::optional<uint64_t>`  | Number of test cases (default: 100)                                                   |
+| `verbosity`             | `Verbosity`                | `Quiet`, `Normal`, `Verbose`, or `Debug`                                              |
+| `seed`                  | `std::optional<uint64_t>`  | Fixed seed for reproducibility                                                        |
+| `derandomize`           | `bool`                     | Use a deterministic seed (default: `false`)                                           |
+| `database`              | `Database`                 | `Database::unset()` (default), `Database::disabled()`, or `Database::from_path(path)` |
+| `suppress_health_check` | `std::vector<HealthCheck>` | Suppress specific health checks                                                       |
 
 ### HealthCheck
 
@@ -112,11 +129,11 @@ hegel::test([](hegel::TestCase& tc) {
 
 ## TestCase Methods
 
-| Method | Signature | Purpose |
-|--------|-----------|---------|
-| `draw` | `template<class T> T draw(const Generator<T>& gen)` | Draw a value from a generator |
-| `assume` | `void assume(bool condition)` | Reject this test case if condition is false |
-| `note` | `void note(std::string_view message)` | Record debug info (printed on final counterexample replay) |
+| Method   | Signature                                           | Purpose                                                    |
+| -------- | --------------------------------------------------- | ---------------------------------------------------------- |
+| `draw`   | `template<class T> T draw(const Generator<T>& gen)` | Draw a value from a generator                              |
+| `assume` | `void assume(bool condition)`                       | Reject this test case if condition is false                |
+| `note`   | `void note(std::string_view message)`               | Record debug info (printed on final counterexample replay) |
 
 ### Usage
 
@@ -132,7 +149,8 @@ hegel::test([](hegel::TestCase& tc) {
 });
 ```
 
-`TestCase` is a non-owning handle. It is not copyable or movable and must not outlive the test callback.
+`TestCase` is a non-owning handle. It is not copyable or movable and must not outlive
+the test callback.
 
 ## Generator Reference
 
@@ -142,13 +160,16 @@ All generators live in `hegel::generators`. Idiomatic import:
 namespace gs = hegel::generators;
 ```
 
-Generators take their configuration as a designated-initializer struct (one struct per generator). Leave fields unset for defaults.
+Generators take their configuration as a designated-initializer struct (one struct per
+generator). Leave fields unset for defaults.
 
 ### Numeric Generators
 
 **`gs::integers<T>(IntegersParams<T> = {})`** — Generate any integer type
 
-Supported types: `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t`, `int`, `long`, `size_t`, etc. The template parameter is required.
+Supported types: `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`,
+`uint32_t`, `uint64_t`, `int`, `long`, `size_t`, etc. The template parameter is
+required.
 
 ```cpp
 auto n = tc.draw(gs::integers<int>());
@@ -157,6 +178,7 @@ auto nonnegative = tc.draw(gs::integers<int>({.min_value = 0}));
 ```
 
 Fields:
+
 - `min_value: std::optional<T>` — Inclusive lower bound (default: type min)
 - `max_value: std::optional<T>` — Inclusive upper bound (default: type max)
 
@@ -172,6 +194,7 @@ auto open_interval = tc.draw(gs::floats<double>({
 ```
 
 Fields:
+
 - `min_value: std::optional<T>`
 - `max_value: std::optional<T>`
 - `exclude_min: bool` — Default: `false`
@@ -199,16 +222,20 @@ auto ascii = tc.draw(gs::text({.alphabet = "abcdefghijklmnopqrstuvwxyz"}));
 ```
 
 Fields:
+
 - `min_size: size_t` (default: 0)
 - `max_size: std::optional<size_t>`
 - `alphabet: std::optional<std::string>` — Fixed allowed characters
 - `codec: std::optional<std::string>` — e.g. `"ascii"`, `"utf-8"`
 - `min_codepoint: std::optional<uint32_t>` / `max_codepoint: std::optional<uint32_t>`
-- `categories: std::optional<std::vector<std::string>>` — Unicode categories (e.g. `{"Ll", "Lu"}`)
+- `categories: std::optional<std::vector<std::string>>` — Unicode categories (e.g.
+  `{"Ll", "Lu"}`)
 - `exclude_categories: std::optional<std::vector<std::string>>`
-- `include_characters: std::optional<std::string>` / `exclude_characters: std::optional<std::string>`
+- `include_characters: std::optional<std::string>` /
+  `exclude_characters: std::optional<std::string>`
 
-**`gs::characters(CharactersParams = {})`** — Generate a single-character string. Same options as `text` except no size or `alphabet` fields.
+**`gs::characters(CharactersParams = {})`** — Generate a single-character string. Same
+options as `text` except no size or `alphabet` fields.
 
 **`gs::binary(BinaryParams = {})`** — Generate `std::vector<uint8_t>`
 
@@ -237,13 +264,16 @@ auto distinct = tc.draw(gs::vectors(gs::integers<int>(), {.unique = true}));
 ```
 
 Fields:
+
 - `min_size: size_t` (default: 0)
 - `max_size: std::optional<size_t>` (default: 100)
 - `unique: bool` — All elements distinct (default: `false`)
 
-**`gs::sets(element_gen, SetsParams = {})`** — Generate `std::set<T>`. Fields: `min_size`, `max_size`.
+**`gs::sets(element_gen, SetsParams = {})`** — Generate `std::set<T>`. Fields:
+`min_size`, `max_size`.
 
-**`gs::maps(key_gen, value_gen, MapsParams = {})`** — Generate `std::map<K, V>`. Fields: `min_size`, `max_size`.
+**`gs::maps(key_gen, value_gen, MapsParams = {})`** — Generate `std::map<K, V>`. Fields:
+`min_size`, `max_size`.
 
 ```cpp
 auto m = tc.draw(gs::maps(gs::text(), gs::integers<int>()));
@@ -251,7 +281,8 @@ auto m = tc.draw(gs::maps(gs::text(), gs::integers<int>()));
 
 ### Tuple Generator
 
-**`gs::tuples(gen_a, gen_b, ...)`** — Generate `std::tuple<A, B, ...>` from 2 or more generators
+**`gs::tuples(gen_a, gen_b, ...)`** — Generate `std::tuple<A, B, ...>` from 2 or more
+generators
 
 ```cpp
 auto pair = tc.draw(gs::tuples(gs::integers<int>(), gs::text()));
@@ -301,7 +332,8 @@ auto dt    = tc.draw(gs::datetimes());
 
 ### Random Generator
 
-**`gs::randoms(RandomsParams = {})`** — A hegel-controlled RNG compatible with `<random>`
+**`gs::randoms(RandomsParams = {})`** — A hegel-controlled RNG compatible with
+`<random>`
 
 ```cpp
 #include <random>
@@ -314,18 +346,25 @@ hegel::test([](hegel::TestCase& tc) {
 });
 ```
 
-The returned `HegelRandom` satisfies the `UniformRandomBitGenerator` concept and works with every distribution in `<random>`.
+The returned `HegelRandom` satisfies the `UniformRandomBitGenerator` concept and works
+with every distribution in `<random>`.
 
 Fields:
+
 - `use_true_random: bool` — Default: `false` (artificial mode)
 
-**Default mode (artificial randomness)** routes every random decision through hegel so the shrinker can minimize individual random choices. Best for most code.
+**Default mode (artificial randomness)** routes every random decision through hegel so
+the shrinker can minimize individual random choices. Best for most code.
 
-**`use_true_random = true`** generates a single shrinkable seed and uses `std::mt19937` locally. Use this when the code under test does rejection sampling or otherwise needs statistically random-looking output — artificial randomness can cause rejection loops to hang.
+**`use_true_random = true`** generates a single shrinkable seed and uses `std::mt19937`
+locally. Use this when the code under test does rejection sampling or otherwise needs
+statistically random-looking output — artificial randomness can cause rejection loops to
+hang.
 
 ## Combinator Methods
 
-Every `Generator<T>` has these chainable methods. They return a new generator (value semantics; cheap to copy).
+Every `Generator<T>` has these chainable methods. They return a new generator (value
+semantics; cheap to copy).
 
 ### `.map(f)`
 
@@ -336,7 +375,8 @@ auto positive_str = gs::integers<uint32_t>({.min_value = 1})
     .map([](uint32_t n) { return std::to_string(n); });
 ```
 
-`.map()` preserves the underlying schema when the source is schema-backed, so mapped primitives are still generated efficiently server-side.
+`.map()` preserves the underlying schema when the source is schema-backed, so mapped
+primitives are still generated efficiently server-side.
 
 ### `.filter(predicate)`
 
@@ -347,7 +387,8 @@ auto even = gs::integers<int>()
     .filter([](int x) { return x % 2 == 0; });
 ```
 
-`.filter()` retries up to 3 times, then calls `tc.assume(false)`. Prefer bounds or constructing valid inputs directly.
+`.filter()` retries up to 3 times, then calls `tc.assume(false)`. Prefer bounds or
+constructing valid inputs directly.
 
 ### `.flat_map(f)`
 
@@ -360,7 +401,8 @@ auto sized_string = gs::integers<size_t>({.min_value = 1, .max_value = 10})
     });
 ```
 
-Rarely needed in hegel-cpp — sequential `tc.draw()` calls inside the test body are usually clearer (see C++-Specific Examples).
+Rarely needed in hegel-cpp — sequential `tc.draw()` calls inside the test body are
+usually clearer (see C++-Specific Examples).
 
 ## Building Custom Generators
 
@@ -378,7 +420,8 @@ auto point_gen = gs::compose([](const hegel::TestCase& tc) {
 auto [x, y] = tc.draw(point_gen);
 ```
 
-Use a trailing return type if the deduction picks the wrong type: `[](const hegel::TestCase& tc) -> long { ... }`.
+Use a trailing return type if the deduction picks the wrong type:
+`[](const hegel::TestCase& tc) -> long { ... }`.
 
 ### `gs::builds<T>(gen_a, gen_b, ...)` — Construct via constructor
 
@@ -409,7 +452,9 @@ auto rect = gs::builds_agg<Rectangle>(
 
 ### `gs::default_generator<T>()` — Auto-derive for structs
 
-Uses [reflect-cpp](https://github.com/getml/reflect-cpp) to inspect struct fields and pick default generators for each field type. Works with primitives, strings, containers, `std::optional`, `std::variant`, `std::tuple`, and nested structs.
+Uses [reflect-cpp](https://github.com/getml/reflect-cpp) to inspect struct fields and
+pick default generators for each field type. Works with primitives, strings, containers,
+`std::optional`, `std::variant`, `std::tuple`, and nested structs.
 
 ```cpp
 struct Person {
@@ -427,7 +472,8 @@ TEST(Person, HasValidAge) {
 
 ### `.override()` — Customize derived fields
 
-`default_generator<T>()` returns a `DerivedGenerator<T>` with an `.override()` method that replaces the default generator for specific fields:
+`default_generator<T>()` returns a `DerivedGenerator<T>` with an `.override()` method
+that replaces the default generator for specific fields:
 
 ```cpp
 auto adult_gen = gs::default_generator<Person>()
@@ -440,13 +486,16 @@ Unspecified fields keep their defaults. Multiple `.override()` calls can be chai
 
 ## C++-Specific Examples
 
-These examples show C++-specific features. For general property patterns (round-trip, model-based, idempotence, etc.), see the main skill's Property Catalogue.
+These examples show C++-specific features. For general property patterns (round-trip,
+model-based, idempotence, etc.), see the main skill's Property Catalogue.
 
-These examples show the `hegel::test` body only. Wrap it in whatever test block your runner uses.
+These examples show the `hegel::test` body only. Wrap it in whatever test block your
+runner uses.
 
 ### Dependent generation with sequential draws
 
-Hegel's imperative style means dependent generation is just sequential code — no `flat_map` needed:
+Hegel's imperative style means dependent generation is just sequential code — no
+`flat_map` needed:
 
 ```cpp
 hegel::test([](hegel::TestCase& tc) {
@@ -491,7 +540,8 @@ hegel::test([](hegel::TestCase& tc) {
 });
 ```
 
-If the code does rejection sampling and the test hangs with the default mode, switch to `.use_true_random = true`:
+If the code does rejection sampling and the test hangs with the default mode, switch to
+`.use_true_random = true`:
 
 ```cpp
 auto rng = tc.draw(gs::randoms({.use_true_random = true}));
@@ -499,7 +549,7 @@ auto rng = tc.draw(gs::randoms({.use_true_random = true}));
 
 ### Wrapping arithmetic in test values
 
-When computing test values from generated data, avoid overflow in your *test* code:
+When computing test values from generated data, avoid overflow in your _test_ code:
 
 ```cpp
 // BAD — signed overflow is undefined behavior
@@ -516,43 +566,71 @@ auto k_squared = k * k;  // can't overflow int64_t
 
 ## Gotchas
 
-1. **No `#[hegel::test]`-style macro.** Call `hegel::test(...)` inside whatever test block your project's runner uses (`TEST(...)` for GTest, `TEST_CASE(...)` for Catch2/doctest, `BOOST_AUTO_TEST_CASE` for Boost.Test, etc.). Hegel is runner-agnostic — on failure it throws, and the surrounding runner reports the failure. Use that runner's own assertions inside the lambda.
+1. **No `#[hegel::test]`-style macro.** Call `hegel::test(...)` inside whatever test
+   block your project's runner uses (`TEST(...)` for GTest, `TEST_CASE(...)` for
+   Catch2/doctest, `BOOST_AUTO_TEST_CASE` for Boost.Test, etc.). Hegel is
+   runner-agnostic — on failure it throws, and the surrounding runner reports the
+   failure. Use that runner's own assertions inside the lambda.
 
-2. **Designated-initializer params, not builders.** Unlike Rust (`.min_value(1).max_value(100)`) or Go (`hegel.Integers[int](1, 100)`), hegel-cpp generators take a params struct: `gs::integers<int>({.min_value = 1, .max_value = 100})`. Omit fields to get defaults.
+2. **Designated-initializer params, not builders.** Unlike Rust
+   (`.min_value(1).max_value(100)`) or Go (`hegel.Integers[int](1, 100)`), hegel-cpp
+   generators take a params struct:
+   `gs::integers<int>({.min_value = 1, .max_value = 100})`. Omit fields to get defaults.
 
-3. **Template parameter is required for numeric generators.** `gs::integers()` won't compile — you must write `gs::integers<int>()` or similar. Same for `gs::floats<double>()`.
+3. **Template parameter is required for numeric generators.** `gs::integers()` won't
+   compile — you must write `gs::integers<int>()` or similar. Same for
+   `gs::floats<double>()`.
 
-4. **Add `.hegel/` to `.gitignore`.** Hegel creates a `.hegel/` directory for caching the server binary and storing the failure database.
+4. **Add `.hegel/` to `.gitignore`.** Hegel creates a `.hegel/` directory for caching
+   the server binary and storing the failure database.
 
-5. **Float defaults include NaN and infinity** when unbounded. If your code doesn't handle them, pass `.allow_nan = false` and/or `.allow_infinity = false` — but first consider whether the code *should* handle them.
+5. **Float defaults include NaN and infinity** when unbounded. If your code doesn't
+   handle them, pass `.allow_nan = false` and/or `.allow_infinity = false` — but first
+   consider whether the code _should_ handle them.
 
-6. **Excessive `assume`/`filter` rejections fail the test.** If `tc.assume()` or `.filter()` rejects too many inputs, hegel gives up (via `HealthCheck::FilterTooMuch`). Restructure generators to produce valid inputs directly.
+6. **Excessive `assume`/`filter` rejections fail the test.** If `tc.assume()` or
+   `.filter()` rejects too many inputs, hegel gives up (via
+   `HealthCheck::FilterTooMuch`). Restructure generators to produce valid inputs
+   directly.
 
-7. **`note()` only prints on the final replay.** Don't rely on it for progress logging — it only appears when the minimal counterexample is displayed.
+7. **`note()` only prints on the final replay.** Don't rely on it for progress logging —
+   it only appears when the minimal counterexample is displayed.
 
-8. **Default collection sizes are small.** `gs::vectors(gen)` with no bounds rarely produces 100+ elements. If you need large collections (e.g., to exercise tree traversal at depth), draw the size separately:
+8. **Default collection sizes are small.** `gs::vectors(gen)` with no bounds rarely
+   produces 100+ elements. If you need large collections (e.g., to exercise tree
+   traversal at depth), draw the size separately:
+
    ```cpp
    auto n = tc.draw(gs::integers<size_t>({.max_value = 300}));
    auto keys = tc.draw(gs::vectors(gs::integers<int>(), {.min_size = n}));
    ```
 
-9. **Use `.unique = true` for key generation.** When testing ordered maps or sets, generate unique keys to avoid ambiguity about which value wins:
+9. **Use `.unique = true` for key generation.** When testing ordered maps or sets,
+   generate unique keys to avoid ambiguity about which value wins:
+
    ```cpp
    auto keys = tc.draw(gs::vectors(gs::integers<int>(),
        {.max_size = 50, .unique = true}));
    ```
 
-10. **C++20 is required.** The library makes heavy use of concepts, designated initializers, and template pack features. Older standards will not compile.
+10. **C++20 is required.** The library makes heavy use of concepts, designated
+    initializers, and template pack features. Older standards will not compile.
 
-11. **`TestCase&` is not copyable or movable.** Capture it by reference in nested lambdas or pass it explicitly — don't try to store it.
+11. **`TestCase&` is not copyable or movable.** Capture it by reference in nested
+    lambdas or pass it explicitly — don't try to store it.
 
-12. **`target()` is not yet available** in hegel-cpp. It is planned for a future release.
+12. **`target()` is not yet available** in hegel-cpp. It is planned for a future
+    release.
 
 ## Stateful Testing
 
-**Stateful (model-based) testing is not yet available in hegel-cpp.** It is planned for a future release. Until then, if you need a state-machine test, either:
+**Stateful (model-based) testing is not yet available in hegel-cpp.** It is planned for
+a future release. Until then, if you need a state-machine test, either:
 
-- Write the rule loop by hand inside `hegel::test(...)`, drawing a rule choice with `gs::sampled_from(...)` and dispatching, or
-- Use hegel in one of the languages where stateful testing is supported (Rust, Python/Hypothesis) for that specific test.
+- Write the rule loop by hand inside `hegel::test(...)`, drawing a rule choice with
+  `gs::sampled_from(...)` and dispatching, or
+- Use hegel in one of the languages where stateful testing is supported (Rust,
+  Python/Hypothesis) for that specific test.
 
-When stateful testing lands in hegel-cpp, this section will be updated with the rule/invariant API.
+When stateful testing lands in hegel-cpp, this section will be updated with the
+rule/invariant API.

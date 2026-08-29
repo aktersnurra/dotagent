@@ -7,7 +7,8 @@ disable-model-invocation: true
 
 # First Principles Thinking
 
-A systematic approach to decomposing complex problems into fundamental truths and reasoning up from there, avoiding the trap of reasoning by analogy.
+A systematic approach to decomposing complex problems into fundamental truths and
+reasoning up from there, avoiding the trap of reasoning by analogy.
 
 ## When to Use This Skill
 
@@ -29,6 +30,7 @@ Strip away implementation details to find the core problem:
 3. **Define success criteria** - What would a perfect solution achieve?
 
 **Key Questions:**
+
 - What is the fundamental job to be done here?
 - If this system didn't exist, what would users actually need?
 - What outcome matters, independent of how we get there?
@@ -38,19 +40,22 @@ Strip away implementation details to find the core problem:
 Identify and question every assumption:
 
 1. **List explicit assumptions** - What are we taking as given?
-2. **Surface implicit assumptions** - What conventions are we following without questioning?
-3. **Test each assumption** - Is this actually a constraint, or just how it's always been done?
+2. **Surface implicit assumptions** - What conventions are we following without
+   questioning?
+3. **Test each assumption** - Is this actually a constraint, or just how it's always
+   been done?
 
 **Assumption Categories:**
 
-| Category | Question to Ask |
-|----------|----------------|
-| Technical | "Must we use this technology/pattern?" |
-| Business | "Is this requirement actually fixed?" |
-| Resource | "Are these constraints real or perceived?" |
-| Historical | "Why was this decision made originally?" |
+| Category   | Question to Ask                            |
+| ---------- | ------------------------------------------ |
+| Technical  | "Must we use this technology/pattern?"     |
+| Business   | "Is this requirement actually fixed?"      |
+| Resource   | "Are these constraints real or perceived?" |
+| Historical | "Why was this decision made originally?"   |
 
 **Red Flags (likely false assumptions):**
+
 - "We've always done it this way"
 - "Industry standard says..."
 - "Everyone uses X for this"
@@ -65,6 +70,7 @@ Identify the irreducible facts:
 3. **User needs** - What does the user fundamentally require?
 
 **Ground Truth Test:**
+
 - Can this be further decomposed?
 - Is this provably true, not just commonly believed?
 - Would violating this definitely cause failure?
@@ -78,6 +84,7 @@ Build solutions from ground truths:
 3. **Challenge each layer** - Does this layer earn its complexity?
 
 **Building Blocks Approach:**
+
 ```
 Ground Truth → Minimal Solution → Justified Additions → Final Design
      ↑              ↑                    ↑
@@ -88,7 +95,8 @@ Ground Truth → Minimal Solution → Justified Additions → Final Design
 
 Ensure the solution is sound:
 
-1. **Trace back to ground truths** - Can every design decision be traced to a fundamental need?
+1. **Trace back to ground truths** - Can every design decision be traced to a
+   fundamental need?
 2. **Identify weak links** - Where does the reasoning rely on assumptions?
 3. **Stress test** - What would break this solution?
 
@@ -129,6 +137,7 @@ Ground Truth → [Step 1] → [Step 2] → Solution
 **Symptom:** Solution is more complex than the problem warrants
 
 **First Principles Check:**
+
 1. Remove one component - does the system still solve the core problem?
 2. If yes, that component wasn't essential
 3. Repeat until removal breaks core functionality
@@ -138,6 +147,7 @@ Ground Truth → [Step 1] → [Step 2] → Solution
 **Symptom:** "Company X does it this way, so we should too"
 
 **First Principles Check:**
+
 1. What problem was Company X actually solving?
 2. Is our problem identical in all relevant dimensions?
 3. What constraints did they have that we don't (and vice versa)?
@@ -147,6 +157,7 @@ Ground Truth → [Step 1] → [Step 2] → Solution
 **Symptom:** Maintaining compatibility with decisions that no longer serve us
 
 **First Principles Check:**
+
 1. What was the original reason for this decision?
 2. Do those conditions still exist?
 3. What's the true cost of change vs. cost of maintaining?
@@ -155,22 +166,24 @@ Ground Truth → [Step 1] → [Step 2] → Solution
 
 First principles thinking works well with these complementary approaches:
 
-| Tool | When to Combine | How |
-|------|-----------------|-----|
-| **Trade-off Analysis** | After identifying ground truths | Evaluate options against fundamentals |
-| **5-Whys** | When assumptions surface | Dig deeper to find root causes |
-| **Pre-mortem** | Before finalizing solution | Stress-test reasoning chain |
-| **Hypothesis Testing** | When ground truths are uncertain | Validate assumptions empirically |
+| Tool                   | When to Combine                  | How                                   |
+| ---------------------- | -------------------------------- | ------------------------------------- |
+| **Trade-off Analysis** | After identifying ground truths  | Evaluate options against fundamentals |
+| **5-Whys**             | When assumptions surface         | Dig deeper to find root causes        |
+| **Pre-mortem**         | Before finalizing solution       | Stress-test reasoning chain           |
+| **Hypothesis Testing** | When ground truths are uncertain | Validate assumptions empirically      |
 
 ## Boundaries
 
 **Will:**
+
 - Challenge assumptions systematically
 - Identify ground truths from first principles
 - Build reasoning chains from fundamentals
 - Reveal when conventional wisdom doesn't apply
 
 **Will Not:**
+
 - Dismiss all existing solutions as wrong
 - Spend unlimited time on every decision (reserve for important choices)
 - Ignore practical constraints in favor of theoretical purity
@@ -179,6 +192,7 @@ First principles thinking works well with these complementary approaches:
 ## Quick Reference
 
 **The First Principles Checklist:**
+
 - [ ] Problem stated in terms of outcomes, not solutions
 - [ ] All assumptions explicitly listed
 - [ ] Each assumption challenged and justified
@@ -190,8 +204,11 @@ First principles thinking works well with these complementary approaches:
 ## Additional Resources
 
 ### Reference Files
+
 - **`references/elon-musk-examples.md`** - Real-world examples from SpaceX and Tesla
 - **`references/software-examples.md`** - Software engineering applications
 
 ### Example Files
-- **`examples/architecture-review.md`** - First principles analysis of a microservices decision
+
+- **`examples/architecture-review.md`** - First principles analysis of a microservices
+  decision

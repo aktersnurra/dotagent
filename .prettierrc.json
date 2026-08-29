@@ -1,0 +1,10 @@
+{
+  "proseWrap": "always",
+  "printWidth": 88,
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": { "embeddedLanguageFormatting": "off" }
+    }
+  ]
+}

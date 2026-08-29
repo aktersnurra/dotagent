@@ -9,7 +9,9 @@ description: Use when designing domain modules, state machines, verifier pipelin
 
 **Elegant UX, strict domain model, boring implementation.**
 
-Use this alongside `type-driven-development` when the language can encode invariants in types. This skill defines the system and domain architecture; type-driven development defines how to make illegal states unrepresentable when possible.
+Use this alongside `type-driven-development` when the language can encode invariants in
+types. This skill defines the system and domain architecture; type-driven development
+defines how to make illegal states unrepresentable when possible.
 
 ## Three-layer model
 
@@ -17,7 +19,8 @@ Use this alongside `type-driven-development` when the language can encode invari
 
 Define the user experience and flow.
 
-Start from what the user is trying to do, what trust they need at each step, and what must be visible, reversible, or explained.
+Start from what the user is trying to do, what trust they need at each step, and what
+must be visible, reversible, or explained.
 
 ### Domain design
 
@@ -27,7 +30,8 @@ Define states and transitions:
 Raw → Parsed → Resolved → Verified → Applied
 ```
 
-Do not let ordinary business logic receive raw, unresolved, or unverified data when a stricter domain type should exist.
+Do not let ordinary business logic receive raw, unresolved, or unverified data when a
+stricter domain type should exist.
 
 Prefer tagged states over booleans or status strings:
 
@@ -65,11 +69,13 @@ Transform data into better types instead of checking raw data repeatedly.
 
 ### Make illegal states unrepresentable
 
-Use explicit states, constructors, and opaque types instead of flags, strings, or generic maps.
+Use explicit states, constructors, and opaque types instead of flags, strings, or
+generic maps.
 
 ### Interfaces are architecture
 
-Use small module boundaries to enforce invariants. Domain modules should expose a narrow, uniform API:
+Use small module boundaries to enforce invariants. Domain modules should expose a
+narrow, uniform API:
 
 - `new` / `validate` constructor
 - `apply` / `evolve` transition
@@ -92,27 +98,34 @@ Keep the domain core pure and deterministic. Push IO to edges:
 
 ### AI proposes, code disposes
 
-LLM output is never trusted directly. It proposes artifacts; deterministic verifiers decide whether those artifacts can be applied.
+LLM output is never trusted directly. It proposes artifacts; deterministic verifiers
+decide whether those artifacts can be applied.
 
 ### Version durable data
 
-Never silently change historical data. Version schemas, formats, prompts, verifier decisions, and persisted artifacts when compatibility or auditability matters.
+Never silently change historical data. Version schemas, formats, prompts, verifier
+decisions, and persisted artifacts when compatibility or auditability matters.
 
 ### Derived state is explicit
 
-Store facts. Compute views. Keep projections, summaries, indexes, and caches visibly derived from source facts.
+Store facts. Compute views. Keep projections, summaries, indexes, and caches visibly
+derived from source facts.
 
 ### Provenance is first-class
 
-Track source, confidence, origin, verifier, timestamp, and transformation path wherever trust matters.
+Track source, confidence, origin, verifier, timestamp, and transformation path wherever
+trust matters.
 
 ### Closed core, open edges
 
-Core states and invariants are fixed. Extensions are additive: add rules, verifiers, interpreters, projections, annotation layers, or edge adapters without weakening the core model.
+Core states and invariants are fixed. Extensions are additive: add rules, verifiers,
+interpreters, projections, annotation layers, or edge adapters without weakening the
+core model.
 
 ### Flexible ≠ shapeless
 
-Use structured extensibility, not generic maps. Add explicit metadata or annotation layers when flexibility is needed.
+Use structured extensibility, not generic maps. Add explicit metadata or annotation
+layers when flexibility is needed.
 
 ## Errors
 
@@ -128,7 +141,8 @@ All domain errors must be structured:
 
 Do not return bare strings from domain or verifier code.
 
-When using this outside Tore or Elixir, preserve the shape: stable error code, human-readable message, and machine-readable context.
+When using this outside Tore or Elixir, preserve the shape: stable error code,
+human-readable message, and machine-readable context.
 
 ## Workflow
 

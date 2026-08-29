@@ -3,12 +3,15 @@
 ## Table of Contents
 
 - [Setup](#setup)
-- [Test Structure](#test-structure) — `hegel.test`, `hegel.testAsync`, `Settings`, `HealthCheck`, database
+- [Test Structure](#test-structure) — `hegel.test`, `hegel.testAsync`, `Settings`,
+  `HealthCheck`, database
 - [TestCase Methods](#testcase-methods) — `draw`, `assume`, `note`
-- [Generator Reference](#generator-reference) — Numeric, boolean, text, characters, binary, collections, tuples, optional, format, regex
+- [Generator Reference](#generator-reference) — Numeric, boolean, text, characters,
+  binary, collections, tuples, optional, format, regex
 - [Combinator Methods](#combinator-methods) — `.map()`, `.filter()`, `.flatMap()`
 - [Composite Generators](#composite-generators) — `composite`, `record`
-- [TypeScript-Specific Examples](#typescript-specific-examples) — Async, dependent generation, BigInt
+- [TypeScript-Specific Examples](#typescript-specific-examples) — Async, dependent
+  generation, BigInt
 - [Gotchas](#gotchas)
 
 ## Setup
@@ -19,15 +22,20 @@ npm install --save-dev @hegeldev/hegel
 
 Hegel requires **Node 16+**. Bun and Deno are not currently supported.
 
-Hegel is **test-runner agnostic** — `hegel.test(...)` is a regular function that runs the property, shrinks on failure, and throws on the minimal counterexample. Use whatever runner the project already uses (Vitest, Jest, Mocha, node:test).
+Hegel is **test-runner agnostic** — `hegel.test(...)` is a regular function that runs
+the property, shrinks on failure, and throws on the minimal counterexample. Use whatever
+runner the project already uses (Vitest, Jest, Mocha, node:test).
 
-Run your tests with the existing runner (e.g. `npx vitest run`). The first invocation auto-installs the `hegel-core` Python server via `uv`. If something goes wrong with that, see https://hegel.dev/reference/installation.
+Run your tests with the existing runner (e.g. `npx vitest run`). The first invocation
+auto-installs the `hegel-core` Python server via `uv`. If something goes wrong with
+that, see https://hegel.dev/reference/installation.
 
 ## Test Structure
 
 ### `hegel.test` (sync) and `hegel.testAsync` (async)
 
-`hegel.test` runs immediately when called and returns `void`. To use it with a test runner that expects a callback, wrap the call in `() => hegel.test(...)`:
+`hegel.test` runs immediately when called and returns `void`. To use it with a test
+runner that expects a callback, wrap the call in `() => hegel.test(...)`:
 
 ```typescript
 import { test } from "vitest";
@@ -44,7 +52,8 @@ test("addition commutes", () =>
   }));
 ```
 
-For async test bodies, use `hegel.testAsync`. It returns `Promise<void>` that resolves when the test completes:
+For async test bodies, use `hegel.testAsync`. It returns `Promise<void>` that resolves
+when the test completes:
 
 ```typescript
 test("fetch round-trip", () =>
@@ -57,11 +66,13 @@ test("fetch round-trip", () =>
   }));
 ```
 
-`hegel.test` throws `TypeError` if you pass it an async function — use `hegel.testAsync` for those.
+`hegel.test` throws `TypeError` if you pass it an async function — use `hegel.testAsync`
+for those.
 
 ### Settings
 
-Both `hegel.test` and `hegel.testAsync` accept an optional second argument: a `Partial<Settings>` object overriding defaults.
+Both `hegel.test` and `hegel.testAsync` accept an optional second argument: a
+`Partial<Settings>` object overriding defaults.
 
 ```typescript
 import { Verbosity, HealthCheck, Database } from "@hegeldev/hegel";
@@ -76,20 +87,21 @@ hegel.test(
 );
 ```
 
-| Field | Type | Default | Purpose |
-|-------|------|---------|---------|
-| `testCases` | `number` | `100` | Number of test cases to run |
-| `seed` | `number \| null` | `null` | Fixed RNG seed for reproducibility |
-| `verbosity` | `Verbosity` | `Normal` | `Quiet`, `Normal`, `Verbose`, `Debug` |
-| `derandomize` | `boolean` | `true` in CI | Use a deterministic seed derived from the test |
-| `database` | `Database` | `unset` (`disabled` in CI) | Failing-example persistence |
-| `suppressHealthCheck` | `HealthCheck[]` | `[]` | Suppress specific health checks |
+| Field                 | Type             | Default                    | Purpose                                        |
+| --------------------- | ---------------- | -------------------------- | ---------------------------------------------- |
+| `testCases`           | `number`         | `100`                      | Number of test cases to run                    |
+| `seed`                | `number \| null` | `null`                     | Fixed RNG seed for reproducibility             |
+| `verbosity`           | `Verbosity`      | `Normal`                   | `Quiet`, `Normal`, `Verbose`, `Debug`          |
+| `derandomize`         | `boolean`        | `true` in CI               | Use a deterministic seed derived from the test |
+| `database`            | `Database`       | `unset` (`disabled` in CI) | Failing-example persistence                    |
+| `suppressHealthCheck` | `HealthCheck[]`  | `[]`                       | Suppress specific health checks                |
 
 ### HealthCheck
 
 `HealthCheck` is a string enum:
 
-- `HealthCheck.FilterTooMuch` — Too many test cases rejected via `assume()` or `.filter()`
+- `HealthCheck.FilterTooMuch` — Too many test cases rejected via `assume()` or
+  `.filter()`
 - `HealthCheck.TooSlow` — Test execution is too slow
 - `HealthCheck.TestCasesTooLarge` — Generated test cases are too large
 - `HealthCheck.LargeInitialTestCase` — The smallest natural input is very large
@@ -103,7 +115,9 @@ hegel.test(
 
 ### Example database
 
-Hegel persists failing examples to a `.hegel/` directory and replays them on subsequent runs. The database key is auto-derived from the test function's source, so replay works without extra setup. In CI environments the database is disabled automatically.
+Hegel persists failing examples to a `.hegel/` directory and replays them on subsequent
+runs. The database key is auto-derived from the test function's source, so replay works
+without extra setup. In CI environments the database is disabled automatically.
 
 Override via the `database` setting:
 
@@ -119,11 +133,11 @@ hegel.test((tc) => { /* ... */ }, { database: Database.disabled });
 
 ## TestCase Methods
 
-| Method | Signature | Purpose |
-|--------|-----------|---------|
-| `draw` | `draw<T>(g: Generator<T>): T` | Draw a value from a generator; shown in counterexample output |
-| `assume` | `assume(condition: boolean): void` | Reject this test case if `condition` is false |
-| `note` | `note(message: string): void` | Record debug info (only printed on the final counterexample replay) |
+| Method   | Signature                          | Purpose                                                             |
+| -------- | ---------------------------------- | ------------------------------------------------------------------- |
+| `draw`   | `draw<T>(g: Generator<T>): T`      | Draw a value from a generator; shown in counterexample output       |
+| `assume` | `assume(condition: boolean): void` | Reject this test case if `condition` is false                       |
+| `note`   | `note(message: string): void`      | Record debug info (only printed on the final counterexample replay) |
 
 ### Usage
 
@@ -141,7 +155,9 @@ hegel.test((tc) => {
 });
 ```
 
-Signal a failure by throwing — any uncaught exception inside the test body is treated as a failing test case. Use your runner's normal assertion library (Vitest's `expect`, Node's `assert`, etc.).
+Signal a failure by throwing — any uncaught exception inside the test body is treated as
+a failing test case. Use your runner's normal assertion library (Vitest's `expect`,
+Node's `assert`, etc.).
 
 ## Generator Reference
 
@@ -151,9 +167,11 @@ All generators live in `@hegeldev/hegel/generators`. Idiomatic import:
 import * as gs from "@hegeldev/hegel/generators";
 ```
 
-You can also reach them through the main module as `hegel.generators.integers()`, but the dedicated import is preferred.
+You can also reach them through the main module as `hegel.generators.integers()`, but
+the dedicated import is preferred.
 
-Generators take their configuration as a single options object. Omit the object (or any field) to use defaults.
+Generators take their configuration as a single options object. Omit the object (or any
+field) to use defaults.
 
 ### Numeric Generators
 
@@ -165,10 +183,12 @@ const bounded = tc.draw(gs.integers({ minValue: 0, maxValue: 100 }));
 ```
 
 Fields:
+
 - `minValue?: number` (default: `Number.MIN_SAFE_INTEGER`)
 - `maxValue?: number` (default: `Number.MAX_SAFE_INTEGER`)
 
-Throws at construction time if bounds are outside the safe-integer range. Use `bigIntegers()` for arbitrary precision.
+Throws at construction time if bounds are outside the safe-integer range. Use
+`bigIntegers()` for arbitrary precision.
 
 **`gs.bigIntegers(options?)`** — Generate arbitrary-precision `bigint` values
 
@@ -190,6 +210,7 @@ const openInterval = tc.draw(gs.floats({
 ```
 
 Fields:
+
 - `minValue?: number`, `maxValue?: number`
 - `excludeMin?: boolean`, `excludeMax?: boolean` (default `false`)
 - `allowNan?: boolean` (default: `true` if completely unbounded, `false` otherwise)
@@ -213,9 +234,11 @@ const abc = tc.draw(gs.text({ alphabet: "abc" }));
 ```
 
 Fields:
+
 - `minSize?: number` (default `0`)
 - `maxSize?: number`
-- `alphabet?: string` — Fixed allowed characters (mutually exclusive with the other character filters)
+- `alphabet?: string` — Fixed allowed characters (mutually exclusive with the other
+  character filters)
 - `codec?: string` — e.g. `"ascii"`, `"utf-8"`, `"latin-1"`
 - `minCodepoint?: number` / `maxCodepoint?: number`
 - `categories?: readonly string[]` — Unicode general categories (e.g. `["L", "Nd"]`)
@@ -223,7 +246,8 @@ Fields:
 - `includeCharacters?: string` — Always include these
 - `excludeCharacters?: string` — Always exclude these
 
-**`gs.characters(options?)`** — Generate a single-codepoint `string`. Same character-filtering options as `text` (no size fields, no `alphabet`).
+**`gs.characters(options?)`** — Generate a single-codepoint `string`. Same
+character-filtering options as `text` (no size fields, no `alphabet`).
 
 **`gs.binary(options?)`** — Generate `Uint8Array`
 
@@ -240,7 +264,8 @@ Fields: `minSize?: number`, `maxSize?: number`.
 const code = tc.draw(gs.fromRegex("[A-Z]{3}-[0-9]{3}", { fullmatch: true }));
 ```
 
-The pattern is a string (not a JS `RegExp` literal). `fullmatch` controls whether the entire string must match.
+The pattern is a string (not a JS `RegExp` literal). `fullmatch` controls whether the
+entire string must match.
 
 ### Constant and Choice Generators
 
@@ -261,11 +286,14 @@ const bounded = tc.draw(gs.arrays(gs.integers(), { minSize: 1, maxSize: 10 }));
 const unique = tc.draw(gs.arrays(gs.integers(), { unique: true }));
 ```
 
-Fields: `minSize?`, `maxSize?`, `unique?` (default `false`). Uniqueness is checked via `JSON.stringify` equality.
+Fields: `minSize?`, `maxSize?`, `unique?` (default `false`). Uniqueness is checked via
+`JSON.stringify` equality.
 
-**`gs.sets(elements, options?)`** — Generate `Set<T>`. Fields: `minSize?`, `maxSize?` (uniqueness is implicit).
+**`gs.sets(elements, options?)`** — Generate `Set<T>`. Fields: `minSize?`, `maxSize?`
+(uniqueness is implicit).
 
-**`gs.maps(keys, values, options?)`** — Generate `Map<K, V>`. Fields: `minSize?`, `maxSize?`.
+**`gs.maps(keys, values, options?)`** — Generate `Map<K, V>`. Fields: `minSize?`,
+`maxSize?`.
 
 ```typescript
 const m = tc.draw(gs.maps(gs.text(), gs.integers(), { maxSize: 5 }));
@@ -273,7 +301,8 @@ const m = tc.draw(gs.maps(gs.text(), gs.integers(), { maxSize: 5 }));
 
 ### Tuple Generator
 
-**`gs.tuples(gen1, gen2, ...)`** — Variadic; returns a generator of a tuple type whose element types are inferred from the arguments.
+**`gs.tuples(gen1, gen2, ...)`** — Variadic; returns a generator of a tuple type whose
+element types are inferred from the arguments.
 
 ```typescript
 const pair = tc.draw(gs.tuples(gs.integers(), gs.text()));   // [number, string]
@@ -306,7 +335,8 @@ Date/time/datetime generators return ISO 8601 strings, not `Date` objects.
 
 ## Combinator Methods
 
-Every `Generator<T>` has chainable methods. They return a new generator (cheap to create).
+Every `Generator<T>` has chainable methods. They return a new generator (cheap to
+create).
 
 ### `.map(f)`
 
@@ -316,7 +346,8 @@ Transform generated values:
 const positiveStr = gs.integers({ minValue: 1 }).map((n) => n.toString());
 ```
 
-`.map()` preserves the underlying schema when the source is schema-backed, so mapped primitives are still generated efficiently on the server.
+`.map()` preserves the underlying schema when the source is schema-backed, so mapped
+primitives are still generated efficiently on the server.
 
 ### `.filter(predicate)`
 
@@ -326,7 +357,8 @@ Keep only values matching a predicate:
 const even = gs.integers().filter((x) => x % 2 === 0);
 ```
 
-`.filter()` retries up to 3 times, then calls `tc.assume(false)`. Prefer bounds or constructing valid inputs directly.
+`.filter()` retries up to 3 times, then calls `tc.assume(false)`. Prefer bounds or
+constructing valid inputs directly.
 
 ### `.flatMap(f)`
 
@@ -337,15 +369,19 @@ const sizedString = gs.integers({ minValue: 1, maxValue: 10 })
   .flatMap((len) => gs.text({ minSize: len, maxSize: len }));
 ```
 
-In most cases, prefer sequential `tc.draw()` calls inside the test body — they read more naturally and produce the same shrinking behavior. Use `.flatMap()` when you need the result packaged as a `Generator<U>`.
+In most cases, prefer sequential `tc.draw()` calls inside the test body — they read more
+naturally and produce the same shrinking behavior. Use `.flatMap()` when you need the
+result packaged as a `Generator<U>`.
 
 ## Composite Generators
 
-Hegel provides two ways to build generators for composite types: `composite` (imperative) and `record` (declarative).
+Hegel provides two ways to build generators for composite types: `composite`
+(imperative) and `record` (declarative).
 
 ### `composite(fn)`
 
-Build a generator from imperative code. The callback receives a `TestCase` and calls `tc.draw()` on inner generators:
+Build a generator from imperative code. The callback receives a `TestCase` and calls
+`tc.draw()` on inner generators:
 
 ```typescript
 interface Person {
@@ -367,13 +403,16 @@ hegel.test((tc) => {
 });
 ```
 
-The return type is inferred from the callback, or pass it as an explicit type argument (`gs.composite<Person>(...)`) when inference is ambiguous.
+The return type is inferred from the callback, or pass it as an explicit type argument
+(`gs.composite<Person>(...)`) when inference is ambiguous.
 
-`composite` is the right tool when fields depend on each other, or when you need conditional or repeated draws.
+`composite` is the right tool when fields depend on each other, or when you need
+conditional or repeated draws.
 
 ### `record(schema)`
 
-Declarative alternative when every field is independent. Pass an object mapping field names to generators:
+Declarative alternative when every field is independent. Pass an object mapping field
+names to generators:
 
 ```typescript
 const userGen = gs.record({
@@ -388,15 +427,18 @@ hegel.test((tc) => {
 });
 ```
 
-`record` infers the result type from the schema and uses the basic-schema path (no per-field span overhead) when all fields are schema-backed.
+`record` infers the result type from the schema and uses the basic-schema path (no
+per-field span overhead) when all fields are schema-backed.
 
 ## TypeScript-Specific Examples
 
-These examples show TypeScript-specific idioms. For general property patterns (round-trip, model-based, idempotence, etc.), see the main skill's Property Catalogue.
+These examples show TypeScript-specific idioms. For general property patterns
+(round-trip, model-based, idempotence, etc.), see the main skill's Property Catalogue.
 
 ### Dependent generation with sequential draws
 
-Hegel's imperative style means dependent generation is just sequential code — no `flatMap` needed:
+Hegel's imperative style means dependent generation is just sequential code — no
+`flatMap` needed:
 
 ```typescript
 hegel.test((tc) => {
@@ -425,7 +467,8 @@ Don't mix sync and async — `hegel.test` rejects async callbacks with a `TypeEr
 
 ### Integers beyond the safe range
 
-`gs.integers()` only produces JS `number` values up to `Number.MAX_SAFE_INTEGER` (`2^53 - 1`). For arbitrary-precision values, use `gs.bigIntegers()`:
+`gs.integers()` only produces JS `number` values up to `Number.MAX_SAFE_INTEGER`
+(`2^53 - 1`). For arbitrary-precision values, use `gs.bigIntegers()`:
 
 ```typescript
 hegel.test((tc) => {
@@ -435,43 +478,72 @@ hegel.test((tc) => {
 });
 ```
 
-If a function under test says it accepts arbitrarily large integers, test it with `bigIntegers()` — `integers()` will silently cap at `MAX_SAFE_INTEGER` and miss precision-loss bugs.
+If a function under test says it accepts arbitrarily large integers, test it with
+`bigIntegers()` — `integers()` will silently cap at `MAX_SAFE_INTEGER` and miss
+precision-loss bugs.
 
 ## Gotchas
 
-1. **`hegel.test` runs immediately and returns `void`.** Wrap in `() => hegel.test(...)` to pass to a test-runner callback (`test("name", () => hegel.test(...))`). Calling `hegel.test(...)` as the value of `test("name", hegel.test(...))` would execute the property at module-load time, which is almost never what you want.
+1. **`hegel.test` runs immediately and returns `void`.** Wrap in `() => hegel.test(...)`
+   to pass to a test-runner callback (`test("name", () => hegel.test(...))`). Calling
+   `hegel.test(...)` as the value of `test("name", hegel.test(...))` would execute the
+   property at module-load time, which is almost never what you want.
 
-2. **`hegel.test` rejects async callbacks; use `hegel.testAsync`.** Passing an `async` function to `hegel.test` throws `TypeError`. Awaiting a `Promise` in `hegel.test` would resolve outside the test case lifecycle.
+2. **`hegel.test` rejects async callbacks; use `hegel.testAsync`.** Passing an `async`
+   function to `hegel.test` throws `TypeError`. Awaiting a `Promise` in `hegel.test`
+   would resolve outside the test case lifecycle.
 
-3. **`gs.integers()` only covers the JS safe-integer range.** It throws at construction if bounds exceed `Number.MAX_SAFE_INTEGER`. Use `gs.bigIntegers()` for arbitrary-precision integers.
+3. **`gs.integers()` only covers the JS safe-integer range.** It throws at construction
+   if bounds exceed `Number.MAX_SAFE_INTEGER`. Use `gs.bigIntegers()` for
+   arbitrary-precision integers.
 
-4. **`gs.binary()` returns `Uint8Array`, not `Buffer` or `string`.** Convert with `Buffer.from(bytes)` if a downstream API expects a `Buffer`.
+4. **`gs.binary()` returns `Uint8Array`, not `Buffer` or `string`.** Convert with
+   `Buffer.from(bytes)` if a downstream API expects a `Buffer`.
 
-5. **Date/time/datetime generators return strings, not `Date`.** They emit ISO 8601 strings — parse with `new Date(s)` if you need a `Date` object.
+5. **Date/time/datetime generators return strings, not `Date`.** They emit ISO 8601
+   strings — parse with `new Date(s)` if you need a `Date` object.
 
-6. **`gs.optional(g)` produces `T | null`, not `T | undefined`.** Check for `=== null`, not `=== undefined`.
+6. **`gs.optional(g)` produces `T | null`, not `T | undefined`.** Check for `=== null`,
+   not `=== undefined`.
 
-7. **Float defaults include NaN and infinity when unbounded.** `gs.floats()` with no bounds generates `NaN` and `Infinity`. If your code doesn't handle them, pass `{ allowNan: false, allowInfinity: false }` — but consider whether the code *should* handle them first.
+7. **Float defaults include NaN and infinity when unbounded.** `gs.floats()` with no
+   bounds generates `NaN` and `Infinity`. If your code doesn't handle them, pass
+   `{ allowNan: false, allowInfinity: false }` — but consider whether the code _should_
+   handle them first.
 
-8. **Excessive `assume`/`filter` rejections fail the test.** If `tc.assume()` or `.filter()` rejects too many inputs, the `FilterTooMuch` health check fires. Restructure generators to produce valid inputs directly (use `.map()` or sequential draws).
+8. **Excessive `assume`/`filter` rejections fail the test.** If `tc.assume()` or
+   `.filter()` rejects too many inputs, the `FilterTooMuch` health check fires.
+   Restructure generators to produce valid inputs directly (use `.map()` or sequential
+   draws).
 
-9. **`note()` only prints on the final replay.** Don't rely on it for progress logging — it only appears when the minimal counterexample is displayed.
+9. **`note()` only prints on the final replay.** Don't rely on it for progress logging —
+   it only appears when the minimal counterexample is displayed.
 
-10. **Default collection sizes are small.** `gs.arrays(gen)` with no bounds rarely produces 100+ elements. To exercise deep traversals, draw the size separately:
+10. **Default collection sizes are small.** `gs.arrays(gen)` with no bounds rarely
+    produces 100+ elements. To exercise deep traversals, draw the size separately:
+
     ```typescript
     const n = tc.draw(gs.integers({ minValue: 0, maxValue: 300 }));
     const xs = tc.draw(gs.arrays(gs.integers(), { minSize: n }));
     ```
 
-11. **Use `unique: true` for key generation.** When generating keys for a `Map` or `Set`, prefer `gs.arrays(keyGen, { unique: true })` to avoid ambiguity about which value wins:
+11. **Use `unique: true` for key generation.** When generating keys for a `Map` or
+    `Set`, prefer `gs.arrays(keyGen, { unique: true })` to avoid ambiguity about which
+    value wins:
+
     ```typescript
     const keys = tc.draw(gs.arrays(gs.integers(), { maxSize: 50, unique: true }));
     ```
 
-12. **Add `.hegel/` to `.gitignore`.** Hegel caches the server binary and the failing-example database under `.hegel/` in your project root.
+12. **Add `.hegel/` to `.gitignore`.** Hegel caches the server binary and the
+    failing-example database under `.hegel/` in your project root.
 
-13. **`fromRegex` takes a string pattern, not a `RegExp`.** Pass `"[A-Z]{3}"`, not `/[A-Z]{3}/`.
+13. **`fromRegex` takes a string pattern, not a `RegExp`.** Pass `"[A-Z]{3}"`, not
+    `/[A-Z]{3}/`.
 
-14. **`target()` and stateful testing are not yet available** in hegel-typescript. They are planned for future releases. Until stateful testing lands, write rule loops by hand inside `hegel.test`/`hegel.testAsync` (draw a rule choice with `gs.sampledFrom`, dispatch, assert invariants).
+14. **`target()` and stateful testing are not yet available** in hegel-typescript. They
+    are planned for future releases. Until stateful testing lands, write rule loops by
+    hand inside `hegel.test`/`hegel.testAsync` (draw a rule choice with
+    `gs.sampledFrom`, dispatch, assert invariants).
 
 15. **Node 16+ only.** Bun and Deno are not currently supported.
