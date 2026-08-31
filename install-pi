@@ -82,6 +82,7 @@ PI_PACKAGES=(
   "npm:pi-subagents"
   "npm:pi-mcp-adapter"
   "npm:pi-lens"
+  "npm:pi-web-access"
   "npm:pi-ask-user"
   "npm:@tintinweb/pi-tasks"
   "npm:pi-hermes-memory"

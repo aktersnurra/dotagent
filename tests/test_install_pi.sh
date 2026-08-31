@@ -78,4 +78,5 @@ jq -e '.packages | any(type == "object" and .source == "npm:pi-ask-user" and .sk
   "$pi_dir/settings.json" >/dev/null
 jq -e '.packages | all(. != "npm:pi-ask-user")' "$pi_dir/settings.json" >/dev/null
 [[ "$(wc -l <"$pi_log" | tr -d ' ')" -gt 0 ]]
+rg -qF "$pi_dir|install npm:pi-web-access" "$pi_log"
 [[ "$(rg -vF "$pi_dir|" "$pi_log" || true)" == "" ]]
