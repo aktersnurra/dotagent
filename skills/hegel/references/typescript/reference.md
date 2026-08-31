@@ -28,7 +28,7 @@ runner the project already uses (Vitest, Jest, Mocha, node:test).
 
 Run your tests with the existing runner (e.g. `npx vitest run`). The first invocation
 auto-installs the `hegel-core` Python server via `uv`. If something goes wrong with
-that, see https://hegel.dev/reference/installation.
+that, see <https://hegel.dev/reference/installation>.
 
 ## Test Structure
 

@@ -27,7 +27,7 @@ WHISPER_LANGUAGE=sv WHISPER_MODEL=small \
   /absolute/path/to/transcribe-youtube "$url" "$artifacts"
 ```
 
-3. Read the emitted SRT, answer the exact question, then keep the transcript and let the
+1. Read the emitted SRT, answer the exact question, then keep the transcript and let the
    script remove temporary audio.
 
 The script first asks `yt-dlp` for subtitles. If none exist, it pipes the best audio

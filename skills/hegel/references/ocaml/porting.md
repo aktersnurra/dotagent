@@ -105,7 +105,7 @@ let point_gen =
 ### Configuration
 
 | QCheck2                                           | Hegel                                                                      |
-| ------------------------------------------------- | -------------------------------------------------------------------------- |
+| ------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------- |
 | `Test.make ~count:500 ...`                        | `[@@settings Hegel.settings ~test_cases:500 ()]`, or `with_test_cases 500` |
 | `Test.make ~long_factor:n ...`                    | No direct equivalent — set `~test_cases` explicitly                        |
 | `QCHECK_SEED` env var                             | `with_seed (Some n)`, or `[@@settings ...                                  | > with_seed (Some n)]` |

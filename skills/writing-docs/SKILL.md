@@ -74,4 +74,4 @@ checker cannot certify that, and slop is not about that. This skill fixes the FO
 slop. It cannot make a hollow paragraph true.
 
 Free official standard (do not paste it in full; it is copyrighted):
-https://asd-ste100.org
+<https://asd-ste100.org>

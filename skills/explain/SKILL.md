@@ -87,20 +87,20 @@ project.
 skills/explain/scripts/render.sh <explain-root>/<YYYY-MM-DD>-<topic>.md
 ```
 
-11. If the user explicitly requested slides, write a condensed slide source under the
-    same `<explain-root>`.
-12. Render and open the slide deck with:
+1. If the user explicitly requested slides, write a condensed slide source under the
+   same `<explain-root>`.
+2. Render and open the slide deck with:
 
 ```bash
 skills/explain/scripts/render-slides.sh <explain-root>/<YYYY-MM-DD>-<topic>-slides.md
 ```
 
-13. Reply only with:
-    - Markdown path
-    - HTML path, if generated
-    - Slides Markdown path, if generated
-    - Slides HTML path, if generated
-    - Whether the browser was opened
+1. Reply only with:
+   - Markdown path
+   - HTML path, if generated
+   - Slides Markdown path, if generated
+   - Slides HTML path, if generated
+   - Whether the browser was opened
 
 ## Pandoc Installation
 

@@ -48,11 +48,11 @@ navigate_pane_right = "i"
 # set above and alt+w reads as "workspace" rather than "next". The < > keys
 # carry their own step-through convention and sit next to each other.
 workspace_picker = "prefix+w"
-previous_workspace = "alt+,"
-next_workspace = "alt+."
+previous_workspace = "alt+r"
+next_workspace = "alt+g"
 switch_workspace = "prefix+shift+1..9"
-previous_agent = "alt+["
-next_agent = "alt+]"
+previous_agent = "alt+s"
+next_agent = "alt+t"
 focus_agent = "prefix+alt+1..9"
 
 # Scrollback in $EDITOR, and instant toggle back to the last pane

@@ -44,7 +44,7 @@ Write whatever test block the runner uses and call `hegel::test(...)` inside it 
 examples below).
 
 If something goes wrong with server installation, see
-https://hegel.dev/reference/installation.
+<https://hegel.dev/reference/installation>.
 
 ## Test Structure
 

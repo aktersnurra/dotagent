@@ -30,7 +30,7 @@ Run tests with `go test`. Hegel tests integrate directly with the standard Go te
 runner via `hegel.Test(t, ...)`.
 
 If something goes wrong with server installation, see
-https://hegel.dev/reference/installation.
+<https://hegel.dev/reference/installation>.
 
 ## Test Structure
 

@@ -37,7 +37,7 @@ Run tests with `cargo test`. Hegel tests use `#[hegel::test]` in place of `#[tes
 integrate directly with the standard Rust test runner.
 
 If something goes wrong with server installation, see
-https://hegel.dev/reference/installation.
+<https://hegel.dev/reference/installation>.
 
 ## Test Structure
 
@@ -682,6 +682,7 @@ let k_squared = k * k;  // can't overflow i32
 
 9. **Use `.unique()` for map/set key generation.** When testing ordered maps or sets,
    generate unique keys to avoid ambiguity about which value wins:
+
    ```rust
    let keys: Vec<i32> = tc.draw(generators::vecs(generators::integers::<i32>())
        .max_size(50).unique());
