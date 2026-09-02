@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pick a workspace and tracked file, then review that file in tuicr.
+# Pick a workspace and one of its regular files, then review that file in tuicr.
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,8 +13,15 @@ workspace="$("$script_dir/workspace-picker.sh" "$caller_cwd" "review file in wor
 [ -n "$workspace" ] || exit 0
 
 file="$(
-	cd "$workspace"
-	jj file list |
+	(
+		cd "$workspace"
+		find . -type f \
+			! -path "./.jj/*" \
+			! -path "./.git/*" \
+			! -path "./node_modules/*" \
+			-print |
+			sed 's#^./##'
+	) |
 		fzf --prompt="  review file > " \
 			--height=100% \
 			--border=none \

@@ -67,7 +67,8 @@ assert_contains "Feature name must not contain path separators." "$temp_dir/inva
 # Creating another workspace from inside one reuses the base repo's shared
 # .workspaces directory instead of nesting a second container beneath feature.
 nested_root="$temp_dir/projects/dotagent.workspaces/feature"
-mkdir -p "$nested_root"
+mkdir -p "$nested_root/docs"
+printf 'design\n' >"$nested_root/docs/ignored-design.md"
 : >"$call_log"
 printf 'second\ny\n' | (
 	cd "$nested_root"
@@ -140,7 +141,7 @@ cat >"$shim_dir/jj" <<'EOF'
 if [[ "$*" == *"workspace list"* ]]; then
   printf '%s\n' "$PICKED_WORKSPACE"
 elif [[ "$1 $2" == "file list" ]]; then
-  printf 'docs/design.md\n'
+  exit 97
 fi
 EOF
 cat >"$shim_dir/herdr" <<'EOF'
@@ -162,17 +163,20 @@ printf '%s' "$count" >"$count_file"
 if [ "$count" -eq 1 ]; then
   printf '%s\n' "$PICKED_WORKSPACE"
 else
-  printf 'docs/design.md\n'
+  cat >"$FILE_CANDIDATES"
+  grep -qx 'docs/ignored-design.md' "$FILE_CANDIDATES" || exit 2
+  printf 'docs/ignored-design.md\n'
 fi
 EOF
 chmod +x "$shim_dir/jj" "$shim_dir/herdr" "$shim_dir/fzf"
 : >"$call_log"
 HOME="$temp_dir" PATH="$shim_dir:$PATH" CALL_LOG="$call_log" \
 	SOURCE_CWD="$repo_root" PICKED_WORKSPACE="$nested_root" FZF_COUNT_FILE="$temp_dir/fzf-count" \
+	FILE_CANDIDATES="$temp_dir/file-candidates" \
 	"$repo_dir/herdr/tuicr-file-pane.sh" >/dev/null
 assert_contains "herdr|pane current" "$call_log"
 assert_contains "herdr|pane split --pane test-origin --direction right --ratio 0.5 --cwd $nested_root --no-focus" "$call_log"
-assert_contains "herdr|pane run test-pane tuicr --file docs/design.md ; exit" "$call_log"
+assert_contains "herdr|pane run test-pane tuicr --file docs/ignored-design.md ; exit" "$call_log"
 assert_contains "herdr|pane wait-output test-pane --match NORMAL --source recent-unwrapped --timeout 10000" "$call_log"
 assert_contains "herdr|pane send-text test-pane :diff" "$call_log"
 assert_contains "herdr|pane send-keys test-pane enter" "$call_log"
