@@ -2,6 +2,24 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-terra",
   "defaultThinkingLevel": "medium",
+  "subagents": {
+    "defaultModel": "openai-codex/gpt-5.6-terra",
+    "defaultThinking": "medium",
+    "agentOverrides": {
+      "worker": {
+        "model": "openai-codex/gpt-5.6-terra",
+        "thinking": "medium"
+      },
+      "scout": {
+        "model": "openai-codex/gpt-5.6-terra",
+        "thinking": "low"
+      },
+      "reviewer": {
+        "model": "openai-codex/gpt-6-astra",
+        "thinking": "high"
+      }
+    }
+  },
   "theme": "no-clown-fiesta-dark",
   "piVim": {
     "modeColors": {
