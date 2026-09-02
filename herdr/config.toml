@@ -1,8 +1,9 @@
 onboarding = false
 # herdr configuration
 # Custom theme ported from no-clown-fiesta.nvim (dark palette).
-# Keybindings mirror ~/.config/tmux/tmux.conf: C-a prefix, Colemak
-# navigation (m/n/e/i = left/down/up/right), vi-flavored feel.
+# Keybindings follow ~/.config/tmux/tmux.conf where the two agree: C-a prefix,
+# Colemak navigation (m/n/e/i = left/down/up/right), vi-flavored feel. tmux and
+# herdr are never run together, so the two are free to diverge elsewhere.
 
 [theme]
 name = "catppuccin"
@@ -29,10 +30,9 @@ new_tab = "prefix+c"
 split_vertical = "prefix+h"
 split_horizontal = "prefix+v"
 
-# Colemak pane navigation on plain Alt, deliberately identical to tmux's
-# unprefixed M-m/n/e/i. Same direction, same action, different layer: the
-# layers nest instead of competing, so one muscle memory covers both. Neovim
-# binds no meta key on these four letters.
+# Colemak pane navigation on plain Alt, the same M-m/n/e/i tmux uses: these
+# are the right home-row keys under the four fingers, so the direction is the
+# physical direction. Neovim binds no meta key on these four letters.
 focus_pane_left = "alt+m"
 focus_pane_down = "alt+n"
 focus_pane_up = "alt+e"
@@ -51,29 +51,26 @@ navigate_pane_right = "i"
 # arriving arrow or mouse report and drops it on the input timeout. Alt plus a
 # letter has no such ambiguity.
 #
-# The letters follow Colemak Mod-DH geometry. Pane navigation sits on the
-# right home row (m/n/e/i); these step keys sit on the top row directly above
-# it (j/l/u/y), so the whole navigation set stays under one hand:
+# The letters follow Colemak Mod-DH geometry, keeping the navigation set in
+# reach of the resting hands:
 #
-#     top:   .  .  .  . [B]   .  L  U  .   <- agents up, step workspaces
-#     home:  .  .  .  . [G]   M  N  E  I   <- agents down, move between panes
+#     top:   Q  W  F  P [B]   J  L  U  Y   <- agents up; workspaces on L/U
+#     home:  A  R  S  T [G]   M  N  E  I   <- agents down; panes on M/N/E/I
 #
 # Workspaces step horizontally on the right-hand top row, directly above the
 # pane keys. Agents step vertically on alt+b and alt+g, stacked in the inner
 # column so up and down map to the physical up and down key.
 #
-# The letters are forced by what the surrounding layers already claim. Neovim
-# holds meta on f/p/,/./s/t/h/w/r/c (window sizing, splits, grug-far,
-# compile-mode) and tmux holds M-s and M-g, so the mnemonic alt+r/g and
-# alt+s/t would each fire two actions at once. st claims alt+j and alt+k for
-# scrollback, its MODKEY being Mod1Mask, and consumes them before the terminal
-# forwards anything, so a binding there validates but is never reached. That
-# leaves the inner column as the only one with two free keys stacked
-# vertically.
+# The letters are forced by what runs inside these panes. Neovim holds meta on
+# f/p/,/./s/t/h/w/r/c (window sizing, splits, grug-far, compile-mode), so the
+# mnemonic alt+r and alt+s/t would each fire two actions at once. st claims
+# alt+j and alt+k for scrollback, its MODKEY being Mod1Mask, and consumes them
+# before the terminal forwards anything, so a binding on those validates here
+# but is never reached. What remains leaves the inner column as the only one
+# with two free keys stacked vertically.
 #
-# alt+g also names tmux's unprefixed M-g popup toggle, which costs nothing
-# here: tmux and herdr are never run at the same time, so the two never
-# compete for the chord.
+# tmux binds M-g and M-s unprefixed, which does not constrain anything: tmux
+# and herdr are never run at the same time.
 workspace_picker = "prefix+w"
 previous_workspace = "alt+l"
 next_workspace = "alt+u"
@@ -92,15 +89,16 @@ zoom = "prefix+z"
 toggle_sidebar = "prefix+b"
 
 # Cycle only agents actively working, without replacing the native all-agent
-# previous/next bindings above. alt+d keeps it off the j/l/u/y stepping row
-# while staying free in both neovim and tmux.
+# previous/next bindings above. alt+d sits on the left hand, clear of the
+# stepping keys, and is free in neovim and st.
 [[keys.command]]
 key = "alt+d"
 type = "shell"
 command = "~/.config/herdr/working-agent.sh next"
 
-# lazyjj popup, mirroring tmux's M-g floating terminal. The wrapper keeps the
-# popup open with an explanation when the active pane is outside a jj repo.
+# lazyjj popup, on the prefix rather than tmux's unprefixed M-g, since alt+g
+# steps agents here. The wrapper keeps the popup open with an explanation when
+# the active pane is outside a jj repo.
 [[keys.command]]
 key = "prefix+g"
 type = "popup"
