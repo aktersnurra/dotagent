@@ -113,3 +113,111 @@ kill -0 "$lazyjj_pid"
 printf x >"$input_fifo"
 wait "$lazyjj_pid"
 assert_contains "Not a Jujutsu repository. Press any key to close..." "$temp_dir/lazyjj.out"
+
+# The picker uses jj's workspace registry for the caller's repository rather
+# than scanning unrelated .workspaces directories.
+cat >"$shim_dir/jj" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$*" == *"workspace list"* ]]; then
+  printf '%s\n' "$PICKED_WORKSPACE"
+fi
+EOF
+cat >"$shim_dir/fzf" <<'EOF'
+#!/usr/bin/env bash
+cat >"$FZF_INPUT"
+printf '%s\n' "$PICKED_WORKSPACE"
+EOF
+chmod +x "$shim_dir/jj" "$shim_dir/fzf"
+PATH="$shim_dir:$PATH" PICKED_WORKSPACE="$nested_root" \
+	FZF_INPUT="$temp_dir/workspace-candidates" \
+	"$repo_dir/herdr/workspace-picker.sh" "$repo_root" >/dev/null
+assert_contains "$nested_root" "$temp_dir/workspace-candidates"
+
+# prefix+f picks a jj workspace, then one of its tracked files, and opens that
+# file in a tuicr split rooted at the selected workspace.
+cat >"$shim_dir/jj" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$*" == *"workspace list"* ]]; then
+  printf '%s\n' "$PICKED_WORKSPACE"
+elif [[ "$1 $2" == "file list" ]]; then
+  printf 'docs/design.md\n'
+fi
+EOF
+cat >"$shim_dir/herdr" <<'EOF'
+#!/usr/bin/env bash
+printf 'herdr|%s\n' "$*" >>"$CALL_LOG"
+if [[ "$1 $2" == "pane current" ]]; then
+  printf '{"result":{"pane":{"pane_id":"test-origin","foreground_cwd":"%s"}}}\n' "$SOURCE_CWD"
+elif [[ "$1 $2" == "pane split" ]]; then
+  printf '{"result":{"pane":{"pane_id":"test-pane"}}}\n'
+fi
+EOF
+cat >"$shim_dir/fzf" <<'EOF'
+#!/usr/bin/env bash
+count_file="$FZF_COUNT_FILE"
+count=0
+[ -f "$count_file" ] && count="$(cat "$count_file")"
+count=$((count + 1))
+printf '%s' "$count" >"$count_file"
+if [ "$count" -eq 1 ]; then
+  printf '%s\n' "$PICKED_WORKSPACE"
+else
+  printf 'docs/design.md\n'
+fi
+EOF
+chmod +x "$shim_dir/jj" "$shim_dir/herdr" "$shim_dir/fzf"
+: >"$call_log"
+HOME="$temp_dir" PATH="$shim_dir:$PATH" CALL_LOG="$call_log" \
+	SOURCE_CWD="$repo_root" PICKED_WORKSPACE="$nested_root" FZF_COUNT_FILE="$temp_dir/fzf-count" \
+	"$repo_dir/herdr/tuicr-file-pane.sh" >/dev/null
+assert_contains "herdr|pane current" "$call_log"
+assert_contains "herdr|pane split --pane test-origin --direction right --ratio 0.5 --cwd $nested_root --no-focus" "$call_log"
+assert_contains "herdr|pane run test-pane tuicr --file docs/design.md ; exit" "$call_log"
+assert_contains "herdr|pane wait-output test-pane --match NORMAL --source recent-unwrapped --timeout 10000" "$call_log"
+assert_contains "herdr|pane send-text test-pane :diff" "$call_log"
+assert_contains "herdr|pane send-keys test-pane enter" "$call_log"
+
+# prefix+s uses master when available and reviews the selected workspace's
+# non-empty stack relative to that base bookmark.
+cat >"$shim_dir/jj" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$*" == *"workspace list"* ]]; then
+  printf '%s\n' "$PICKED_WORKSPACE"
+elif [[ "$1" == log ]]; then
+  if [[ "$*" == *master* ]]; then printf 'master-id\n'; else printf 'head-id\n'; fi
+fi
+EOF
+cat >"$shim_dir/fzf" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$PICKED_WORKSPACE"
+EOF
+chmod +x "$shim_dir/jj" "$shim_dir/fzf"
+: >"$call_log"
+HOME="$temp_dir" PATH="$shim_dir:$PATH" CALL_LOG="$call_log" \
+	SOURCE_CWD="$repo_root" PICKED_WORKSPACE="$nested_root" \
+	"$repo_dir/herdr/tuicr-stack-pane.sh" >/dev/null
+assert_contains "herdr|pane current" "$call_log"
+assert_contains "herdr|pane split --pane test-origin --direction right --ratio 0.5 --cwd $nested_root --no-focus" "$call_log"
+assert_contains "herdr|pane run test-pane tuicr --revisions master..head-id ; exit" "$call_log"
+
+prefix_f_type="$(awk '
+  /key = "prefix\+f"/ { found=1 }
+  found && /type = / { print; exit }
+' "$repo_dir/herdr/config.toml")"
+[[ "$prefix_f_type" == 'type = "popup"' ]]
+prefix_f_command="$(awk '
+  /key = "prefix\+f"/ { found=1 }
+  found && /command = / { print; exit }
+' "$repo_dir/herdr/config.toml")"
+[[ "$prefix_f_command" == 'command = "~/.config/herdr/tuicr-file-pane.sh"' ]]
+
+prefix_s_type="$(awk '
+  /key = "prefix\+s"/ { found=1 }
+  found && /type = / { print; exit }
+' "$repo_dir/herdr/config.toml")"
+[[ "$prefix_s_type" == 'type = "popup"' ]]
+prefix_s_command="$(awk '
+  /key = "prefix\+s"/ { found=1 }
+  found && /command = / { print; exit }
+' "$repo_dir/herdr/config.toml")"
+[[ "$prefix_s_command" == 'command = "~/.config/herdr/tuicr-stack-pane.sh"' ]]

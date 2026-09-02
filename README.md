@@ -21,6 +21,9 @@ dotagent/
 │   ├── new-jj-workspace.sh   # prefix+shift+g: new jj workspace as a herdr workspace
 │   ├── open-workspace.sh     # prefix+o: fuzzy-pick a repo/workspace to open
 │   ├── review-pane.sh        # prefix+d: review the diff in tuicr, in a split pane
+│   ├── tuicr-file-pane.sh    # prefix+f: pick a workspace and file to review
+│   ├── tuicr-stack-pane.sh   # prefix+s: pick a workspace and review its stack
+│   ├── workspace-picker.sh   # Shared repo/jj-workspace fzf picker
 │   └── plugins/
 │       └── next-agent/       # prefix+u: jump to the agent that needs attention
 ├── tuicr/
@@ -71,12 +74,15 @@ Prefix is `ctrl+a`, matching tmux. Custom bindings on top of the defaults:
 | `prefix+u`       | Jump to the agent that needs attention (blocked, then done, then idle) |
 | `prefix+o`       | Fuzzy-pick a repo or jj workspace and open it as a workspace           |
 | `prefix+d`       | Review in tuicr in a split pane: the working copy, or the last commit  |
+| `prefix+f`       | Fuzzy-pick a repo/jj workspace, then a tracked file to review in tuicr |
+| `prefix+s`       | Fuzzy-pick a repo/jj workspace, then review its `master`/`main` stack  |
 | `prefix+g`       | lazyjj popup (explains when outside a jj repo)                         |
 | `prefix+shift+g` | New jj workspace in `<repo>.workspaces/<feature>`                      |
 
 `prefix+d` reviews the working copy when it is dirty. A clean working copy is the common
 case under jj, so it falls back to the nearest non-empty ancestor rather than reporting
-nothing to review.
+nothing to review. `prefix+s` uses `master` when available, otherwise `main`, as the
+selected workspace's stack base.
 
 ## Harness config locations
 

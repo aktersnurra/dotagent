@@ -41,6 +41,11 @@ grep -qF 'Filter out every directory matching `*.workspaces`' \
 grep -qF 'jj git fetch' "$repo_dir/commands/sync-master.md"
 grep -qF 'jj new <base-revision>' "$repo_dir/commands/sync-master.md"
 
+[[ -f "$repo_dir/commands/tuicr-comments.md" ]]
+grep -qF 'argument-hint: "[workspace]"' "$repo_dir/commands/tuicr-comments.md"
+grep -qF 'tuicr review list' "$repo_dir/commands/tuicr-comments.md"
+grep -qF 'tuicr review comments' "$repo_dir/commands/tuicr-comments.md"
+
 HOME="$home_dir" PATH="$bin_dir:$PATH" "$repo_dir/install-claude"
 
 for command in "$repo_dir"/commands/*.md; do

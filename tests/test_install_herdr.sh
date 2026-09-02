@@ -17,7 +17,10 @@ HERDR_CONFIG_DIR="$herdr_dir" "$repo_dir/install-herdr"
 [[ "$(readlink "$herdr_dir/lazyjj.sh")" == "$repo_dir/herdr/lazyjj.sh" ]]
 [[ "$(readlink "$herdr_dir/new-jj-workspace.sh")" == "$repo_dir/herdr/new-jj-workspace.sh" ]]
 [[ "$(readlink "$herdr_dir/open-workspace.sh")" == "$repo_dir/herdr/open-workspace.sh" ]]
+[[ "$(readlink "$herdr_dir/workspace-picker.sh")" == "$repo_dir/herdr/workspace-picker.sh" ]]
 [[ "$(readlink "$herdr_dir/review-pane.sh")" == "$repo_dir/herdr/review-pane.sh" ]]
+[[ "$(readlink "$herdr_dir/tuicr-file-pane.sh")" == "$repo_dir/herdr/tuicr-file-pane.sh" ]]
+[[ "$(readlink "$herdr_dir/tuicr-stack-pane.sh")" == "$repo_dir/herdr/tuicr-stack-pane.sh" ]]
 [[ "$(readlink "$herdr_dir/plugins/next-agent")" == "$repo_dir/herdr/plugins/next-agent" ]]
 
 # Re-running is idempotent: the plugin symlink is replaced, not nested inside

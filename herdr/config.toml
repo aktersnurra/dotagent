@@ -103,6 +103,22 @@ key = "prefix+d"
 type = "shell"
 command = "~/.config/herdr/review-pane.sh"
 
+# Fuzzy-pick a repo or jj workspace, then open one tracked file in tuicr.
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "~/.config/herdr/tuicr-file-pane.sh"
+width = "60%"
+height = "60%"
+
+# Fuzzy-pick a repo or jj workspace, then review its master/main change stack.
+[[keys.command]]
+key = "prefix+s"
+type = "popup"
+command = "~/.config/herdr/tuicr-stack-pane.sh"
+width = "60%"
+height = "60%"
+
 # Fuzzy-pick an existing repo or jj workspace and open it as a workspace.
 [[keys.command]]
 key = "prefix+o"
