@@ -29,11 +29,12 @@ new_tab = "prefix+c"
 split_vertical = "prefix+h"
 split_horizontal = "prefix+v"
 
-# Colemak pane navigation, matching tmux's unprefixed Alt+m/n/e/i.
-focus_pane_left = "alt+m"
-focus_pane_down = "alt+n"
-focus_pane_up = "alt+e"
-focus_pane_right = "alt+i"
+# Direct Herdr navigation consistently uses Ctrl+Alt. Arrows avoid terminal
+# control-character collisions from Ctrl+Alt letter chords.
+focus_pane_left = "ctrl+alt+left"
+focus_pane_down = "ctrl+alt+down"
+focus_pane_up = "ctrl+alt+up"
+focus_pane_right = "ctrl+alt+right"
 
 # Navigate-mode picker uses the same Colemak letters.
 navigate_pane_left = "m"
@@ -43,22 +44,19 @@ navigate_pane_right = "i"
 
 # Quick jumps between workspaces and agents.
 #
-# Workspaces step on alt+, / alt+. rather than a letter pair: the obvious
-# mnemonic keys are spoken for, since alt+n is focus_pane_down in the Colemak
-# set above and alt+w reads as "workspace" rather than "next". The < > keys
-# carry their own step-through convention and sit next to each other.
+# Workspace and agent navigation use the same Ctrl+Alt modifier family.
 workspace_picker = "prefix+w"
-previous_workspace = "alt+r"
-next_workspace = "alt+g"
+previous_workspace = "ctrl+alt+r"
+next_workspace = "ctrl+alt+g"
 switch_workspace = "prefix+shift+1..9"
-previous_agent = "alt+s"
-next_agent = "alt+t"
+previous_agent = "ctrl+alt+s"
+next_agent = "ctrl+alt+t"
 focus_agent = "prefix+alt+1..9"
 
 # Scrollback in $EDITOR, and instant toggle back to the last pane
 # (like tmux's `sesh last`).
 edit_scrollback = "prefix+e"
-last_pane = "alt+a"
+last_pane = "ctrl+alt+a"
 
 # Zoom current pane and toggle the sidebar.
 zoom = "prefix+z"
@@ -67,7 +65,7 @@ toggle_sidebar = "prefix+b"
 # Cycle only agents actively working, without replacing the native all-agent
 # previous/next bindings above.
 [[keys.command]]
-key = "alt+."
+key = "ctrl+alt+o"
 type = "shell"
 command = "~/.config/herdr/working-agent.sh next"
 
