@@ -64,6 +64,13 @@ last_pane = "alt+a"
 zoom = "prefix+z"
 toggle_sidebar = "prefix+b"
 
+# Cycle only agents actively working, without replacing the native all-agent
+# previous/next bindings above.
+[[keys.command]]
+key = "alt+."
+type = "shell"
+command = "~/.config/herdr/working-agent.sh next"
+
 # lazyjj popup, mirroring tmux's M-g floating terminal. The wrapper keeps the
 # popup open with an explanation when the active pane is outside a jj repo.
 [[keys.command]]

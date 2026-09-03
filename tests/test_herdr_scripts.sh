@@ -225,3 +225,71 @@ prefix_s_command="$(awk '
   found && /command = / { print; exit }
 ' "$repo_dir/herdr/config.toml")"
 [[ "$prefix_s_command" == 'command = "~/.config/herdr/tuicr-stack-pane.sh"' ]]
+
+# Alt+Shift+S/T navigate only working agents, in state-change order, with
+# wraparound. A non-working focused agent enters the cycle at either end.
+cat >"$shim_dir/herdr" <<'EOF'
+#!/usr/bin/env bash
+printf 'herdr|%s\n' "$*" >>"$CALL_LOG"
+case "$1 $2" in
+  "agent list") cat "$AGENTS_JSON" ;;
+esac
+EOF
+chmod +x "$shim_dir/herdr"
+
+run_working_agent() {
+  : >"$call_log"
+  HERDR_BIN_PATH="$shim_dir/herdr" CALL_LOG="$call_log" AGENTS_JSON="$temp_dir/agents.json" \
+    "$repo_dir/herdr/working-agent.sh" "$1" >/dev/null
+}
+
+cat >"$temp_dir/agents.json" <<'EOF'
+{"result":{"agents":[
+  {"pane_id":"oldest","agent_status":"working","state_change_seq":10,"focused":false},
+  {"pane_id":"current","agent_status":"working","state_change_seq":20,"focused":true},
+  {"pane_id":"newest","agent_status":"working","state_change_seq":30,"focused":false},
+  {"pane_id":"idle","agent_status":"idle","state_change_seq":40,"focused":false}
+]}}
+EOF
+run_working_agent next
+assert_contains "herdr|agent focus newest" "$call_log"
+run_working_agent previous
+assert_contains "herdr|agent focus oldest" "$call_log"
+
+cat >"$temp_dir/agents.json" <<'EOF'
+{"result":{"agents":[
+  {"pane_id":"oldest","agent_status":"working","state_change_seq":10,"focused":false},
+  {"pane_id":"current","agent_status":"working","state_change_seq":20,"focused":false},
+  {"pane_id":"newest","agent_status":"working","state_change_seq":30,"focused":true}
+]}}
+EOF
+run_working_agent next
+assert_contains "herdr|agent focus oldest" "$call_log"
+
+cat >"$temp_dir/agents.json" <<'EOF'
+{"result":{"agents":[
+  {"pane_id":"oldest","agent_status":"working","state_change_seq":10,"focused":false},
+  {"pane_id":"newest","agent_status":"working","state_change_seq":30,"focused":false},
+  {"pane_id":"idle","agent_status":"idle","state_change_seq":40,"focused":true}
+]}}
+EOF
+run_working_agent previous
+assert_contains "herdr|agent focus newest" "$call_log"
+run_working_agent next
+assert_contains "herdr|agent focus oldest" "$call_log"
+
+cat >"$temp_dir/agents.json" <<'EOF'
+{"result":{"agents":[{"pane_id":"idle","agent_status":"idle","state_change_seq":1,"focused":true}]}}
+EOF
+run_working_agent next
+assert_contains "herdr|notification show No working agents --sound none" "$call_log"
+
+cat >"$temp_dir/agents.json" <<'EOF'
+{"result":{"agents":[{"pane_id":"only","agent_status":"working","state_change_seq":1,"focused":true}]}}
+EOF
+run_working_agent next
+assert_contains "herdr|notification show Only one working agent --sound none" "$call_log"
+
+assert_contains 'ln -sf "$DOTFILES/herdr/working-agent.sh" "$HERDR/working-agent.sh"' "$repo_dir/install-herdr"
+assert_contains 'key = "alt+."' "$repo_dir/herdr/config.toml"
+assert_contains 'command = "~/.config/herdr/working-agent.sh next"' "$repo_dir/herdr/config.toml"
