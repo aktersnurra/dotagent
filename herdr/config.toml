@@ -29,12 +29,14 @@ new_tab = "prefix+c"
 split_vertical = "prefix+h"
 split_horizontal = "prefix+v"
 
-# Direct Herdr navigation consistently uses Ctrl+Alt. Arrows avoid terminal
-# control-character collisions from Ctrl+Alt letter chords.
-focus_pane_left = "ctrl+alt+left"
-focus_pane_down = "ctrl+alt+down"
-focus_pane_up = "ctrl+alt+up"
-focus_pane_right = "ctrl+alt+right"
+# Colemak pane navigation on plain Alt, deliberately identical to tmux's
+# unprefixed M-m/n/e/i. Same direction, same action, different layer: the
+# layers nest instead of competing, so one muscle memory covers both. Neovim
+# binds no meta key on these four letters.
+focus_pane_left = "alt+m"
+focus_pane_down = "alt+n"
+focus_pane_up = "alt+e"
+focus_pane_right = "alt+i"
 
 # Navigate-mode picker uses the same Colemak letters.
 navigate_pane_left = "m"
@@ -44,28 +46,56 @@ navigate_pane_right = "i"
 
 # Quick jumps between workspaces and agents.
 #
-# Workspace and agent navigation use the same Ctrl+Alt modifier family.
+# Letters, not brackets: alt+[ emits ESC [, byte-identical to the start of
+# every CSI escape sequence, so the client cannot tell the chord from an
+# arriving arrow or mouse report and drops it on the input timeout. Alt plus a
+# letter has no such ambiguity.
+#
+# The letters follow Colemak Mod-DH geometry. Pane navigation sits on the
+# right home row (m/n/e/i); these step keys sit on the top row directly above
+# it (j/l/u/y), so the whole navigation set stays under one hand:
+#
+#     top:   .  .  .  . [B]   .  L  U  .   <- agents up, step workspaces
+#     home:  .  .  .  . [G]   M  N  E  I   <- agents down, move between panes
+#
+# Workspaces step horizontally on the right-hand top row, directly above the
+# pane keys. Agents step vertically on alt+b and alt+g, stacked in the inner
+# column so up and down map to the physical up and down key.
+#
+# The letters are forced by what the surrounding layers already claim. Neovim
+# holds meta on f/p/,/./s/t/h/w/r/c (window sizing, splits, grug-far,
+# compile-mode) and tmux holds M-s and M-g, so the mnemonic alt+r/g and
+# alt+s/t would each fire two actions at once. st claims alt+j and alt+k for
+# scrollback, its MODKEY being Mod1Mask, and consumes them before the terminal
+# forwards anything, so a binding there validates but is never reached. That
+# leaves the inner column as the only one with two free keys stacked
+# vertically.
+#
+# alt+g also names tmux's unprefixed M-g popup toggle, which costs nothing
+# here: tmux and herdr are never run at the same time, so the two never
+# compete for the chord.
 workspace_picker = "prefix+w"
-previous_workspace = "ctrl+alt+r"
-next_workspace = "ctrl+alt+g"
+previous_workspace = "alt+l"
+next_workspace = "alt+u"
 switch_workspace = "prefix+shift+1..9"
-previous_agent = "ctrl+alt+s"
-next_agent = "ctrl+alt+t"
+previous_agent = "alt+b"
+next_agent = "alt+g"
 focus_agent = "prefix+alt+1..9"
 
 # Scrollback in $EDITOR, and instant toggle back to the last pane
 # (like tmux's `sesh last`).
 edit_scrollback = "prefix+e"
-last_pane = "ctrl+alt+a"
+last_pane = "alt+a"
 
 # Zoom current pane and toggle the sidebar.
 zoom = "prefix+z"
 toggle_sidebar = "prefix+b"
 
 # Cycle only agents actively working, without replacing the native all-agent
-# previous/next bindings above.
+# previous/next bindings above. alt+d keeps it off the j/l/u/y stepping row
+# while staying free in both neovim and tmux.
 [[keys.command]]
-key = "ctrl+alt+o"
+key = "alt+d"
 type = "shell"
 command = "~/.config/herdr/working-agent.sh next"
 
