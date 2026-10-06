@@ -95,7 +95,6 @@ selected workspace's stack base.
 
 | Plugin            | Purpose                                                                      |
 | ----------------- | ---------------------------------------------------------------------------- |
-| `superpowers`     | Workflow skills: spec, plan, checkpoint, TDD, debugging, brainstorming, etc. |
 | `frontend-design` | Production-grade UI component generation                                     |
 | `hegel-skill`     | Property-based testing with Hegel (also vendored in `skills/hegel/` for Pi)  |
 
