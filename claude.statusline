@@ -24,17 +24,15 @@ SEVEN_D=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty
 
 # ── ANSI helpers ────────────────────────────────────────────────────────────
 RESET="\033[0m"
-BOLD="\033[1m"
-DIM="\033[2m"
 
-FG_WHITE="\033[97m"
-FG_CYAN="\033[96m"
-FG_GREEN="\033[92m"
-FG_YELLOW="\033[93m"
-FG_RED="\033[91m"
-FG_MAGENTA="\033[95m"
-FG_BLUE="\033[94m"
-FG_GRAY="\033[90m"
+# no-clown-fiesta.nvim dark palette (24-bit)
+fg_hex() { printf "\\033[38;2;%d;%d;%dm" "0x${1:1:2}" "0x${1:3:2}" "0x${1:5:2}"; }
+FG_YELLOW=$(fg_hex "#F4BF75")   # yellow
+FG_RED=$(fg_hex "#B46958")      # red
+FG_BLUE=$(fg_hex "#7E97AB")     # gray_blue
+FG_LIGHT=$(fg_hex "#AFAFAF")    # light_gray
+FG_GRAY=$(fg_hex "#727272")     # medium_gray
+FG_TRACK=$(fg_hex "#373737")    # gray
 
 # ── Compact token count (84600 → 85k, 1000000 → 1M) ───────────────────────
 fmt_k() {
@@ -49,7 +47,7 @@ fmt_k() {
 pct_color() {
   if   [ "$1" -ge 90 ]; then printf "%s" "$FG_RED"
   elif [ "$1" -ge 70 ]; then printf "%s" "$FG_YELLOW"
-  else                       printf "%s" "$FG_GREEN"
+  else                       printf "%s" "$FG_LIGHT"
   fi
 }
 
@@ -62,23 +60,18 @@ make_bar() {
   local on off
   on=$(printf "%${filled}s" "");  on="${on// /━}"
   off=$(printf "%${empty}s" "");  off="${off// /─}"
-  printf "%s" "${color}${on}${RESET}${FG_GRAY}${off}${RESET}"
+  printf "%s" "${color}${on}${RESET}${FG_TRACK}${off}${RESET}"
 }
 
 # ── Assemble the line ────────────────────────────────────────────────────────
-SEP="${DIM}${FG_GRAY} | ${RESET}"
+SEP="${FG_TRACK} | ${RESET}"
 ICON_CTX=""     # nf-fa-microchip
 ICON_USAGE="󰊚"   # nf-md-gauge
 
 # settings.json sets statusLine.hideVimModeIndicator, so the mode lives here.
 LEFT=""
-case "$VIM_MODE" in
-  "")        ;;
-  INSERT)    LEFT="${BOLD}${FG_GREEN}${VIM_MODE}${RESET}${SEP}" ;;
-  VISUAL*)   LEFT="${BOLD}${FG_MAGENTA}${VIM_MODE}${RESET}${SEP}" ;;
-  *)         LEFT="${BOLD}${FG_CYAN}${VIM_MODE}${RESET}${SEP}" ;;
-esac
-LEFT="${LEFT}${BOLD}${FG_MAGENTA}${MODEL}${RESET}"
+[ -n "$VIM_MODE" ] && LEFT="${FG_GRAY}${VIM_MODE}${RESET}${SEP}"
+LEFT="${LEFT}${FG_LIGHT}${MODEL}${RESET}"
 LEFT="${LEFT}${SEP}${FG_BLUE}${FOLDER}${RESET}"
 
 RIGHT=""
