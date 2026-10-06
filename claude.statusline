@@ -1,0 +1,122 @@
+#!/bin/bash
+# Read JSON data that Claude Code sends to stdin
+input=$(cat)
+
+# ── Extract fields ──────────────────────────────────────────────────────────
+MODEL=$(echo "$input" | jq -r '.model.display_name // "Claude"')
+DIR=$(echo "$input"   | jq -r '.workspace.current_dir // ""')
+FOLDER="${DIR##*/}"
+[ -z "$FOLDER" ] && FOLDER="~"
+
+USED=$(echo "$input"      | jq -r '.context_window.used_percentage      // empty')
+CTX_USED_TOKENS=$(echo "$input" | jq -r '
+  .context_window.current_usage |
+  if . then
+    (.input_tokens + .output_tokens + .cache_creation_input_tokens + .cache_read_input_tokens)
+  else empty end' 2>/dev/null)
+CTX_WINDOW_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
+
+VIM_MODE=$(echo "$input" | jq -r '.vim.mode // empty')
+
+FIVE_H=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage  // empty')
+SEVEN_D=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+
+
+# ── ANSI helpers ────────────────────────────────────────────────────────────
+RESET="\033[0m"
+BOLD="\033[1m"
+DIM="\033[2m"
+
+FG_WHITE="\033[97m"
+FG_CYAN="\033[96m"
+FG_GREEN="\033[92m"
+FG_YELLOW="\033[93m"
+FG_RED="\033[91m"
+FG_MAGENTA="\033[95m"
+FG_BLUE="\033[94m"
+FG_GRAY="\033[90m"
+
+# ── Compact token count (84600 → 85k, 1000000 → 1M) ───────────────────────
+fmt_k() {
+  local n="$1"
+  if   (( n >= 1000000 )); then printf "%sM" "$(( (n + 500000) / 1000000 ))"
+  elif (( n >= 1000 ));    then printf "%sk" "$(( (n + 500) / 1000 ))"
+  else                          printf "%s" "$n"
+  fi
+}
+
+# ── Bars ────────────────────────────────────────────────────────────────────
+pct_color() {
+  if   [ "$1" -ge 90 ]; then printf "%s" "$FG_RED"
+  elif [ "$1" -ge 70 ]; then printf "%s" "$FG_YELLOW"
+  else                       printf "%s" "$FG_GREEN"
+  fi
+}
+
+make_bar() {
+  local pct="${1:-0}" color="$2" width="${3:-12}"
+  local filled=$(( (pct * width + 50) / 100 ))
+  (( pct > 0 && filled == 0 )) && filled=1
+  (( filled > width )) && filled=$width
+  local empty=$(( width - filled ))
+  local on off
+  on=$(printf "%${filled}s" "");  on="${on// /━}"
+  off=$(printf "%${empty}s" "");  off="${off// /─}"
+  printf "%s" "${color}${on}${RESET}${FG_GRAY}${off}${RESET}"
+}
+
+# ── Assemble the line ────────────────────────────────────────────────────────
+SEP="${DIM}${FG_GRAY} | ${RESET}"
+ICON_CTX=""     # nf-fa-microchip
+ICON_USAGE="󰊚"   # nf-md-gauge
+
+# settings.json sets statusLine.hideVimModeIndicator, so the mode lives here.
+LEFT=""
+case "$VIM_MODE" in
+  "")        ;;
+  INSERT)    LEFT="${BOLD}${FG_GREEN}${VIM_MODE}${RESET}${SEP}" ;;
+  VISUAL*)   LEFT="${BOLD}${FG_MAGENTA}${VIM_MODE}${RESET}${SEP}" ;;
+  *)         LEFT="${BOLD}${FG_CYAN}${VIM_MODE}${RESET}${SEP}" ;;
+esac
+LEFT="${LEFT}${BOLD}${FG_MAGENTA}${MODEL}${RESET}"
+LEFT="${LEFT}${SEP}${FG_BLUE}${FOLDER}${RESET}"
+
+RIGHT=""
+if [ -n "$USED" ]; then
+  PCT_INT=$(printf "%.0f" "$USED")
+  PCT_COLOR=$(pct_color "$PCT_INT")
+  BAR=$(make_bar "$PCT_INT" "$PCT_COLOR")
+  TOKEN_LABEL=""
+  if [ -n "$CTX_USED_TOKENS" ]; then
+    TOKEN_LABEL=" ${FG_GRAY}$(fmt_k "$CTX_USED_TOKENS")"
+    [ -n "$CTX_WINDOW_SIZE" ] && TOKEN_LABEL="${TOKEN_LABEL}/$(fmt_k "$CTX_WINDOW_SIZE")"
+    TOKEN_LABEL="${TOKEN_LABEL}${RESET}"
+  fi
+  RIGHT="${FG_GRAY}ctx${RESET} ${BAR} ${PCT_COLOR}${PCT_INT}%${RESET}${TOKEN_LABEL}"
+fi
+
+limit_segment() {
+  local label="$1" pct color
+  pct=$(printf "%.0f" "$2")
+  color=$(pct_color "$pct")
+  printf "%s" "${FG_GRAY}${label}${RESET} $(make_bar "$pct" "$color" 6) ${color}${pct}%${RESET}"
+}
+
+LIMITS=""
+[ -n "$FIVE_H" ]  && LIMITS="$(limit_segment 5h "$FIVE_H")"
+[ -n "$SEVEN_D" ] && LIMITS="${LIMITS:+${LIMITS}  }$(limit_segment 7d "$SEVEN_D")"
+[ -n "$LIMITS" ] && RIGHT="${RIGHT:+${RIGHT}${SEP}}${FG_GRAY}usage${RESET} ${LIMITS}"
+
+# Right-align RIGHT when Claude Code tells us the terminal width.
+# MARGIN covers Claude Code's own status line indent.
+MARGIN=4
+visible_width() {
+  printf "%b" "$1" | sed 's/\x1b\[[0-9;]*m//g' | LC_ALL=C.UTF-8 wc -m
+}
+if [ -n "$RIGHT" ] && [ -n "$COLUMNS" ]; then
+  PAD=$(( COLUMNS - MARGIN - $(visible_width "$LEFT") - $(visible_width "$RIGHT") ))
+  (( PAD < 3 )) && PAD=3
+  printf "%b%*s%b\n" "$LEFT" "$PAD" "" "$RIGHT"
+else
+  printf "%b\n" "${LEFT}${RIGHT:+${SEP}${RIGHT}}"
+fi
