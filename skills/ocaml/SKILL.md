@@ -4,7 +4,6 @@ description: OCaml-specific idioms and library conventions. Use when writing
   or reviewing OCaml code, or when the user mentions Eio, Lwt, effect handlers,
   GADTs, functors, module types, QCheck, Ortac, dune, Base, Core, Sexplib,
   Command, config-as-code, or algebraic effects.
-disable-model-invocation: true
 ---
 
 ## Type-driven design in OCaml

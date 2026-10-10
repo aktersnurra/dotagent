@@ -1,7 +1,6 @@
 ---
 name: design-doctrine
 description: Use when designing domain modules, state machines, verifier pipelines, LLM-mediated workflows, artifact application flows, durable data models, or evolvable domain cores where correctness depends on explicit states, structured errors, provenance, deterministic verification, and effects at boundaries.
-disable-model-invocation: true
 ---
 
 # System Design Doctrine Skill
