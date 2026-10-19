@@ -1,9 +1,9 @@
 ---
-name: design-doctrine
-description: Use when designing domain modules, state machines, verifier pipelines, LLM-mediated workflows, artifact application flows, durable data models, or evolvable domain cores where correctness depends on explicit states, structured errors, provenance, deterministic verification, and effects at boundaries.
+name: system-design
+description: Use when designing domain modules, state machines, verifier pipelines, LLM-mediated workflows, artifact application flows, durable data models, or evolvable domain cores where correctness depends on explicit states, structured errors, provenance, deterministic verification, and effects at boundaries. Also use for UI architecture: component state, composition, and data flow.
 ---
 
-# System Design Doctrine Skill
+# System Design Skill
 
 ## Core maxim
 
@@ -126,6 +126,35 @@ core model.
 
 Use structured extensibility, not generic maps. Add explicit metadata or annotation
 layers when flexibility is needed.
+
+## UI architecture
+
+For how a UI is structured (state, composition, data flow). For how it looks and reads,
+use `ui-design`.
+
+- **View is a pure function of state.** `model → view`; state changes only through
+  explicit actions applied by a transition function. Explicit transitions let you
+  coalesce, debounce, and guard actions (double-clicks, accidental input).
+- **Not every component renders.** Much UI logic is a state machine that produces values.
+  Keep it separate from view code so it can be composed and tested without a DOM.
+- **Data flows along dependencies, not the layout tree.** Don't lift state to a common
+  parent only to share it. Let a field's value feed a sibling's enabled state directly.
+- **Hide local state.** A component exposes its result, not its model or action types.
+  Decide deliberately where state lives, since state lost on unmount drives people to
+  global stores.
+- **Make composition cheap.** If combining two components takes boilerplate, people write
+  monoliths. Treat composition cost as a design constraint.
+- **Prefer a static structure.** Fixed component structure with runtime switching between
+  views allows optimization, inspection, and early composition errors.
+- **Design for small deltas.** UIs change in small pieces; keep recomputation proportional
+  to what changed (memoize, derive, don't rebuild).
+- **Mutation lives at the edge.** Wrap mutable UI or DOM libraries behind a boundary; keep
+  the reactive core pure.
+- **Scope styles per component.** Composed components must not collide on class names.
+- **Make intermediate state inspectable.** Debug views, previews of derived values, and
+  state inspectors pay for themselves.
+- **Check the environment before copying advice.** Bundle size, SSR, and offline matter
+  differently for a long-lived internal app than for a public site.
 
 ## Errors
 

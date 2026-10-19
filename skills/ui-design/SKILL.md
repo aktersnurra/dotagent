@@ -613,6 +613,9 @@ apply — agentic UI extends them, doesn't replace them.
 
 ## What this skill is not
 
+It is also not about how the UI is built. For component state, composition, and data
+flow, use the "UI architecture" section of `system-design`.
+
 This is a working framework, not a style guide. It doesn't tell you which colors to use,
 which font, which radius for card corners. Those are project-level decisions that should
 be consistent across the app but aren't universal principles.

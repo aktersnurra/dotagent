@@ -8,7 +8,7 @@ import {
 const expectedAgentVisible = [
   "brainstorming",
   "context-mode",
-  "design-doctrine",
+  "system-design",
   "dispatching-parallel-agents",
   "elixir",
   "executing-plans",

@@ -1,7 +1,7 @@
 export const AGENT_VISIBLE_SKILL_NAMES: ReadonlySet<string> = new Set([
   "brainstorming",
   "context-mode",
-  "design-doctrine",
+  "system-design",
   "dispatching-parallel-agents",
   "elixir",
   "executing-plans",

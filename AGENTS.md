@@ -29,7 +29,7 @@ when the conflict changes the outcome.
 - Use `systematic-debugging` before fixing bugs, failing tests, or unexpected behavior.
 - Use `verification-before-completion` before claiming work is done, fixed, or passing.
 - Use `jj` for all Jujutsu operations.
-- Use domain/design skills for model-heavy work: `design-doctrine`,
+- Use domain/design skills for model-heavy work: `system-design`,
   `type-driven-development`, `tiger-style`.
 - Use language skills for language-specific work: `elixir`, `ocaml`.
 - Use UI skills and the frontend-design plugin for screens, components, layouts, and

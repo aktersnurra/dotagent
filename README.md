@@ -31,7 +31,7 @@ dotagent/
 │   └── themes/
 │       └── no-clown-fiesta.toml  # palette ported from no-clown-fiesta.nvim
 └── skills/
-    ├── design-doctrine/    # Explicit, evolvable domain-core design
+    ├── system-design/      # Explicit, evolvable domain-core design
     ├── elixir/             # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
     ├── explain/            # Detailed explanations, walkthroughs, and durable docs
     ├── first-principles/   # Question assumptions, evaluate designs from scratch
@@ -102,7 +102,7 @@ selected workspace's stack base.
 
 | Skill                         | Trigger                                                                  |
 | ----------------------------- | ------------------------------------------------------------------------ |
-| `design-doctrine`             | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
+| `system-design`               | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
 | `elixir`                      | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
 | `explain`                     | Detailed explanations, walkthroughs, app/service overviews, durable docs |
 | `first-principles`            | Questioning assumptions, evaluating a design or approach from scratch    |
