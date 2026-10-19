@@ -21,7 +21,11 @@ cat >"$bin_dir/claude" <<'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
-chmod +x "$bin_dir/pi" "$bin_dir/claude"
+cat >"$bin_dir/npm" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+chmod +x "$bin_dir/pi" "$bin_dir/claude" "$bin_dir/npm"
 
 HOME="$home_dir" PATH="$bin_dir:$PATH" \
 	"$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot

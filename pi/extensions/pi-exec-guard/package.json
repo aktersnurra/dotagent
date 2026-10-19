@@ -1,0 +1,24 @@
+{
+  "name": "pi-exec-guard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test *.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "3.22.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=1.1.0"
+  },
+  "overrides": {
+    "@earendil-works/pi-codemode": "1.1.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.1.0",
+    "@types/node": "24.12.4",
+    "typescript": "5.9.3"
+  }
+}

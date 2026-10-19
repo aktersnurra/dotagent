@@ -19,6 +19,11 @@ cat >"$bin_dir/pi" <<'EOF'
 printf '%s|%s\n' "${PI_CODING_AGENT_DIR:-}" "$*" >>"$PI_LOG"
 EOF
 chmod +x "$bin_dir/pi"
+cat >"$bin_dir/npm" <<'EOF'
+#!/usr/bin/env bash
+printf '%s|npm %s\n' "${PI_CODING_AGENT_DIR:-}" "$*" >>"$PI_LOG"
+EOF
+chmod +x "$bin_dir/npm"
 
 mkdir -p "$pi_dir"
 cat >"$pi_dir/settings.json" <<'EOF'
@@ -49,6 +54,10 @@ if [[ "$actual_agents_link" != "$repo_dir/AGENTS.md" ]]; then
 	exit 1
 fi
 [[ -L "$pi_dir/skills/jj" ]]
+[[ -L "$pi_dir/extensions/pi-exec-guard" ]]
+expected_guard_link="$repo_dir/pi/extensions/pi-exec-guard"
+[[ "$(readlink "$pi_dir/extensions/pi-exec-guard")" == "$expected_guard_link" ]]
+rg -qF "$pi_dir|npm ci --prefix $expected_guard_link --omit=dev --omit=peer --ignore-scripts --no-audit --no-fund" "$pi_log"
 [[ -L "$pi_dir/extensions/pi-skill-visibility" ]]
 actual_extension_link="$(readlink "$pi_dir/extensions/pi-skill-visibility")"
 expected_extension_link="$repo_dir/pi/extensions/pi-skill-visibility"
@@ -62,6 +71,24 @@ HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
   "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 [[ "$(readlink "$pi_dir/extensions/pi-skill-visibility")" == "$expected_extension_link" ]]
 cmp "$temp_dir/skill-visibility.expected.json" "$pi_dir/skill-visibility.json"
+[[ "$(readlink "$pi_dir/extensions/pi-exec-guard")" == "$expected_guard_link" ]]
+! rg -q 'PI_EXEC_GUARD|OPENROUTER_API_KEY' "$pi_dir/settings.json"
+
+for collision in directory symlink; do
+  guard_collision_dir="$temp_dir/guard-$collision"
+  mkdir -p "$guard_collision_dir/extensions"
+  if [[ "$collision" == directory ]]; then
+    mkdir "$guard_collision_dir/extensions/pi-exec-guard"
+  else
+    ln -s /unrelated/extension "$guard_collision_dir/extensions/pi-exec-guard"
+  fi
+  if HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
+    "$repo_dir/install-pi" --dir "$guard_collision_dir" >"$temp_dir/collision.log" 2>&1; then
+    echo "install-pi replaced an unrelated guard $collision" >&2
+    exit 1
+  fi
+  rg -q 'Refusing to replace' "$temp_dir/collision.log"
+done
 
 mkdir -p "$collision_pi_dir/extensions/pi-skill-visibility"
 if HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
@@ -72,8 +99,8 @@ fi
 
 [[ -f "$pi_dir/settings.json" ]]
 [[ "$(jq -r '.defaultProvider' "$pi_dir/settings.json")" == "github-copilot" ]]
-[[ "$(jq -r '.defaultModel' "$pi_dir/settings.json")" == "gpt-5.6-terra" ]]
-[[ "$(jq -r '.defaultThinkingLevel' "$pi_dir/settings.json")" == "medium" ]]
+[[ "$(jq -r '.defaultModel' "$pi_dir/settings.json")" == "$(jq -r '.defaultModel' "$repo_dir/pi.settings.json")" ]]
+[[ "$(jq -r '.defaultThinkingLevel' "$pi_dir/settings.json")" == "$(jq -r '.defaultThinkingLevel' "$repo_dir/pi.settings.json")" ]]
 jq -e '.packages | any(type == "object" and .source == "npm:pi-ask-user" and .skills == [])' \
   "$pi_dir/settings.json" >/dev/null
 jq -e '.packages | all(. != "npm:pi-ask-user")' "$pi_dir/settings.json" >/dev/null

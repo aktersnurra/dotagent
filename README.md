@@ -64,6 +64,15 @@ dotagent/
 ./install-pi --dir ~/.pi/work --provider github-copilot
 ```
 
+## Pi execution and network guard
+
+`install-pi` installs the optional [execution/network guard](pi/extensions/pi-exec-guard/README.md).
+It stays inactive unless `PI_EXEC_GUARD=1` is set when Pi loads it, and requires
+`OPENROUTER_API_KEY`. Local rules and Jev 1.13 assess covered execution/web/MCP calls;
+risky or uncertain calls require one-call approval. Classifier failures block execution.
+Classifier-eligible commands and arguments are sent to OpenRouter/TypeSafe. This is a
+best-effort guardrail, not a sandbox or firewall; read the linked privacy and coverage limits.
+
 ## Herdr keybindings
 
 Prefix is `ctrl+a`, matching tmux. Custom bindings on top of the defaults:

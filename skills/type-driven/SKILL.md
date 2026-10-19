@@ -9,6 +9,7 @@ description: >
   systems, or resource lifecycles where correctness depends on ordering of
   operations. Use when the user says "types first", "make illegal states
   unrepresentable", or "encode invariants".
+disable-model-invocation: true
 ---
 
 ## Philosophy

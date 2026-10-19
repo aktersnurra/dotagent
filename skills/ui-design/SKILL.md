@@ -1,6 +1,7 @@
 ---
 name: ui-design
 description: First-principles framework for designing app UIs that feel like designed tools rather than database admin panels. Use when designing or reviewing any screen, component, or layout. Covers posture (calm, restraint, outcomes-not-process), structure (hierarchy, container scope, tense), components (cards/lists/forms/charts), microcopy (empty/loading/error states), and an end-of-skill quick-reference checklist. Project-agnostic; for AI-agent-specific patterns (run receipts, diff alphabet, undo-over-approval) see the companion `agentic-ui` skill when present.
+disable-model-invocation: true
 ---
 
 # UI design

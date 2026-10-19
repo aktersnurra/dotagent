@@ -69,6 +69,14 @@ link_directory \
   "$DOTFILES/pi/extensions/pi-skill-visibility" \
   "$PI/extensions/pi-skill-visibility"
 
+link_directory \
+  "$DOTFILES/pi/extensions/pi-exec-guard" \
+  "$PI/extensions/pi-exec-guard"
+
+PI_CODING_AGENT_DIR="$PI" npm ci \
+  --prefix "$DOTFILES/pi/extensions/pi-exec-guard" \
+  --omit=dev --omit=peer --ignore-scripts --no-audit --no-fund
+
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$PI/skills"
 
 for command in "$DOTFILES/commands"/*.md; do
