@@ -1,6 +1,6 @@
 ---
 name: system-design
-description: Use when designing domain modules, state machines, verifier pipelines, LLM-mediated workflows, artifact application flows, durable data models, or evolvable domain cores where correctness depends on explicit states, structured errors, provenance, deterministic verification, and effects at boundaries. Also use for UI architecture: component state, composition, and data flow.
+description: "Use when designing domain modules, state machines, verifier pipelines, LLM-mediated workflows, artifact application flows, durable data models, or evolvable domain cores where correctness depends on explicit states, structured errors, provenance, deterministic verification, and effects at boundaries. Also use for UI architecture: component state, composition, and data flow."
 ---
 
 # System Design Skill

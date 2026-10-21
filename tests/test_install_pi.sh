@@ -43,8 +43,24 @@ cat >"$pi_dir/skill-visibility.json" <<'EOF'
 EOF
 cp "$pi_dir/skill-visibility.json" "$temp_dir/skill-visibility.expected.json"
 
+mkdir -p "$temp_dir/home/.pi-lens"
+printf '{"disabledServers":["python"]}\n' >"$temp_dir/home/.pi-lens/lsp.json"
+
 HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
 	"$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
+
+lens_config="$temp_dir/home/.pi-lens/config.json"
+if [[ ! -f "$lens_config" ]]; then
+  echo "install-pi did not install the canonical pi-lens config" >&2
+  exit 1
+fi
+[[ ! -e "$temp_dir/home/.pi-lens/lsp.json" ]]
+jq -e '.lsp.disabledServers == ["python"] and
+  .lsp.servers.ty == {
+    "name": "ty", "extensions": [".py", ".pyi"], "command": "ty",
+    "args": ["server"], "rootMarkers": ["pyproject.toml", ".git"]
+  } and (has("servers") | not) and (has("disabledServers") | not)' \
+  "$lens_config" >/dev/null
 
 [[ -L "$pi_dir/AGENTS.md" ]]
 actual_agents_link="$(readlink "$pi_dir/AGENTS.md")"
@@ -71,6 +87,8 @@ HOME="$temp_dir/home" PATH="$bin_dir:$PATH" PI_LOG="$pi_log" \
   "$repo_dir/install-pi" --dir "$pi_dir" --provider github-copilot
 [[ "$(readlink "$pi_dir/extensions/pi-skill-visibility")" == "$expected_extension_link" ]]
 cmp "$temp_dir/skill-visibility.expected.json" "$pi_dir/skill-visibility.json"
+cmp "$repo_dir/.pi-lens/config.json" "$lens_config"
+[[ ! -e "$temp_dir/home/.pi-lens/lsp.json" ]]
 [[ "$(readlink "$pi_dir/extensions/pi-exec-guard")" == "$expected_guard_link" ]]
 ! rg -q 'PI_EXEC_GUARD|OPENROUTER_API_KEY' "$pi_dir/settings.json"
 
