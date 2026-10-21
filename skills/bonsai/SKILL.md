@@ -1,6 +1,7 @@
 ---
 name: bonsai
 description: Use when building, debugging, testing, or reviewing Jane Street Bonsai web apps in OCaml, including Bonsai.t, local graph, let%arr, match%sub, state machines, Vdom, Effect.t, Bonsai.assoc, Bonsai.peek, or Bonsai_web_test. Targets bleeding-edge upstream master rather than legacy Proc or Arrow APIs.
+disable-model-invocation: true
 ---
 
 # Bonsai
