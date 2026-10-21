@@ -54,12 +54,12 @@ navigate_pane_right = "i"
 # The letters follow Colemak Mod-DH geometry, keeping the navigation set in
 # reach of the resting hands:
 #
-#     top:   Q  W  F  P [B]   J  L  U  Y   <- agents up; workspaces on L/U
-#     home:  A  R  S  T [G]   M  N  E  I   <- agents down; panes on M/N/E/I
+#     top:   Q  W  F  P [B]   J  L  U  Y   <- previous agent/workspace
+#     home:  A  R  S  T [G]   M  N  E  I   <- next agent/workspace; panes M/N/E/I
 #
-# Workspaces step horizontally on the right-hand top row, directly above the
-# pane keys. Agents step vertically on alt+b and alt+g, stacked in the inner
-# column so up and down map to the physical up and down key.
+# Agents step vertically on alt+b and alt+g, stacked in the inner column so
+# up and down map to the physical up and down key. Add shift to the same pair
+# to step workspaces without displacing pane navigation or Neovim bindings.
 #
 # The letters are forced by what runs inside these panes. Neovim holds meta on
 # f/p/,/./s/t/h/w/r/c (window sizing, splits, grug-far, compile-mode), so the
@@ -72,8 +72,8 @@ navigate_pane_right = "i"
 # tmux binds M-g and M-s unprefixed, which does not constrain anything: tmux
 # and herdr are never run at the same time.
 workspace_picker = "prefix+w"
-previous_workspace = "alt+l"
-next_workspace = "alt+u"
+previous_workspace = "alt+shift+b"
+next_workspace = "alt+shift+g"
 switch_workspace = "prefix+shift+1..9"
 previous_agent = "alt+b"
 next_agent = "alt+g"
