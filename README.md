@@ -31,6 +31,7 @@ dotagent/
 │   └── themes/
 │       └── no-clown-fiesta.toml  # palette ported from no-clown-fiesta.nvim
 └── skills/
+    ├── bonsai/             # Bleeding-edge Jane Street Bonsai web apps, state, effects, testing
     ├── system-design/      # Explicit, evolvable domain-core design
     ├── elixir/             # Elixir/BEAM, OTP, Phoenix, Ecto, Nx conventions
     ├── explain/            # Detailed explanations, walkthroughs, and durable docs
@@ -111,6 +112,7 @@ selected workspace's stack base.
 
 | Skill                         | Trigger                                                                  |
 | ----------------------------- | ------------------------------------------------------------------------ |
+| `bonsai`                      | Jane Street Bonsai web apps, local graph, Vdom, effects, state, testing   |
 | `system-design`               | Domain cores, verifier pipelines, state machines, LLM artifact workflows |
 | `elixir`                      | Elixir/BEAM code, OTP, Phoenix, Ecto, Nx, ExUnit                         |
 | `explain`                     | Detailed explanations, walkthroughs, app/service overviews, durable docs |
