@@ -45,6 +45,16 @@ when the conflict changes the outcome.
   edge case, explain the concrete failure mode, likelihood, and complexity cost to the
   user and get their buy-in. Do not silently expand scope for theoretical robustness.
 - Prefer the smallest API and the fewest moving parts that satisfy the request.
+- Validate external input once at the boundary that owns it, then pass typed values
+  inward. Do not revalidate guarantees already established by a schema, constructor,
+  or internal type.
+- Extract helpers when they name a meaningful concept, clarify a complex boundary,
+  or enable reuse. Keep straightforward single-use logic at the call site.
+- Keep pure work pure. Parsing, validation, and option construction should stay
+  synchronous when they perform no effects.
+- Test the real implementation and observable behavior; do not duplicate implementation
+  logic in tests. Prefer real collaborators and mock only where necessary. UI previews
+  should render production components.
 - Keep one task in progress at a time when using todos.
 - Verify before making success claims. Say what command or check proves the claim.
 - If verification fails, report the failure and keep the work open.
