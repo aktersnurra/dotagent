@@ -41,6 +41,9 @@ when the conflict changes the outcome.
 - Do not clean up adjacent code, comments, formatting, or old imports unless your change
   made them wrong.
 - Do not add speculative features, abstractions, or error handling.
+- Before adding complexity for a speculative or vanishingly unlikely race or security
+  edge case, explain the concrete failure mode, likelihood, and complexity cost to the
+  user and get their buy-in. Do not silently expand scope for theoretical robustness.
 - Prefer the smallest API and the fewest moving parts that satisfy the request.
 - Keep one task in progress at a time when using todos.
 - Verify before making success claims. Say what command or check proves the claim.
