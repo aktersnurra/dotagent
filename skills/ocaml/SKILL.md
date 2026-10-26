@@ -36,6 +36,11 @@ disable-model-invocation: true
 - For command-line interfaces use Jane Street's `Command` library, not `Arg` or
   `getopt`. It is typed, composable, and self-documenting. Subcommands are first-class
   values.
+- Exception: code built on FreeBSD (e.g. an app deployed to a FreeBSD jail) cannot use
+  `Core`, `Core_unix`, `Command` or `ppx_jane`: opam-repository marks `bin_prot` and
+  `spawn` unavailable on FreeBSD, so the build does not solve. Use `Base`,
+  `ppx_sexp_conv`, `ppx_compare` and `ppx_let` individually, and `Cmdliner` for the
+  CLI. Check the target OS before adding a Jane Street dependency.
 
 ## Concurrency
 
