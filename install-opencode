@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OPENCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+
+mkdir -p "$OPENCODE/skills" "$OPENCODE/commands"
+
+if [[ -L "$OPENCODE/CLAUDE.md" ]]; then
+  rm "$OPENCODE/CLAUDE.md"
+fi
+
+ln -sf "$DOTFILES/AGENTS.md" "$OPENCODE/AGENTS.md"
+
+"$DOTFILES/install-skills" "$DOTFILES/skills" "$OPENCODE/skills"
+
+for command in "$DOTFILES/commands"/*.md; do
+  [[ -e "$command" ]] || continue
+  ln -sf "$command" "$OPENCODE/commands/$(basename "$command")"
+done
+
+echo "OpenCode configured."

@@ -16,6 +16,10 @@ cat >"$dotfiles_dir/install-claude" <<'EOF'
 #!/usr/bin/env bash
 printf 'claude|%s\n' "$*" >>"$INSTALL_LOG"
 EOF
+cat >"$dotfiles_dir/install-opencode" <<'EOF'
+#!/usr/bin/env bash
+printf 'opencode|%s\n' "$*" >>"$INSTALL_LOG"
+EOF
 cat >"$dotfiles_dir/install-pi" <<'EOF'
 #!/usr/bin/env bash
 printf 'pi|%s\n' "$*" >>"$INSTALL_LOG"
@@ -28,13 +32,14 @@ cat >"$dotfiles_dir/install-tuicr" <<'EOF'
 #!/usr/bin/env bash
 printf 'tuicr|%s\n' "$*" >>"$INSTALL_LOG"
 EOF
-chmod +x "$dotfiles_dir/install-claude" "$dotfiles_dir/install-pi" \
+chmod +x "$dotfiles_dir/install-claude" "$dotfiles_dir/install-opencode" "$dotfiles_dir/install-pi" \
   "$dotfiles_dir/install-herdr" "$dotfiles_dir/install-tuicr"
 
 DOTFILES="$dotfiles_dir" INSTALL_LOG="$log_file" \
   "$repo_dir/install" --pi-dir "$temp_dir/pi-work" --provider github-copilot
 
 [[ "$(rg -Fxc 'claude|' "$log_file")" -eq 1 ]]
+[[ "$(rg -Fxc 'opencode|' "$log_file")" -eq 1 ]]
 [[ "$(rg -Fxc 'herdr|' "$log_file")" -eq 1 ]]
 [[ "$(rg -Fxc 'tuicr|' "$log_file")" -eq 1 ]]
 [[ "$(rg -Fxc "pi|--dir $temp_dir/pi-work --provider github-copilot" "$log_file")" -eq 1 ]]

@@ -99,6 +99,7 @@ selected workspace's stack base.
 | Harness     | Context file          | Skills              | Settings                  |
 | ----------- | --------------------- | ------------------- | ------------------------- |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/skills/` | `~/.claude/settings.json` |
+| OpenCode    | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/skills/` | `~/.config/opencode/opencode.jsonc` |
 | Pi          | `<pi-dir>/AGENTS.md`  | `<pi-dir>/skills/`  | `<pi-dir>/settings.json`  |
 
 ## Plugins (Claude Code)

@@ -40,6 +40,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 "$DOTFILES/install-claude"
+"$DOTFILES/install-opencode"
 "$DOTFILES/install-herdr"
 "$DOTFILES/install-tuicr"
 
@@ -58,4 +59,4 @@ else
   "$DOTFILES/install-pi"
 fi
 
-echo "Claude Code, Herdr, tuicr, and Pi configured."
+echo "Claude Code, OpenCode, Herdr, tuicr, and Pi configured."

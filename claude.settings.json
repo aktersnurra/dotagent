@@ -28,7 +28,7 @@
       "Bash(export -p*)"
     ]
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
