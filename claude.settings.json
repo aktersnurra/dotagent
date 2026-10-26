@@ -128,5 +128,6 @@
   "tui": "fullscreen",
   "theme": "dark-ansi",
   "editorMode": "vim",
+  "vimInsertModeRemaps": { "jj": "<Esc>" },
   "agentPushNotifEnabled": true
 }
