@@ -53,28 +53,6 @@
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "mkdir -p \"$CLAUDE_PROJECT_DIR/.claude\" && echo \"$(date): wrote $CLAUDE_FILE_PATHS\" >> \"$CLAUDE_PROJECT_DIR/.claude/writes.log\""
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Context compacting — writing session state...' && touch \"$CLAUDE_PROJECT_DIR/.claude/writes.log\" && cat \"$CLAUDE_PROJECT_DIR/.claude/writes.log\" >> \"$CLAUDE_PROJECT_DIR/SESSION_SUMMARY.md\" && : > \"$CLAUDE_PROJECT_DIR/.claude/writes.log\""
-          }
-        ]
-      }
     ]
   },
   "statusLine": {
