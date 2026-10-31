@@ -113,8 +113,14 @@ gives you the type system, the module system, and the compiler for free.
 - Use optional arguments only when absence has a sensible default — not as a convenience
   to avoid building a record.
 - Avoid `_opt` suffix variants unless the caller genuinely needs both.
-- Enable warnings as errors in development: `-w @A-4-33-40-41-42-43-34-44`. Do not
-  enable this in distributed packages — the warning set grows between compiler releases.
+- Warnings are always errors, in every profile (dev and release), in every project. Set
+  it once in the root `dune` so it covers all stanzas and deploy builds:
+  `(env (_ (flags (:standard -strict-sequence -w +a-4-29-40-41-42-44-45-48-58-59-60-66-70 -warn-error +a))))`.
+  Fix the warning rather than disabling it; a warning on the disabled list above is the
+  only exception. Do not add extra `-w` exclusions or file-wide `[@@@warning "-..."]` to
+  get a build through; a narrow `[@@warning "-N"]` is acceptable only for a false
+  positive from generated ppx code. If a new compiler release adds warnings, fix them in the same change that
+  upgrades the compiler.
 
 ## Build
 
