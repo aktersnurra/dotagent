@@ -7,7 +7,14 @@ CLAUDE="$HOME/.claude"
 mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks" "$CLAUDE/commands"
 
 ln -sf "$DOTFILES/AGENTS.md" "$CLAUDE/CLAUDE.md"
-ln -sf "$DOTFILES/claude.settings.json" "$CLAUDE/settings.json"
+# Claude Code rewrites settings.json when plugins or marketplaces change, so a
+# read-only checkout (an ADE workbench mount) gets a copy instead of a link.
+if [[ -w "$DOTFILES" ]]; then
+  ln -sf "$DOTFILES/claude.settings.json" "$CLAUDE/settings.json"
+else
+  rm -f "$CLAUDE/settings.json"
+  install -m 644 "$DOTFILES/claude.settings.json" "$CLAUDE/settings.json"
+fi
 ln -sf "$DOTFILES/claude.statusline" "$CLAUDE/statusline"
 ln -sf "$DOTFILES/.claude/agents/implementer.md" "$CLAUDE/agents/implementer.md"
 
@@ -24,6 +31,8 @@ done
 
 echo "Installing Claude plugins..."
 claude plugins uninstall superpowers@superpowers-dev --scope user --keep-data || true
+# A fresh install knows only the built-in directory, not this marketplace.
+claude plugins marketplace add anthropics/claude-plugins-official || true
 claude plugins install frontend-design@claude-plugins-official --scope user
 claude plugins marketplace add hegeldev/hegel-skill || true
 claude plugins install hegel-skill@hegeldev --scope user
