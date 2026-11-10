@@ -1,6 +1,7 @@
 import { Body, anchorText, showsAnchorInPanel } from "./body.tsx"
-import type { Comment } from "./comment.ts"
+import { threadKey, type Comment } from "./comment.ts"
 import { Thread } from "./comments.tsx"
+import { Icon } from "./icons.tsx"
 import { outlineRows } from "./outline.ts"
 import type { Block, Story } from "./story.ts"
 
@@ -8,11 +9,15 @@ const ahead = { calls: "calls", depends: "depends on", "reads-before": "is read 
 const behind = { calls: "called by", depends: "needed by", "reads-before": "is read after", changes: "changed by" } as const
 
 export interface NoteHandlers {
+  /** The thread that is open, as a thread key, if any. */
+  readonly open: string | undefined
+  /** How far down its section each thread's passage sits, in pixels, by thread key. */
+  readonly anchors: Readonly<Record<string, number>>
   readonly onOpen: (blockId: string, quote: string) => void
+  readonly onClose: () => void
   readonly onRemoveThread: (blockId: string, quote: string) => void
   readonly onChange: (c: Comment, text: string) => void
   readonly onAsk: (c: Comment) => void
-  readonly onDiscard: (c: Comment) => void
 }
 
 interface SectionProps extends NoteHandlers {
@@ -56,13 +61,24 @@ const Section = (p: SectionProps) => {
           </ul>
         )}
       </div>
-      <aside class="sec-notes" aria-label={`Questions about ${b.label}`}>
-        {[...new Set(p.notes.map((c) => c.quote))].map((quote) => (
-          <Thread key={quote} quote={quote} turns={p.notes.filter((c) => c.quote === quote)}
-            onChange={p.onChange} onAsk={p.onAsk} onCancel={p.onDiscard}
-            onReply={() => p.onOpen(b.id, quote)} onRemove={() => p.onRemoveThread(b.id, quote)} />
-        ))}
-      </aside>
+      {[...new Set(p.notes.map((c) => c.quote))].map((quote) => {
+        const key = threadKey(b.id, quote)
+        const turns = p.notes.filter((c) => c.quote === quote)
+        const answers = turns.filter((c) => c._tag === "Answered").length
+        const top = `top:${p.anchors[key] ?? 0}px`
+        return p.open === key
+          ? (
+            <div key={key} class="float" style={top}>
+              <Thread quote={quote} turns={turns} onChange={p.onChange} onAsk={p.onAsk} onClose={p.onClose} onRemove={() => p.onRemoveThread(b.id, quote)} />
+            </div>
+          )
+          : (
+            <button key={key} type="button" class="pin" style={top} aria-label="Open the questions about this passage"
+              title={quote === "" ? "Questions" : quote} onClick={() => p.onOpen(b.id, quote)}>
+              <Icon name="comment" />{answers > 0 && <span>{answers}</span>}
+            </button>
+          )
+      })}
     </section>
   )
 }
@@ -81,7 +97,8 @@ export const Document = (p: { story: Story; comments: ReadonlyArray<Comment>; on
         : r._tag === "Heading" ? <p key={r.text} class="part">{r.text}</p>
         : <Section key={r.block.id} story={story} block={r.block} depth={r.depth} step={r.step}
             notes={p.comments.filter((c) => c.blockId === r.block.id)}
-            onGo={p.onGo} onOpen={p.onOpen} onRemoveThread={p.onRemoveThread} onChange={p.onChange} onAsk={p.onAsk} onDiscard={p.onDiscard} />,
+            open={p.open} anchors={p.anchors}
+            onGo={p.onGo} onOpen={p.onOpen} onClose={p.onClose} onRemoveThread={p.onRemoveThread} onChange={p.onChange} onAsk={p.onAsk} />,
       )}
     </article>
   )

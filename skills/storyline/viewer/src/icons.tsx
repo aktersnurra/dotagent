@@ -6,7 +6,9 @@ import chevronLeft from "@material-symbols/svg-400/outlined/chevron_left.svg"
 import chevronRight from "@material-symbols/svg-400/outlined/chevron_right.svg"
 import close from "@material-symbols/svg-400/outlined/close.svg"
 import comment from "@material-symbols/svg-400/outlined/comment.svg"
+import del from "@material-symbols/svg-400/outlined/delete.svg"
 import fitScreen from "@material-symbols/svg-400/outlined/fit_screen.svg"
+import menu from "@material-symbols/svg-400/outlined/side_navigation.svg"
 import refresh from "@material-symbols/svg-400/outlined/refresh.svg"
 import remove from "@material-symbols/svg-400/outlined/remove.svg"
 import reply from "@material-symbols/svg-400/outlined/reply.svg"
@@ -21,7 +23,9 @@ const paths = {
   chevronRight: pathOf(chevronRight),
   close: pathOf(close),
   comment: pathOf(comment),
+  delete: pathOf(del),
   fitScreen: pathOf(fitScreen),
+  menu: pathOf(menu),
   refresh: pathOf(refresh),
   remove: pathOf(remove),
   reply: pathOf(reply),
