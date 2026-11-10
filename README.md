@@ -42,6 +42,7 @@ dotagent/
     ├── jj/                 # Jujutsu VCS idioms and workflows
     ├── looter/             # Research and compare live marketplace purchases
     ├── ocaml/              # OCaml idioms, Eio, dune, testing conventions
+    ├── socratic-tutor/     # Socratic tutoring to mastery (vendored from janestreet/agent_skills)
     ├── tiger-style/        # Tiger Style naming and API design conventions
     ├── transcribing-youtube-videos/ # Answer questions from YouTube video audio/captions
     ├── tuicr/               # Launch tuicr for review, read comments back (vendored)
@@ -122,6 +123,7 @@ selected workspace's stack base.
 | `jj`                          | Any jj/jujutsu VCS operation                                             |
 | `looter`                      | Researching or comparing live marketplace purchases                      |
 | `ocaml`                       | OCaml code, Eio, Lwt, GADTs, dune                                        |
+| `socratic-tutor`              | "Teach me / quiz me / drill me" on a topic (vendored upstream)           |
 | `tiger-style`                 | Naming functions, types, designing APIs                                  |
 | `transcribing-youtube-videos` | Answering a question from a YouTube video's audio/captions               |
 | `tuicr`                       | Opening a review pane, reading review comments back (vendored upstream)  |
