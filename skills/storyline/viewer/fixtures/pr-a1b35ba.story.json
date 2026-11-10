@@ -1,0 +1,142 @@
+{
+  "kind": "pr",
+  "revision": "a1b35ba",
+  "title": "fix(claude): install on a fresh or read-only machine",
+  "levels": [
+    {
+      "level": 0,
+      "name": "Change"
+    }
+  ],
+  "blocks": [
+    {
+      "_tag": "Summary",
+      "id": "why",
+      "label": "the problem",
+      "title": "Two things broke install-claude on a fresh or read-only machine",
+      "summary": "On a fresh Claude Code, installing frontend-design failed because the claude-plugins-official marketplace was not known yet. On a read-only checkout, such as an ADE workbench mount, Claude Code could not rewrite a linked settings.json and the write failed with EROFS. The change fixes both in install-claude.",
+      "level": 0,
+      "section": "background",
+      "anchors": []
+    },
+    {
+      "_tag": "Concept",
+      "id": "settings-write",
+      "label": "settings.json",
+      "title": "Why a link to a read-only file fails",
+      "summary": "install-claude used to symlink claude.settings.json into ~/.claude. Claude Code rewrites settings.json whenever plugins or marketplaces change, and that write follows the link into the checkout. If the checkout is read-only, the write fails.",
+      "level": 0,
+      "section": "background",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 10,
+          "endLine": 17,
+          "revision": "a1b35ba"
+        }
+      ]
+    },
+    {
+      "_tag": "Concept",
+      "id": "marketplaces",
+      "label": "marketplaces",
+      "title": "Why the marketplace must be added first",
+      "summary": "A fresh Claude Code knows only its built-in plugin directory. The script installs frontend-design from claude-plugins-official, so that marketplace has to exist before the install runs. hegeldev already followed this pattern.",
+      "level": 0,
+      "section": "background",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 34,
+          "endLine": 38,
+          "revision": "a1b35ba"
+        }
+      ]
+    },
+    {
+      "_tag": "Diff",
+      "id": "settings-copy",
+      "label": "settings copy",
+      "title": "Link settings.json when the checkout is writable, otherwise copy it",
+      "summary": "The else path removes any old file and installs a copy with mode 644.",
+      "level": 0,
+      "section": "review",
+      "reason": "Read this first: it has the only branching logic in the change.",
+      "hunks": [
+        {
+          "path": "install-claude",
+          "patch": "@@ -7,7 +7,14 @@\n mkdir -p \"$CLAUDE/skills\" \"$CLAUDE/agents\" \"$CLAUDE/hooks\" \"$CLAUDE/commands\"\n \n ln -sf \"$DOTFILES/AGENTS.md\" \"$CLAUDE/CLAUDE.md\"\n-ln -sf \"$DOTFILES/claude.settings.json\" \"$CLAUDE/settings.json\"\n+# Claude Code rewrites settings.json when plugins or marketplaces change, so a\n+# read-only checkout (an ADE workbench mount) gets a copy instead of a link.\n+if [[ -w \"$DOTFILES\" ]]; then\n+  ln -sf \"$DOTFILES/claude.settings.json\" \"$CLAUDE/settings.json\"\n+else\n+  rm -f \"$CLAUDE/settings.json\"\n+  install -m 644 \"$DOTFILES/claude.settings.json\" \"$CLAUDE/settings.json\"\n+fi\n ln -sf \"$DOTFILES/claude.statusline\" \"$CLAUDE/statusline\"\n ln -sf \"$DOTFILES/.claude/agents/implementer.md\" \"$CLAUDE/agents/implementer.md\"\n "
+        }
+      ],
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 10,
+          "endLine": 17,
+          "revision": "a1b35ba"
+        }
+      ]
+    },
+    {
+      "_tag": "Diff",
+      "id": "marketplace-add",
+      "label": "marketplace add",
+      "title": "Add the official marketplace before installing from it",
+      "summary": "One new line, placed before the frontend-design install. It tolerates failure with || true, like the hegeldev line below it.",
+      "level": 0,
+      "section": "review",
+      "reason": "Second because it is independent of the first hunk and takes seconds to check.",
+      "hunks": [
+        {
+          "path": "install-claude",
+          "patch": "@@ -24,6 +31,8 @@\n \n echo \"Installing Claude plugins...\"\n claude plugins uninstall superpowers@superpowers-dev --scope user --keep-data || true\n+# A fresh install knows only the built-in directory, not this marketplace.\n+claude plugins marketplace add anthropics/claude-plugins-official || true\n claude plugins install frontend-design@claude-plugins-official --scope user\n claude plugins marketplace add hegeldev/hegel-skill || true\n claude plugins install hegel-skill@hegeldev --scope user"
+        }
+      ],
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 34,
+          "endLine": 36,
+          "revision": "a1b35ba"
+        }
+      ]
+    },
+    {
+      "_tag": "Risk",
+      "id": "rerun-discards",
+      "label": "re-running",
+      "title": "Re-running install in a read-only checkout discards Claude Code's own writes",
+      "summary": "In the copy path the script runs rm -f and then install every time. Anything Claude Code wrote to its copy of settings.json since the last run, such as plugin or marketplace entries, is replaced by the checkout's version. Worth asking whether that is intended.",
+      "level": 0,
+      "section": "review",
+      "severity": "medium",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 14,
+          "endLine": 17,
+          "revision": "a1b35ba"
+        }
+      ]
+    },
+    {
+      "_tag": "Risk",
+      "id": "silent-marketplace",
+      "label": "|| true",
+      "title": "A failed marketplace add is silent",
+      "summary": "If adding claude-plugins-official fails, for example with no network, the script carries on and the next line fails instead, with a less direct message. The same already holds for hegeldev.",
+      "level": 0,
+      "section": "review",
+      "severity": "low",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 35,
+          "endLine": 36,
+          "revision": "a1b35ba"
+        }
+      ]
+    }
+  ],
+  "edges": []
+}

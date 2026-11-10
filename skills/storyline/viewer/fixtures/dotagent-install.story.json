@@ -1,0 +1,189 @@
+{
+  "kind": "codebase",
+  "revision": "ba11c48",
+  "title": "How dotagent installs agent config",
+  "levels": [
+    {
+      "level": 0,
+      "name": "System"
+    },
+    {
+      "level": 1,
+      "name": "Modules"
+    }
+  ],
+  "blocks": [
+    {
+      "_tag": "Summary",
+      "id": "overview",
+      "label": "dotagent",
+      "title": "One repo configures every coding agent on a machine",
+      "summary": "dotagent keeps shared guidance, skills, hooks and settings in one checkout and links them into each agent's config directory. A single install script runs one installer per tool.",
+      "level": 0,
+      "anchors": []
+    },
+    {
+      "_tag": "CodeRef",
+      "id": "entry",
+      "label": "install",
+      "title": "install runs one installer per tool",
+      "summary": "The top-level script parses its flags, then runs install-claude, install-herdr and install-tuicr in that order.",
+      "level": 0,
+      "code": "\"$DOTFILES/install-claude\"\n\"$DOTFILES/install-herdr\"\n\"$DOTFILES/install-tuicr\"",
+      "anchors": [
+        {
+          "path": "install",
+          "startLine": 42,
+          "endLine": 44,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "Concept",
+      "id": "pi",
+      "label": "install-pi",
+      "title": "Pi is configured last, with optional flags",
+      "summary": "install forwards --pi-dir and --provider to install-pi only when they are given. Without them install-pi runs with its defaults. Passing --provider without --pi-dir is a usage error.",
+      "level": 0,
+      "anchors": [
+        {
+          "path": "install",
+          "startLine": 46,
+          "endLine": 59,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "Flow",
+      "id": "claude",
+      "label": "install-claude",
+      "title": "install-claude links files into ~/.claude",
+      "summary": "It creates the target directories, links the shared files, then installs plugins through the claude CLI.",
+      "level": 0,
+      "steps": [
+        "Create the skills, agents, hooks and commands directories",
+        "Link AGENTS.md as CLAUDE.md, then link or copy settings.json",
+        "Link the statusline and the implementer agent",
+        "Link every file in hooks/",
+        "Hand the skills folder to install-skills",
+        "Link every commands/*.md",
+        "Install plugins with the claude CLI"
+      ],
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 7,
+          "endLine": 38,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "CodeRef",
+      "id": "skills",
+      "label": "install-skills",
+      "title": "Each skill folder is symlinked, never overwritten",
+      "summary": "For every folder in skills/ it creates a symlink in the target directory. It skips a link that is already correct and stops on anything else.",
+      "level": 0,
+      "code": "for skill in \"$SOURCE_DIR\"/*/; do\n  name=\"$(basename \"$skill\")\"\n  target=\"$TARGET_DIR/$name\"\n\n  if [[ -L \"$target\" ]]; then\n    current=\"$(readlink \"$target\")\"\n    if [[ \"$current\" == \"$skill\" ]]; then\n      continue\n    fi\n\n    echo \"Refusing to replace symlink: $target -> $current\" >&2\n    echo \"Expected: $skill\" >&2\n    exit 1\n  fi\n\n  if [[ -e \"$target\" ]]; then\n    echo \"Refusing to replace existing path: $target\" >&2\n    exit 1\n  fi\n\n  ln -s \"$skill\" \"$target\"\ndone",
+      "anchors": [
+        {
+          "path": "install-skills",
+          "startLine": 9,
+          "endLine": 30,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "CodeRef",
+      "id": "settings",
+      "label": "settings",
+      "title": "Settings are linked, or copied on a read-only checkout",
+      "summary": "Claude Code rewrites settings.json when plugins or marketplaces change. If the checkout is not writable, such as a read-only mount, the script copies the file instead of linking it.",
+      "level": 1,
+      "parent": "claude",
+      "code": "# Claude Code rewrites settings.json when plugins or marketplaces change, so a\n# read-only checkout (an ADE workbench mount) gets a copy instead of a link.\nif [[ -w \"$DOTFILES\" ]]; then\n  ln -sf \"$DOTFILES/claude.settings.json\" \"$CLAUDE/settings.json\"\nelse\n  rm -f \"$CLAUDE/settings.json\"\n  install -m 644 \"$DOTFILES/claude.settings.json\" \"$CLAUDE/settings.json\"\nfi",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 10,
+          "endLine": 17,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "CodeRef",
+      "id": "hooks-commands",
+      "label": "hooks and commands",
+      "title": "Hooks and commands are linked one file at a time",
+      "summary": "Every file in hooks/ is linked into ~/.claude/hooks, and every commands/*.md into ~/.claude/commands. The commands loop skips the glob when nothing matches.",
+      "level": 1,
+      "parent": "claude",
+      "code": "for hook in \"$DOTFILES/hooks\"/*; do\n  ln -sf \"$hook\" \"$CLAUDE/hooks/$(basename \"$hook\")\"\ndone\n\n\"$DOTFILES/install-skills\" \"$DOTFILES/skills\" \"$CLAUDE/skills\"\n\nfor command in \"$DOTFILES/commands\"/*.md; do\n  [[ -e \"$command\" ]] || continue\n  ln -sf \"$command\" \"$CLAUDE/commands/$(basename \"$command\")\"\ndone",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 21,
+          "endLine": 30,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "CodeRef",
+      "id": "plugins",
+      "label": "plugins",
+      "title": "Plugins come from the claude CLI",
+      "summary": "The superpowers uninstall and the marketplace adds may fail without stopping the script, because of || true. The two plugin installs may not.",
+      "level": 1,
+      "parent": "claude",
+      "code": "echo \"Installing Claude plugins...\"\nclaude plugins uninstall superpowers@superpowers-dev --scope user --keep-data || true\n# A fresh install knows only the built-in directory, not this marketplace.\nclaude plugins marketplace add anthropics/claude-plugins-official || true\nclaude plugins install frontend-design@claude-plugins-official --scope user\nclaude plugins marketplace add hegeldev/hegel-skill || true\nclaude plugins install hegel-skill@hegeldev --scope user",
+      "anchors": [
+        {
+          "path": "install-claude",
+          "startLine": 32,
+          "endLine": 38,
+          "revision": "ba11c48"
+        }
+      ]
+    },
+    {
+      "_tag": "Concept",
+      "id": "conflict-rule",
+      "label": "conflict rule",
+      "title": "An existing path is a conflict, not something to replace",
+      "summary": "A symlink that already points at the right folder is skipped. A symlink to anything else, or a real file or directory at the target, stops the script with exit 1. Re-running is safe, and a conflict is loud.",
+      "level": 1,
+      "parent": "skills",
+      "anchors": [
+        {
+          "path": "install-skills",
+          "startLine": 13,
+          "endLine": 27,
+          "revision": "ba11c48"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "entry",
+      "to": "claude",
+      "kind": "calls"
+    },
+    {
+      "from": "entry",
+      "to": "pi",
+      "kind": "calls"
+    },
+    {
+      "from": "claude",
+      "to": "skills",
+      "kind": "calls"
+    }
+  ]
+}

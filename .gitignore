@@ -16,3 +16,6 @@ SESSION_SUMMARY.md
 /skills/ui-design/ui-design
 /skills/ui-design-checklist/ui-design-checklist
 /skills/elixir/elixir
+/skills/storyline/viewer/node_modules
+/.docs/
+/skills/storyline/viewer/dist/viewer.js
