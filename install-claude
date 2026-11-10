@@ -4,7 +4,7 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE="$HOME/.claude"
 
-mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks" "$CLAUDE/commands"
+mkdir -p "$CLAUDE/skills" "$CLAUDE/agents" "$CLAUDE/hooks" "$CLAUDE/commands" "$CLAUDE/themes"
 
 ln -sf "$DOTFILES/AGENTS.md" "$CLAUDE/CLAUDE.md"
 # Claude Code rewrites settings.json when plugins or marketplaces change, so a
@@ -20,6 +20,11 @@ ln -sf "$DOTFILES/.claude/agents/implementer.md" "$CLAUDE/agents/implementer.md"
 
 for hook in "$DOTFILES/hooks"/*; do
   ln -sf "$hook" "$CLAUDE/hooks/$(basename "$hook")"
+done
+
+for theme in "$DOTFILES/themes"/*.json; do
+  [[ -e "$theme" ]] || continue
+  ln -sf "$theme" "$CLAUDE/themes/$(basename "$theme")"
 done
 
 "$DOTFILES/install-skills" "$DOTFILES/skills" "$CLAUDE/skills"
