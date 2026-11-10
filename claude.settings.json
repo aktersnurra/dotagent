@@ -82,6 +82,12 @@
         "source": "github",
         "repo": "hegeldev/hegel-skill"
       }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     }
   },
   "sandbox": {
@@ -123,7 +129,7 @@
     }
   },
   "tui": "fullscreen",
-  "theme": "dark-ansi",
+  "theme": "custom:no-clown-fiesta",
   "editorMode": "vim",
   "agentPushNotifEnabled": true
 }
