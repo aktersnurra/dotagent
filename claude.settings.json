@@ -28,7 +28,7 @@
       "Bash(export -p*)"
     ]
   },
-  "model": "opus",
+  "model": "claude-opus-5-5",
   "hooks": {
     "PreToolUse": [
       {
