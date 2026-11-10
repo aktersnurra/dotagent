@@ -63,3 +63,21 @@ test("the PR walkthrough chain carries no labels", async () => {
   const s = sceneFor(await load("pr-a1b35ba.story.json"), undefined)
   assert.ok(s.lines.every((l) => l.label === undefined))
 })
+
+test("no arrow of a codebase map runs behind a block, and all of them stay inside the drawing", async () => {
+  const s = sceneFor(await load("dotagent-install.story.json"), undefined)
+  const inside = (p, q, n) => {
+    const left = n.x + 1, right = n.x + NODE_W - 1, top = n.y + 1, bottom = n.y + NODE_H - 1
+    return p.x === q.x
+      ? p.x > left && p.x < right && Math.max(p.y, q.y) > top && Math.min(p.y, q.y) < bottom
+      : p.y > top && p.y < bottom && Math.max(p.x, q.x) > left && Math.min(p.x, q.x) < right
+  }
+  for (const l of s.lines) {
+    const pts = [{ x: l.x1, y: l.y1 }, ...(l.via ?? []), { x: l.x2, y: l.y2 }]
+    for (let i = 0; i + 1 < pts.length; i++) {
+      assert.ok(pts[i].x === pts[i + 1].x || pts[i].y === pts[i + 1].y, `${l.from}->${l.to} has a slanted run`)
+      for (const n of s.nodes) assert.ok(!inside(pts[i], pts[i + 1], n), `${l.from}->${l.to} runs behind ${n.block.id}`)
+    }
+    for (const p of pts) assert.ok(p.x >= 0 && p.x <= s.width && p.y >= 0 && p.y <= s.height, `${l.from}->${l.to} leaves the drawing`)
+  }
+})
