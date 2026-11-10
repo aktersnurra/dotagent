@@ -16,6 +16,16 @@ import { sectionAt } from "./spy.ts"
 import { Action, initialState, reduce } from "./state.ts"
 import { loadStory, StoryInvalid, type Story } from "./story.ts"
 
+type Theme = "light" | "dark"
+
+/** The reader's earlier choice, or else what the system is set to. */
+const startingTheme = (): Theme => {
+  let saved: string | null = null
+  try { saved = localStorage.getItem("storyline-theme") } catch { /* storage is off */ }
+  if (saved === "light" || saved === "dark") return saved
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
+
 const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Comment> }) => {
   const [state, dispatch] = useReducer(reduce, { ...initialState, comments })
   const [unsaved, setUnsaved] = useState(false)
@@ -35,6 +45,12 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
   }, [state.comments])
   const [asking, setAsking] = useState(false)
   const [sidebar, setSidebar] = useState(true)
+  const [theme, setTheme] = useState<Theme>(startingTheme)
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem("storyline-theme", theme) } catch { /* private mode: the choice lasts for this visit */ }
+  }, [theme])
+  const flipTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"))
   // The one thread that is open, and where each thread's passage sits in its section.
   const [open, setOpen] = useState<{ blockId: string; quote: string } | undefined>()
   const [anchors, setAnchors] = useState<Readonly<Record<string, number>>>({})
@@ -91,6 +107,7 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
       const at = current.current === undefined ? -1 : order.indexOf(current.current)
       if (ev.key === "a") setAsking((on) => !on)
       else if (ev.key === "[") setSidebar((on) => !on)
+      else if (ev.key === "t") flipTheme()
       else if (ev.key === "Escape") { if (openNow.current) closeThread(); else setAsking(false) }
       else if (ev.key === "j" && order[at + 1]) go(order[at + 1])
       else if (ev.key === "k" && at >= 0) go(order[at - 1])
@@ -199,6 +216,8 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
               onClick={() => dispatch(Action.SetView({ view: "map" }))}><Icon name="accountTree" /></button>
           </div>
         )}
+        <button type="button" class="tool" aria-label={theme === "dark" ? "Switch to light" : "Switch to dark"} title={`${theme === "dark" ? "Light" : "Dark"} theme (t)`}
+          onClick={flipTheme}><Icon name={theme === "dark" ? "lightMode" : "darkMode"} /></button>
         <button type="button" class="tool ask-toggle" aria-pressed={asking} aria-label="Ask about something" title="Ask: click anything in the story (a)"
           onClick={() => setAsking((on) => !on)}><Icon name="comment" /></button>
       </header>
