@@ -48,6 +48,7 @@ dotagent/
     ├── tuicr/               # Launch tuicr for review, read comments back (vendored)
     ├── type-driven/        # Type-driven design and railway-oriented programming
     ├── ui-design/          # First-principles UI design reasoning
+    ├── visual-design/      # Visual craft: spacing, type, color schemes, motion, imagery
     ├── wiki/               # Distill sources into a queryable personal wiki
     └── writing-docs/       # Rewrite prose into plain Simplified Technical English
 ```
@@ -129,5 +130,6 @@ selected workspace's stack base.
 | `tuicr`                       | Opening a review pane, reading review comments back (vendored upstream)  |
 | `type-driven`                 | Modelling errors, designing interfaces, ADTs, ROP                        |
 | `ui-design`                   | Designing or reviewing screens, components, and layouts                  |
+| `visual-design`               | Spacing, type, color palettes, states, motion, image direction           |
 | `wiki`                        | Capturing a YouTube/article URL into a wiki page, or querying the wiki   |
 | `writing-docs`                | Rewriting prose into plain, human-sounding technical English             |
