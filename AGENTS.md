@@ -40,6 +40,8 @@ Ask only when an unresolved conflict changes the outcome.
 - Use `bonsai` for Bonsai state, effects, components, and tests.
 - Use `ui-design` for screens, components, layouts, and visual design review.
   Use the frontend-design plugin when available.
+- Use `component-ui` when building UI to reuse existing components before writing new
+  ones.
 - Use `visual-design` for color schemes, typography, spacing, motion, and imagery.
   For any interactive UI, apply its feedback kit by default: press, hover, and focus
   states, loading and confirmation on async actions, animated state changes, reduced

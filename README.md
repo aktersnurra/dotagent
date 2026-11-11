@@ -47,6 +47,7 @@ dotagent/
     ├── transcribing-youtube-videos/ # Answer questions from YouTube video audio/captions
     ├── tuicr/               # Launch tuicr for review, read comments back (vendored)
     ├── type-driven/        # Type-driven design and railway-oriented programming
+    ├── component-ui/       # Reuse existing components to build UI (Phoenix, Bonsai)
     ├── ui-design/          # First-principles UI design reasoning
     ├── visual-design/      # Visual craft: spacing, type, color schemes, motion, imagery
     ├── wiki/               # Distill sources into a queryable personal wiki
@@ -129,6 +130,7 @@ selected workspace's stack base.
 | `transcribing-youtube-videos` | Answering a question from a YouTube video's audio/captions               |
 | `tuicr`                       | Opening a review pane, reading review comments back (vendored upstream)  |
 | `type-driven`                 | Modelling errors, designing interfaces, ADTs, ROP                        |
+| `component-ui`                | Building UI from existing project components before writing new ones     |
 | `ui-design`                   | Designing or reviewing screens, components, and layouts                  |
 | `visual-design`               | Spacing, type, color palettes, states, motion, image direction           |
 | `wiki`                        | Capturing a YouTube/article URL into a wiki page, or querying the wiki   |
