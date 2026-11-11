@@ -29,6 +29,8 @@ Ask only when an unresolved conflict changes the outcome.
   already approved the design.
 - Use `test-driven-development` for feature work, bug fixes, refactors, and behavior
   changes. For pure config/doc edits, verify with focused shell checks.
+- Use `hegel` for property-based tests when code has round-trips, invariants, or
+  contracts that hold across many inputs, in languages Hegel supports.
 - Use `systematic-debugging` before fixing bugs, failing tests, or unexpected behavior.
 - Use `verification-before-completion` before claiming work is done, fixed, or passing.
 - Use `jj` for all Jujutsu operations.
