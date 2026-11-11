@@ -39,7 +39,7 @@ const Section = (p: SectionProps) => {
   })
   const Title = p.depth === 0 ? "h2" : "h3"
   return (
-    <section class="sec" id={`s-${b.id}`} data-block={b.id} data-kind={b._tag} style={`--depth:${p.depth}`}>
+    <section class="sec" id={`s-${b.id}`} data-block={b.id} data-kind={b._tag}>
       <div class="sec-body">
         {p.step !== undefined && <span class="num" aria-hidden="true">{p.step}</span>}
         {b._tag === "Risk" && <p class={`severity ${b.severity}`}>{b.severity[0]!.toUpperCase() + b.severity.slice(1)} risk</p>}

@@ -47,8 +47,11 @@ export interface ThreadProps {
 export const Thread = (p: ThreadProps) => {
   const asked = p.turns.filter((c) => c._tag !== "Draft")
   const draft = p.turns.find((c) => c._tag === "Draft")
-  const end = useRef<HTMLDivElement>(null)
-  useEffect(() => { end.current?.scrollIntoView({ block: "nearest" }) }, [p.turns])
+  const list = useRef<HTMLDivElement>(null)
+  const last = asked.at(-1)
+  const tail = last?._tag === "Pending" ? last.partial : last?._tag === "Answered" ? last.answer : ""
+  // Keep the newest words in view inside the thread only. The page itself must stay where the reader put it.
+  useEffect(() => { if (list.current) list.current.scrollTop = list.current.scrollHeight }, [asked.length, tail])
   return (
     <div class="thread" role="dialog" aria-label="Questions about this passage">
       <div class="thread-head">
@@ -57,7 +60,7 @@ export const Thread = (p: ThreadProps) => {
         <Act icon="close" label="Close (Esc)" onClick={p.onClose} />
       </div>
       {asked.length > 0 && (
-        <div class="turns">
+        <div class="turns" ref={list}>
           {asked.map((c) => (
             <div key={c.id} class="turn">
               <p class="q">{c.text}</p>
@@ -72,7 +75,6 @@ export const Thread = (p: ThreadProps) => {
               )}
             </div>
           ))}
-          <div ref={end} />
         </div>
       )}
       {draft?._tag === "Draft" && (
