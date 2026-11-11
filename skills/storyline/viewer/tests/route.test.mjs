@@ -30,3 +30,9 @@ test("the label point lies on the path's middle segment", () => {
   assert.equal(mid.x, 50)
   assert.equal(mid.y, 30)
 })
+
+test("an arrow with corner points is drawn through them, with its label on the longest run", () => {
+  const r = route({ from: "a", to: "b", x1: 0, y1: 0, x2: 100, y2: 300, via: [{ x: 40, y: 0 }, { x: 40, y: 300 }] })
+  assert.equal(r.d, "M0 0 L40 0 L40 300 L100 300")
+  assert.deepEqual(r.mid, { x: 40, y: 150 })
+})

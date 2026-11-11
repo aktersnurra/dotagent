@@ -82,8 +82,8 @@ The viewer, schema reference and validator live in the sibling `storyline` skill
 Do not paste the story into chat. Give the address, the title, the revision, how many sections
 there are at each level, and whether the story was reused or newly written. Say how to ask a
 question: press
-the speech-bubble button at the top of the outline (or `a`), click a paragraph or a line of code,
-type the question and press Enter. The reply arrow under an answer asks a follow-up. Mention that
+the speech-bubble button at the top right (or `a`), click a paragraph or a line of code, type the
+question and press Enter. The thread stays open for replies; a pin beside the passage reopens it. Mention that
 the tree button next to it shows the story as a map of blocks and arrows.
 
 ## Rules

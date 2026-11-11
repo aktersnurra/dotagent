@@ -4,7 +4,8 @@ import { Effect, Exit } from "effect"
 import { Asker, AskFailed } from "./asker.ts"
 import { promptFor } from "./body.tsx"
 import { Canvas } from "./canvas.tsx"
-import { Comment, cleanQuote } from "./comment.ts"
+import { Comment, cleanQuote, threadKey } from "./comment.ts"
+import { Icon } from "./icons.tsx"
 import { Outline } from "./outline.tsx"
 import { findQuote } from "./mark.ts"
 import { readingOrder } from "./outline.ts"
@@ -14,6 +15,16 @@ import { sceneFor } from "./scene.ts"
 import { sectionAt } from "./spy.ts"
 import { Action, initialState, reduce } from "./state.ts"
 import { loadStory, StoryInvalid, type Story } from "./story.ts"
+
+type Theme = "light" | "dark"
+
+/** The reader's earlier choice, or else what the system is set to. */
+const startingTheme = (): Theme => {
+  let saved: string | null = null
+  try { saved = localStorage.getItem("storyline-theme") } catch { /* storage is off */ }
+  if (saved === "light" || saved === "dark") return saved
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
 
 const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Comment> }) => {
   const [state, dispatch] = useReducer(reduce, { ...initialState, comments })
@@ -33,6 +44,18 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
     return () => clearTimeout(timer)
   }, [state.comments])
   const [asking, setAsking] = useState(false)
+  const [sidebar, setSidebar] = useState(true)
+  const [theme, setTheme] = useState<Theme>(startingTheme)
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem("storyline-theme", theme) } catch { /* private mode: the choice lasts for this visit */ }
+  }, [theme])
+  const flipTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"))
+  // The one thread that is open, and where each thread's passage sits in its section.
+  const [open, setOpen] = useState<{ blockId: string; quote: string } | undefined>()
+  const [anchors, setAnchors] = useState<Readonly<Record<string, number>>>({})
+  const openNow = useRef(open)
+  openNow.current = open
   const pane = useRef<HTMLElement>(null)
   const current = useRef(state.current)
   const jumping = useRef(false)
@@ -83,7 +106,9 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
       if (ev.metaKey || ev.ctrlKey || ev.altKey || t.closest("textarea, input")) return
       const at = current.current === undefined ? -1 : order.indexOf(current.current)
       if (ev.key === "a") setAsking((on) => !on)
-      else if (ev.key === "Escape") setAsking(false)
+      else if (ev.key === "[") setSidebar((on) => !on)
+      else if (ev.key === "t") flipTheme()
+      else if (ev.key === "Escape") { if (openNow.current) closeThread(); else setAsking(false) }
       else if (ev.key === "j" && order[at + 1]) go(order[at + 1])
       else if (ev.key === "k" && at >= 0) go(order[at - 1])
     }
@@ -104,33 +129,45 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
     openThread(blockId, cleanQuote(copy.textContent ?? "") ?? "")
   }
 
-  // Passages the reader asked about stay marked in the text.
+  // Passages the reader asked about stay marked in the text, and each thread sits level with its passage.
   useEffect(() => {
-    if (!("highlights" in CSS)) return
-    const ranges = state.comments.flatMap((c) => {
-      const body = c.quote === "" ? undefined : sectionOf(c.blockId)?.querySelector(".sec-body")
-      if (!body) return []
+    if (state.view !== "read") return
+    const ranges: Range[] = []
+    const tops: Record<string, number> = {}
+    for (const c of state.comments) {
+      const key = threadKey(c.blockId, c.quote)
+      const sec = sectionOf(c.blockId)
+      const body = sec?.querySelector(".sec-body")
+      if (key in tops || !sec || !body) continue
+      tops[key] = 0
       const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT)
       const nodes: Text[] = []
       while (walker.nextNode()) nodes.push(walker.currentNode as Text)
       const found = findQuote(nodes.map((n) => n.data), c.quote)
-      if (!found) return []
+      if (!found) continue
       const range = document.createRange()
       range.setStart(nodes[found.start.node]!, found.start.offset)
       range.setEnd(nodes[found.end.node]!, found.end.offset)
-      return [range]
-    })
-    CSS.highlights.set("asked", new Highlight(...ranges))
-  }, [state.comments, state.view])
+      ranges.push(range)
+      tops[key] = Math.round(range.getBoundingClientRect().top - sec.getBoundingClientRect().top)
+    }
+    if ("highlights" in CSS) CSS.highlights.set("asked", new Highlight(...ranges))
+    setAnchors((old) => (JSON.stringify(old) === JSON.stringify(tops) ? old : tops))
+  }, [state.comments, state.view, sidebar])
 
   /** Open the thread about a passage, ready for a question. */
   const openThread = (blockId: string, quote: string) => {
     dispatch(Action.OpenDraft({ id: crypto.randomUUID(), blockId, quote }))
-    // A thread that already had a question half written keeps it; put the cursor back in it.
-    requestAnimationFrame(() => {
-      const threads = [...(sectionOf(blockId)?.querySelectorAll<HTMLElement>(".thread") ?? [])]
-      threads.find((t) => t.dataset.quote === quote)?.querySelector("textarea")?.focus({ preventScroll: true })
-    })
+    setOpen({ blockId, quote })
+  }
+
+  /** Close the open thread. A question box left empty goes with it. */
+  const closeThread = () => {
+    const was = openNow.current
+    if (!was) return
+    const empty = state.comments.find((c) => c._tag === "Draft" && c.blockId === was.blockId && c.quote === was.quote && c.text.trim() === "")
+    if (empty) dispatch(Action.RemoveComment({ id: empty.id }))
+    setOpen(undefined)
   }
 
   const ask = (c: Comment) => {
@@ -148,7 +185,12 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
       return yield* asker.ask(promptFor(b, text, quote, earlier), (whole) => set(Comment.Pending({ ...base, partial: whole })))
     }).pipe(Effect.provide(window.claude ? Asker.artifact : Asker.local))
     void Effect.runPromiseExit(program).then((exit) => {
-      if (Exit.isSuccess(exit)) return set(Comment.Answered({ ...base, answer: exit.value }))
+      // While the thread is still open, the next question can be typed straight away.
+      const reopen = () => {
+        const now = openNow.current
+        if (now && now.blockId === blockId && now.quote === quote) dispatch(Action.OpenDraft({ id: crypto.randomUUID(), blockId, quote }))
+      }
+      if (Exit.isSuccess(exit)) { set(Comment.Answered({ ...base, answer: exit.value })); reopen(); return }
       const failure = exit.cause.reasons.find((r) => r._tag === "Fail")
       set(Comment.Failed({
         ...base,
@@ -160,17 +202,35 @@ const App = ({ story, comments }: { story: Story; comments: ReadonlyArray<Commen
   }
 
   return (
-    <div class={`app${state.view === "map" ? " map" : ""}${asking ? " asking" : ""}`}>
-      <Outline story={story} state={state} unsaved={unsaved} asking={asking} onToggleAsk={() => setAsking((on) => !on)} onGo={go} dispatch={dispatch} />
+    <div class={`app${state.view === "map" ? " map" : ""}${asking ? " asking" : ""}${sidebar ? "" : " no-sidebar"}`}>
+      <header class="bar">
+        <button type="button" class="tool" aria-pressed={sidebar} aria-label="Outline" title="Outline ([)" onClick={() => setSidebar((on) => !on)}><Icon name="menu" /></button>
+        <button type="button" class="bar-title" title="Back to the top" onClick={() => go(undefined)}>{story.title}</button>
+        <code class="chip">{story.revision}</code>
+        <span class="bar-space" />
+        {story.kind === "codebase" && (
+          <div class="seg" role="group" aria-label="View">
+            <button type="button" class="tool" aria-pressed={state.view === "read"} aria-label="Read as a document" title="Document"
+              onClick={() => dispatch(Action.SetView({ view: "read" }))}><Icon name="article" /></button>
+            <button type="button" class="tool" aria-pressed={state.view === "map"} aria-label="Show as a map" title="Map"
+              onClick={() => dispatch(Action.SetView({ view: "map" }))}><Icon name="accountTree" /></button>
+          </div>
+        )}
+        <button type="button" class="tool" aria-label={theme === "dark" ? "Switch to light" : "Switch to dark"} title={`${theme === "dark" ? "Light" : "Dark"} theme (t)`}
+          onClick={flipTheme}><Icon name={theme === "dark" ? "lightMode" : "darkMode"} /></button>
+        <button type="button" class="tool ask-toggle" aria-pressed={asking} aria-label="Ask about something" title="Ask: click anything in the story (a)"
+          onClick={() => setAsking((on) => !on)}><Icon name="comment" /></button>
+      </header>
+      {sidebar && <Outline story={story} state={state} unsaved={unsaved} onGo={go} dispatch={dispatch} />}
       <main class="pane" ref={pane} onClickCapture={askAbout}>
         {state.view === "map"
           ? <Canvas scene={sceneFor(story, undefined)} partsOf={(id) => story.blocks.filter((b) => b.parent === id).length} onOpen={go} />
           : <Document story={story} comments={state.comments} onGo={go}
-              onOpen={openThread}
-              onRemoveThread={(blockId, quote) => dispatch(Action.RemoveThread({ blockId, quote }))}
+              open={open && threadKey(open.blockId, open.quote)} anchors={anchors}
+              onOpen={openThread} onClose={closeThread}
+              onRemoveThread={(blockId, quote) => { dispatch(Action.RemoveThread({ blockId, quote })); setOpen(undefined) }}
               onChange={(c, text) => dispatch(Action.UpdateComment({ comment: Comment.Draft({ id: c.id, blockId: c.blockId, quote: c.quote, text }) }))}
-              onAsk={ask}
-              onDiscard={(c) => dispatch(Action.RemoveComment({ id: c.id }))} />}
+              onAsk={ask} />}
       </main>
     </div>
   )

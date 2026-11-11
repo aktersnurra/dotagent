@@ -3,28 +3,11 @@ import { outlineRows } from "./outline.ts"
 import type { Story } from "./story.ts"
 import { Action, type ViewerState } from "./state.ts"
 
-export const Outline = (p: { story: Story; state: ViewerState; unsaved: boolean; asking: boolean; onToggleAsk: () => void; onGo: (id: string | undefined) => void; dispatch: (a: Action) => void }) => {
+export const Outline = (p: { story: Story; state: ViewerState; unsaved: boolean; onGo: (id: string | undefined) => void; dispatch: (a: Action) => void }) => {
   const rows = outlineRows(p.story, p.state.collapsed)
   const asked = new Set(p.state.comments.map((c) => c.blockId))
   return (
     <nav class="outline" aria-label="Outline">
-      <button type="button" class="story" onClick={() => p.onGo(undefined)}>
-        <span class="story-title">{p.story.title}</span>
-        <span class="story-rev">{p.story.revision}</span>
-      </button>
-      <div class="tools">
-        <button type="button" class="tool ask-toggle" aria-pressed={p.asking} aria-label="Ask about something" title="Ask: click anything in the story (a)" onClick={p.onToggleAsk}>
-          <Icon name="comment" />
-        </button>
-        {p.story.kind === "codebase" && (
-          <>
-            <button type="button" class="tool" aria-pressed={p.state.view === "read"} aria-label="Read as a document" title="Document"
-              onClick={() => p.dispatch(Action.SetView({ view: "read" }))}><Icon name="article" /></button>
-            <button type="button" class="tool" aria-pressed={p.state.view === "map"} aria-label="Show as a map" title="Map"
-              onClick={() => p.dispatch(Action.SetView({ view: "map" }))}><Icon name="accountTree" /></button>
-          </>
-        )}
-      </div>
       <ul>
         {rows.map((r, i) => {
           if (r._tag === "Overview") return null

@@ -4,6 +4,9 @@ import type { Block, Story } from "./story.ts"
 export const NODE_W = 280
 export const NODE_H = 244
 const GAP_X = 96
+// Between the columns of a map there must be room for arrows to bend and for their labels.
+const MAP_GAP_ACROSS = 168
+const MAP_GAP_ALONG = 48
 const GAP_Y = 56
 const BACKGROUND_PER_ROW = 3
 const GRID_PER_ROW = 3
@@ -37,13 +40,14 @@ const build = (
   lines: ReadonlyArray<Line>,
   labels: ReadonlyArray<SceneLabel>,
   steps: ReadonlyMap<string, number>,
+  size?: { readonly width: number; readonly height: number },
 ): Scene => {
   const byId = new Map(blocks.map((b) => [b.id, b]))
   const nodes = placed.map((p): SceneNode => {
     const step = steps.get(p.id)
     return step === undefined ? { block: byId.get(p.id)!, x: p.x, y: p.y } : { block: byId.get(p.id)!, x: p.x, y: p.y, step }
   })
-  const { width, height } = extent(placed)
+  const { width, height } = size ?? extent(placed)
   return { nodes, lines, labels, width, height }
 }
 
@@ -71,10 +75,10 @@ export const sceneFor = (story: Story, parent: string | undefined): Scene => {
   const ids = blocks.map((b) => b.id)
   const edges = story.edges.filter((e) => ids.includes(e.from) && ids.includes(e.to))
   if (edges.length === 0) return build(blocks, rows(ids, 0, GRID_PER_ROW), [], [], new Map())
-  const lay = layout(ids, edges, { direction: "right", nodeW: NODE_W, nodeH: NODE_H, gapX: GAP_X, gapY: GAP_Y / 2 })
+  const lay = layout(ids, edges, { direction: "right", nodeW: NODE_W, nodeH: NODE_H, gapX: MAP_GAP_ACROSS, gapY: MAP_GAP_ALONG })
   const labelled = lay.lines.map((l): Line => {
     const e = edges.find((x) => x.from === l.from && x.to === l.to)
     return e ? { ...l, label: RELATION[e.kind] } : l
   })
-  return build(blocks, lay.nodes, labelled, [], new Map())
+  return build(blocks, lay.nodes, labelled, [], new Map(), { width: lay.width, height: lay.height })
 }
