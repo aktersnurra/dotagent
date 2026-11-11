@@ -7,7 +7,6 @@ description: >
   ExUnit, StreamData, hot code reloading, or BEAM concurrency. Also trigger
   when designing state machines, session runners, data pipelines, embedded
   systems, or ML pipelines in Elixir.
-disable-model-invocation: true
 ---
 
 ## Philosophy

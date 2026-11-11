@@ -1,6 +1,7 @@
 ---
 name: pr-story
 description: Use when the user wants to review a pull request, a jj change or a branch diff as a guided walkthrough, wants the background needed to review a patch, or asks to be walked through a change in a readable order with the option to ask questions.
+disable-model-invocation: true
 ---
 
 # PR story

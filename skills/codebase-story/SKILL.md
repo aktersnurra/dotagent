@@ -1,6 +1,7 @@
 ---
 name: codebase-story
 description: Use when the user wants to understand a codebase, a directory or a subsystem as a guided read, asks how a project fits together, wants an onboarding walkthrough of code, or asks to be walked through code from the big picture down to the details with the option to ask questions.
+disable-model-invocation: true
 ---
 
 # Codebase story
