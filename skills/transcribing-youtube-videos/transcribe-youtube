@@ -4,7 +4,7 @@ umask 077
 
 url=${1:?"usage: transcribe-youtube URL ARTIFACTS_DIR"}
 artifacts=${2:?"usage: transcribe-youtube URL ARTIFACTS_DIR"}
-language=${WHISPER_LANGUAGE:-sv}
+language=${WHISPER_LANGUAGE:-}
 model=${WHISPER_MODEL:-small}
 audio="$artifacts/audio.wav"
 mkdir -p "$artifacts"
@@ -12,7 +12,7 @@ chmod 700 "$artifacts"
 trap 'rm -f "$audio"' EXIT HUP INT TERM
 
 uvx --from yt-dlp yt-dlp \
-  --write-subs --write-auto-subs --sub-langs "$language.*,en.*" \
+  --write-subs --write-auto-subs --sub-langs "${language:+$language.*,}en.*" \
   --sub-format vtt --skip-download -o "$artifacts/transcript.%(ext)s" \
   "$url" >/dev/null 2>&1 || true
 
@@ -24,15 +24,14 @@ if [[ -n "$transcript" ]]; then
 fi
 
 uvx --from yt-dlp yt-dlp \
-  --extractor-args 'youtube:player_client=android_vr' \
-  -f 'bestaudio[ext=m4a]/bestaudio' -o - "$url" |
+  -f 'bestaudio/best' -o - "$url" |
   ffmpeg -hide_banner -loglevel error -y -i pipe:0 \
     -vn -ac 1 -ar 16000 -c:a pcm_s16le "$audio"
 
 if [[ $(uname -s) == Darwin ]]; then
   mlx_model=${MLX_WHISPER_MODEL:-mlx-community/whisper-${model}-mlx}
   uvx --from mlx-whisper mlx_whisper "$audio" \
-    --model "$mlx_model" --language "$language" --task transcribe \
+    --model "$mlx_model" ${language:+--language "$language"} --task transcribe \
     --output-format srt --output-dir "$artifacts" \
     --output-name transcript >/dev/null
 else
@@ -41,7 +40,7 @@ else
     device=cuda
   fi
   uvx --from openai-whisper whisper "$audio" \
-    --device "$device" --model "$model" --language "$language" \
+    --device "$device" --model "$model" ${language:+--language "$language"} \
     --task transcribe --output_format srt --output_dir "$artifacts" >/dev/null
   mv "$artifacts/audio.srt" "$artifacts/transcript.srt"
 fi

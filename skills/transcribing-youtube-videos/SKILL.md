@@ -23,7 +23,7 @@ limitations. It does not launch another subagent.
 
 ```bash
 artifacts=$(mktemp -d "${TMPDIR:-/tmp}/youtube-transcript.XXXXXX")
-WHISPER_LANGUAGE=sv WHISPER_MODEL=small \
+WHISPER_MODEL=small \
   /absolute/path/to/transcribe-youtube "$url" "$artifacts"
 ```
 
