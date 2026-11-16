@@ -92,7 +92,9 @@ function/module APIs. Claude can then read and edit them.
 Free and open source only. Names to consider by kind. Verify they fit the stack and the
 licence before proposing; most target React.
 
-- Foundations: shadcn/ui, Radix, Base UI.
+- Foundations: shadcn/ui, Radix, Base UI, coss ui (coss.com/ui: Base UI + Tailwind,
+  the components behind Cal.com; includes command, drawer, date picker, number field.
+  Use only coss ui, not the paid coss.com platform).
 - Specialists: Sonner (toasts), Vaul (drawers), cmdk (command menu), NumberFlow
   (animated numbers).
 - Showpieces: Magic UI, Aceternity UI (free components only), 21st.dev.
